@@ -1,4 +1,4 @@
-// === jsMetric ===
+// === Sylvester ===
 // Vector and Matrix mathematics modules for JavaScript
 // Copyright (c) 2007 James Coglan
 // 
@@ -20,7 +20,7 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-var jsMetric = {
+var Sylvester = {
   precision: 1e-12
 };
 
@@ -88,13 +88,13 @@ var Vector = {
     // Returns true iff the vector is parallel to the argument
     this.isParallelTo = function(vector) {
       var angle = this.angleFrom(vector);
-      return (angle === null) ? null : (this.angleFrom(vector) <= jsMetric.precision);
+      return (angle === null) ? null : (this.angleFrom(vector) <= Sylvester.precision);
     };
     
     // Returns true iff the vector is perpendicular to the argument
     this.isPerpendicularTo = function(vector) {
       var angle = this.angleFrom(vector);
-      return (angle === null) ? null : (Math.abs(this.angleFrom(vector) - Math.PI/2) <= jsMetric.precision);
+      return (angle === null) ? null : (Math.abs(this.angleFrom(vector) - Math.PI/2) <= Sylvester.precision);
     };
     
     // Returns the result of adding the argument to the vector
@@ -177,10 +177,10 @@ var Vector = {
     };
     
     // Sets the elements of the vector to the given value if they
-    // differ from it by less than jsMetric.precision
+    // differ from it by less than Sylvester.precision
     this.snapTo = function(x) {
       this.setElements(this.map(function(y) {
-        return (Math.abs(y - x) <= jsMetric.precision) ? x : y;
+        return (Math.abs(y - x) <= Sylvester.precision) ? x : y;
       }).elements);
       return this;
     };
@@ -559,7 +559,7 @@ var Matrix = {
     };
     
     // Sets the elements of the matrix to the given value if they
-    // differ from it by less than jsMetric.precision
+    // differ from it by less than Sylvester.precision
     this.snapTo = function(x) {
       for (var i = 1; i <= this.rows(); i++) {
         this.elements[i - 1] = this.row(i).snapTo(x).elements;
