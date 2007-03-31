@@ -123,6 +123,12 @@ window.onload = function() {
     V.dup().eql(V)
   );
   
+  V = Vector.create(1,6,3,9);
+  assert('Mapping by squaring values',
+    V.map(function(x) { return Math.pow(x,2); }).eql(Vector.create(1,36,9,81)),
+    V.map(function(x) { return Math.pow(x,2); }).inspect()
+  );
+  
   V = Vector.create(8,2,9,4);
   assert('Normalization: modulus',
     V.toUnitVector().modulus() == 1,
@@ -342,6 +348,14 @@ window.onload = function() {
     M1.eql(M2)
   );
   
+  assert('Mapping by adding 3 to all values',
+    M1.map(function(x) { return x + 3; }).eql(Matrix.create([
+      [5,6,11],
+      [10,3,5],
+      [9,6,3]
+    ]))
+  );
+  
   M2 = Matrix.Random(2,5);
   assert('Not the same shape',
     !M2.isSameSizeAs(M1)
@@ -453,6 +467,14 @@ window.onload = function() {
   assert('Multiplication with wrong shape',
     M1.x(M) === null
   );
+  
+  for (i = 0; i < 10; i++) {
+    M = Matrix.Random(3,3).x(100).round();
+    assert('Triangulation',
+      M.toRightTriangular().inspect().match(/\[[0-9\-\.]+, [0-9\-\.]+, [0-9\-\.]+\]\n\[0, [0-9\-\.]+, [0-9\-\.]+\]\n\[0, 0, [0-9\-\.]+\]/),
+      M.toRightTriangular().snapTo(0).inspect()
+    );
+  }
   
   summary = document.getElementById('summary');
   var date = new Date();

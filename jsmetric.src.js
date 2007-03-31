@@ -21,7 +21,7 @@
 // DEALINGS IN THE SOFTWARE.
 
 var jsMetric = {
-  precision: 1e-15
+  precision: 1e-12
 };
 
 var Vector = {
@@ -58,6 +58,15 @@ var Vector = {
       return Vector.create(this.elements);
     };
     
+    // Maps the vector to another vector according to the given function
+    this.map = function(fn) {
+      var elements = [];
+      for (var i = 1; i <= this.dimensions(); i++) {
+        elements.push(fn(this.e(i)));
+      }
+      return Vector.create(elements);
+    };
+    
     // Alters the vector so that its modulus is unity. Returns the vector
     this.normalize = function() {
       var new_elements = [];
@@ -82,13 +91,13 @@ var Vector = {
     // Returns true iff the vector is parallel to the argument
     this.isParallelTo = function(vector) {
       var angle = this.angleFrom(vector);
-      return (angle === null) ? null : (this.angleFrom(vector) < jsMetric.precision);
+      return (angle === null) ? null : (this.angleFrom(vector) <= jsMetric.precision);
     };
     
     // Returns true iff the vector is perpendicular to the argument
     this.isPerpendicularTo = function(vector) {
       var angle = this.angleFrom(vector);
-      return (angle === null) ? null : (Math.abs(this.angleFrom(vector) - Math.PI/2) < jsMetric.precision);
+      return (angle === null) ? null : (Math.abs(this.angleFrom(vector) - Math.PI/2) <= jsMetric.precision);
     };
     
     // Returns the result of adding the argument to the vector
@@ -180,6 +189,17 @@ var Vector = {
         new_elements.push(Math.round(this.e(i)));
       }
       return Vector.create(new_elements);
+    };
+    
+    // Sets the elements of the vector to the given value if they
+    // differ from it by less than jsMetric.precision
+    this.snapTo = function(x) {
+      var elements = [];
+      for (var i = 1; i <= this.dimensions(); i++) {
+        elements.push(Math.abs(this.e(i) - x) <= jsMetric.precision ? x : this.e(i));
+      }
+      this.setElements(elements);
+      return this;
     };
     
     // Returns a string representation of the vector
@@ -305,6 +325,15 @@ var Matrix = {
     // Returns a copy of the matrix
     this.dup = function() {
       return Matrix.create(this.elements);
+    };
+    
+    // Maps the matrix to another matrix (of the same dimensions) according to the given function
+    this.map = function(fn) {
+      var els = [];
+      for (var i = 1; i <= this.rows(); i++) {
+        els.push(this.row(i).map(fn).elements);
+      }
+      return Matrix.create(els);
     };
     
     // Returns true iff the argument has the same dimensions as the matrix
@@ -433,32 +462,37 @@ var Matrix = {
       }
     };
     
-    // Diagonalize the matrix by Gaussian elimination. This method only
-    // adds multiples of rows to other rows. No rows are scaled up or
-    // switched, and the determinant is preserved.
-    this.diagonalize = function() {
-      var i, j;
-      for (i = 1; i < this.rows(); i++) {
-        if (this.e(i,i) != 0) {
-          for (j = i + 1; j <= this.rows(); j++) {
-            this.elements[j - 1] = this.row(j).subtract(this.row(i).x(this.e(j,i) / this.e(i,i))).elements;
+    // Make the matrix upper (right) triangular by Gaussian elimination.
+    // This method only adds multiples of rows to other rows. No rows are
+    // scaled up or switched, and the determinant is preserved. Elements that
+    // are within rounding error precision of zero are snapped to zero.
+    this.toRightTriangular = function() {
+      var i, j, M = this.dup();
+      for (i = 1; i < M.rows(); i++) {
+        if (M.e(i,i) == 0) {
+          for (j = i + 1; j <= M.rows(); j++) {
+            if (M.e(j,i) != 0) {
+              M.elements[i - 1] = M.row(i).add(M.row(j)).elements;
+            }
+          }
+        }
+        if (M.e(i,i) != 0) {
+          for (j = i + 1; j <= M.rows(); j++) {
+            M.elements[j - 1] = M.row(j).subtract(M.row(i).x(M.e(j,i) / M.e(i,i))).elements;
           }
         }
       }
-      return this;
+      return M.snapTo(0);
     };
     
-    // Returns the result of diagonalizing the matrix
-    this.toDiagonalMatrix = function() {
-      return this.dup().diagonalize();
-    };
+    this.toUpperTriangular = function() { return this.toRightTriangular(); };
     
     // Returns the determinant for square matrices
     this.determinant = function() {
       if (!this.isSquare()) {
         return null;
       } else {
-        var els = this.toDiagonalMatrix().diagonal().elements;
+        var els = this.toRightTriangular().diagonal().elements;
         var det = els[0];
         for (var i = 1; i < els.length; i++) { det = det * els[i]; }
         return det;
@@ -477,7 +511,7 @@ var Matrix = {
       if (!this.isSquare()) {
         return null;
       } else {
-        var els = this.toDiagonalMatrix().diagonal().elements;
+        var els = this.toRightTriangular().diagonal().elements;
         var tr = els[0];
         for (var i = 1; i < els.length; i++) { tr = tr + els[i]; }
         return tr;
@@ -508,8 +542,8 @@ var Matrix = {
       var i, j;
       if (this.isSquare() && !this.isSingular()) {
         var n = this.rows();
-        var M = this.augment(Matrix.I(n));
-        M.diagonalize(); // Matrix is non-singular so there will be no zeros on the diagonal
+        var M = this.augment(Matrix.I(n)).toRightTriangular();
+        // Matrix is non-singular so there will be no zeros on the diagonal
         for (i = 1; i <= n; i++) {
           M.elements[i - 1] = M.row(i).x(1 / M.e(i,i)).elements;
         }
@@ -529,13 +563,22 @@ var Matrix = {
     // Returns the result of rounding all the elements
     this.round = function() {
       var new_els = [], i, j;
-      for (i = 1; i < this.rows(); i++) {
+      for (i = 1; i <= this.rows(); i++) {
         new_els[i - 1] = [];
-        for (j = 1; j < this.cols(); j++) {
+        for (j = 1; j <= this.cols(); j++) {
           new_els[i - 1].push(Math.round(this.e(i,j)));
         }
       }
       return Matrix.create(new_els);
+    };
+    
+    // Sets the elements of the matrix to the given value if they
+    // differ from it by less than jsMetric.precision
+    this.snapTo = function(x) {
+      for (var i = 1; i <= this.rows(); i++) {
+        this.elements[i - 1] = this.row(i).snapTo(x).elements;
+      }
+      return this;
     };
     
     // Returns a string representation of the matrix
