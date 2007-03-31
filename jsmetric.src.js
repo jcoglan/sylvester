@@ -20,6 +20,10 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
+var jsMetric = {
+  precision: 1e-15
+};
+
 var Vector = {
 
   // Generic vector class
@@ -50,12 +54,6 @@ var Vector = {
       for (var i = 0; i < args.length; i++) {
         if (!isNaN(args[i])) { this.elements.push(args[i]); }
       }
-      this.r = this.modulus();
-      this.d = this.dimensions();
-      this.x = null || this.e(0);
-      this.y = null || this.e(1);
-      this.z = null || this.e(2);
-      this.t = null || this.e(3);
     };
     
     // Construct the vector
@@ -88,16 +86,20 @@ var Vector = {
     
     // Returns the angle between the vector and the argument (also a vector)
     this.angleFrom = function(vector) {
-      return Math.acos(this.dot(vector) / (this.modulus() * vector.modulus()));
+      var dot = this.dot(vector);
+      return (dot === null) ? null : Math.acos(this.dot(vector) / (this.modulus() * vector.modulus()));
     };
     
     // Returns true iff the vector is parallel to the argument
     this.isParallelTo = function(vector) {
-      if (this.dimensions() != vector.dimensions()) {
-        return null;
-      } else {
-        return (this.angleFrom(vector) < 1e-20);
-      }
+      var angle = this.angleFrom(vector);
+      return (angle === null) ? null : (this.angleFrom(vector) < jsMetric.precision);
+    };
+    
+    // Returns true iff the vector is perpendicular to the argument
+    this.isPerpendicularTo = function(vector) {
+      var angle = this.angleFrom(vector);
+      return (angle === null) ? null : (Math.abs(this.angleFrom(vector) - Math.PI/2) < jsMetric.precision);
     };
     
     // Returns the result of adding the argument to the vector
@@ -199,10 +201,20 @@ var Vector = {
   
   // Constructor function
   create: function() {
-    if (arguments[0][0] == undefined) {
-      return new Vector.Abstract(arguments);
+    var elements;
+    if (arguments[0] == undefined) {
+      return null;
     } else {
-      return new Vector.Abstract(arguments[0]);
+      if (arguments[0][0] == undefined) {
+        elements = arguments;
+      } else {
+        elements = arguments[0];
+      }
+      if (elements.length < 1) {
+        return null;
+      } else {
+        return new Vector.Abstract(elements);
+      }
     }
   }
 };
@@ -217,6 +229,15 @@ Vector.Random = function(n) {
   var elements = [];
   for (var i = 0; i < n; i++) {
     elements.push(Math.random());
+  }
+  return Vector.create(elements);
+};
+
+// Zero-length vector
+Vector.Zero = function(n) {
+  var elements = [];
+  for (var i = 0; i < n; i++) {
+    elements.push(0)
   }
   return Vector.create(elements);
 };

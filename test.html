@@ -1,0 +1,307 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+<title>jsMetric Test Suite</title>
+<script src="jsmetric.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+var resultList, summary, nTests = 0, nFailures = 0, A, V, V1, V2, M, M1, M2;
+var begin = (new Date()).getMilliseconds();
+
+window.onload = function() {
+
+  resultList = document.getElementById('results');
+  
+  title('Setup');
+  assert('Test assertion', true);
+  
+  title('Vector tests');
+  
+  V = Vector.create(0, 1, 7, 5);
+  assert('Creation with integers',
+    V.inspect() == '[0, 1, 7, 5]',
+    V.inspect()
+  );
+  
+  V = Vector.create(0, 1.4, 7.034, 5.28638);
+  assert('Creation with floats',
+    V.inspect() == '[0, 1.4, 7.034, 5.28638]',
+    V.inspect()
+  );
+  
+  A = [0,3,4,5];
+  V = Vector.create(A);
+  assert('Creation from array',
+    V.inspect() == '[' + A.join(', ') + ']',
+    V.inspect()
+  );
+  
+  assert('Element retrieval: first element',
+    V.e(1) === 0,
+    V.e(1)
+  );
+  
+  assert('Element retrieval: last element',
+    V.e(4) == 5,
+    V.e(4)
+  );
+  
+  assert('Dimensions',
+    V.dimensions() == 4,
+    V.dimensions()
+  );
+  
+  assert('Modulus',
+    V.modulus() == Math.sqrt(50),
+    V.modulus()
+  );
+  
+  assert('Zero vector',
+    Vector.Zero(4).inspect() == '[0, 0, 0, 0]',
+    Vector.Zero(4).inspect()
+  );
+  
+  assert('Zero vector size 1',
+    Vector.Zero(1).modulus() === 0,
+    Vector.Zero(1).modulus()
+  );
+  
+  assert('Zero vector size 2',
+    Vector.Zero(25).modulus() === 0,
+    Vector.Zero(25).modulus()
+  );
+  
+  assert('Unit vector size',
+    Vector.i.modulus() == 1,
+    Vector.i.inspect()
+  );
+  
+  V = Vector.Random(5);
+  assert('Random vector dimensions',
+    V.dimensions() == 5,
+    V.inspect()
+  );
+  
+  assert('Equality with random vector',
+    V.eql(V),
+    V.inspect()
+  );
+  
+  assert('Equality with zero vector',
+    Vector.Zero(3).eql(Vector.create(0,0,0))
+  );
+  
+  assert('Equality with integers vs floats',
+    Vector.create(3,6,9).eql(Vector.create(3.0,6.0,9.0))
+  );
+  
+  assert('Inequality',
+    !Vector.create(3,6,9).eql(Vector.create(3.0,6.01,9.0))
+  );
+  
+  V = Vector.create(4);
+  assert('Single element',
+    V.inspect() == '[4]',
+    V.inspect()
+  );
+  assert('Single element: modulus',
+    V.modulus() == 4,
+    V.modulus()
+  );
+  
+  assert('Zero elements',
+    Vector.create() === null
+  );
+  
+  assert('Duplication',
+    V.dup().eql(V)
+  );
+  
+  V = Vector.create(8,2,9,4);
+  assert('Normalization: modulus',
+    V.toUnitVector().modulus() == 1,
+    V.toUnitVector().modulus()
+  );
+  assert('Normalization: direction by multiplication',
+    V.toUnitVector().x(Math.sqrt(165)).eql(V),
+    V.toUnitVector().inspect()
+  );
+  assert('Normalization: direction by isParallelTo',
+    V.toUnitVector().isParallelTo(V),
+    V.toUnitVector().inspect()
+  );
+  
+  assert('Angle between i and j',
+    Vector.i.angleFrom(Vector.j) == Math.PI/2,
+    Vector.i.angleFrom(Vector.j) + ' is not equal to ' + Math.PI/2
+  );
+  
+  assert('Angle between j and i',
+    Vector.j.angleFrom(Vector.i) == Math.PI/2,
+    Vector.j.angleFrom(Vector.i) + ' is not equal to ' + Math.PI/2
+  );
+  
+  assert('Angle in 2D', // Approximate - rounding errors appear at very small scale otherwise
+    Math.round((Vector.create(1,0).angleFrom(Vector.create(1,1)))*1000000)/1000000 == Math.round(1000000*Math.PI/4)/1000000,
+    Math.round((Vector.create(1,0).angleFrom(Vector.create(1,1)))*1000000)/1000000 + ' is not equal to ' + Math.round(1000000*Math.PI/4)/1000000
+  );
+  
+  assert('Parallelity',
+    Vector.i.isParallelTo(Vector.i.x(235457)),
+    Vector.i.angleFrom(Vector.i.x(235457))
+  );
+  
+  assert('Perpendicularity',
+    Vector.i.isPerpendicularTo(Vector.k),
+    Vector.i.angleFrom(Vector.k)
+  );
+  
+  V1 = Vector.create(2,9,4);
+  V2 = Vector.create(0,13,7);
+  assert('Addition with equal dimensions',
+    V1.add(V2).eql(Vector.create(2,22,11)),
+    V1.add(V2).inspect()
+  );
+  
+  assert('Subtraction',
+    V1.subtract(V2).eql(Vector.create(2,-4,-3)),
+    V1.subtract(V2).inspect()
+  );
+  
+  assert('Multiplication by a scalar',
+    V1.x(12).eql(Vector.create(24, 108, 48)),
+    V1.x(12).inspect()
+  );
+  
+  assert('Dot product',
+    V1.dot(V2) == 9*13 + 4*7,
+    V1.dot(V2) + ' is not equal to ' + (9*13 + 4*7)
+  );
+  
+  assert('Cross product',
+    V1.cross(V2).eql(Vector.create(9*7-4*13, 4*0-2*7, 2*13-9*0)),
+    V1.cross(V2).inspect()
+  );
+  
+  V2 = Vector.create(2);
+  
+  assert('Addition with unequal dimensions',
+    V1.add(V2) === null
+  );
+  
+  assert('Dot product with unequal dimensions',
+    V1.dot(V2) === null
+  );
+  
+  assert('Cross product with unequal dimensions',
+    V1.cross(V2) === null
+  );
+  
+  assert('angleFrom with unequal dimensions',
+    V1.angleFrom(V2) === null
+  );
+  
+  assert('Parallelity with unequal dimensions',
+    V1.isParallelTo(V2) === null
+  );
+  
+  assert('Perpendicularity with unequal dimensions',
+    V1.isPerpendicularTo(V2) === null
+  );
+  
+  V = Vector.create(2,8,5,9,3,7,12);
+  assert('Maximum element',
+    V.max() == 12,
+    V.max
+  );
+  
+  V = Vector.create(-17,8,5,9,3,7,12);
+  assert('Maximum element (negative)',
+    V.max() == -17,
+    V.max
+  );
+  
+  V = Vector.create(2,6,0,3);
+  assert('indexOf',
+    V.indexOf(2) == 1
+  );
+  
+  assert('indexOf 2',
+    V.indexOf(3) == 4
+  );
+  
+  assert('indexOf max',
+    V.indexOf(V.max()) == 2
+  );
+  
+  assert('indexOf with no match',
+    V.indexOf(7) === null
+  );
+  
+  assert('Rounding',
+    Vector.create(2.56, 3.5, 3.49).round().eql(Vector.create(3,4,3))
+  );
+  
+  summary = document.getElementById('summary');
+  summary.innerHTML = 'Tests completed in ' + ((new Date()).getMilliseconds() - begin)/1000 + ' seconds. ' + nTests + ' assertions, ' + nFailures + ' failures.';
+
+};
+
+var assert = function(testName, condition, message) {
+  nTests++;
+  var display, klass;
+  if (condition) {
+    klass = 'success';
+    display = 'Passed';
+  } else {
+    nFailures++;
+    klass = 'failure';
+    display = (message ? '\n\n' + message : 'Failure').replace(/\n/g, '<br />');
+  }
+  var item = document.createElement('li');
+  resultList.appendChild(item);
+  item.className = klass;
+  item.innerHTML = testName + ': ' + display;
+};
+
+var title = function(str) {
+  var item = document.createElement('li');
+  resultList.appendChild(item);
+  item.innerHTML = str;
+};
+
+</script>
+<style type="text/css">
+
+body {
+  font: 15px Helvetica, Arial, sans-serif;
+}
+
+li {
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.success {
+  color: #69c328;
+}
+
+.failure {
+  color: #c34e28;
+}
+
+</style>
+</head>
+<body>
+
+<h1>jsMetric Test Suite</h1>
+
+<p id="summary"></p>
+
+<ul id="results">
+</ul>
+
+</body>
+</html>
