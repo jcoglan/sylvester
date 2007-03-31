@@ -7,8 +7,8 @@
 <script src="jsmetric.js" type="text/javascript"></script>
 <script type="text/javascript">
 
-var resultList, summary, nTests = 0, nFailures = 0, A, V, V1, V2, M, M1, M2;
-var begin = (new Date()).getMilliseconds();
+var resultList, summary, nTests = 0, nFailures = 0, i, A, V, V1, V2, M, M1, M2;
+var beginDate = new Date();
 
 window.onload = function() {
 
@@ -48,6 +48,10 @@ window.onload = function() {
     V.e(4)
   );
   
+  assert('Element retrieval: out of bounds',
+    V.e(5) === null
+  );
+  
   assert('Dimensions',
     V.dimensions() == 4,
     V.dimensions()
@@ -63,26 +67,26 @@ window.onload = function() {
     Vector.Zero(4).inspect()
   );
   
-  assert('Zero vector size 1',
-    Vector.Zero(1).modulus() === 0,
-    Vector.Zero(1).modulus()
-  );
-  
-  assert('Zero vector size 2',
-    Vector.Zero(25).modulus() === 0,
-    Vector.Zero(25).modulus()
-  );
-  
   assert('Unit vector size',
     Vector.i.modulus() == 1,
     Vector.i.inspect()
   );
   
-  V = Vector.Random(5);
-  assert('Random vector dimensions',
-    V.dimensions() == 5,
-    V.inspect()
-  );
+  for (i = 1; i < 8; i++) {
+    V = Vector.Random(i);
+    assert('Random vector dimensions ('+i+')',
+      V.dimensions() == i,
+      V.inspect()
+    );
+    assert('Zero vector size ('+i+')',
+      Vector.Zero(i).modulus() === 0,
+      Vector.Zero(i).modulus()
+    );
+    assert('Zero vector dimensions ('+i+')',
+      Vector.Zero(i).dimensions() == i,
+      Vector.Zero(i).dimensions()
+    );
+  }
   
   assert('Equality with random vector',
     V.eql(V),
@@ -244,8 +248,115 @@ window.onload = function() {
     Vector.create(2.56, 3.5, 3.49).round().eql(Vector.create(3,4,3))
   );
   
+  title('Matrix tests');
+  
+  M = Matrix.create([
+    [0,3,4,8],
+    [3,9,7,3]
+  ]);
+  assert('Creation',
+    M.inspect() == '[0, 3, 4, 8]\n[3, 9, 7, 3]',
+    M.inspect()
+  );
+  assert('Retrieval',
+    M.e(1,1) === 0,
+    M.e(1,1)
+  )
+  assert('Retrieval 2',
+    M.e(1,4) == 8,
+    M.e(1,4)
+  );
+  assert('Retrieval out of bounds',
+    M.e(2,6) === null
+  )
+  
+  assert('Row retrieval',
+    M.row(2).eql(Vector.create(3,9,7,3)),
+    M.row(2).inspect()
+  );
+  
+  assert('Row retrieval out of bounds',
+    M.row(3) === null
+  );
+  
+  assert('Column retrieval',
+    M.col(2).eql(Vector.create(3,9)),
+    M.col(2).inspect()
+  );
+  
+  assert('Column retrieval out of bounds',
+    M.col(6) === null
+  );
+  
+  assert('Number of rows',
+    M.rows() == 2,
+    M.rows()
+  );
+  
+  assert('Number of columns',
+    M.cols() == 4,
+    M.cols()
+  );
+  
+  assert('Creation with no elements',
+    Matrix.create() === null
+  );
+  
+  M = Matrix.create([
+    [0,2,7,5]
+  ]);
+  assert('Create with single row',
+    M.inspect() == '[0, 2, 7, 5]',
+    M.inspect()
+  );
+  
+  M = Matrix.create([
+    [0],[2],[7],[5]
+  ]);
+  assert('Create with single column',
+    M.inspect() == '[0]\n[2]\n[7]\n[5]',
+    M.inspect()
+  );
+  
+  M = Matrix.create([
+    [0,3,4,8,7],
+    [3,9,7,3]
+  ]);
+  assert('Create with bad dimensions',
+    M === null
+  );
+  
+  assert('Create with one element',
+    Matrix.create([0]).inspect() == '[0]'
+  );
+  
+  for (i = 1; i < 8; i++) {
+    M = Matrix.Random(4,i);
+    assert('Random matrix dimensions (4,'+i+')',
+      M.rows() == 4 && M.cols() == i,
+      M.cols()
+    );
+    M = Matrix.Random(i,3);
+    assert('Random matrix dimensions ('+i+',3)',
+      M.rows() == i && M.cols() == 3,
+      M.rows()
+    );
+    M = Matrix.Zero(5,i);
+    assert('Zero matrix dimensions (5,'+i+')',
+      M.rows() == 5 && M.cols() == i,
+      M.cols()
+    );
+    M = Matrix.Zero(i,2);
+    assert('Zero matrix dimensions ('+i+',2)',
+      M.cols() == 2 && M.rows() == i,
+      M.rows()
+    );
+  }
+  
   summary = document.getElementById('summary');
-  summary.innerHTML = 'Tests completed in ' + ((new Date()).getMilliseconds() - begin)/1000 + ' seconds. ' + nTests + ' assertions, ' + nFailures + ' failures.';
+  var date = new Date();
+  var time = 1000*(date.getSeconds() - beginDate.getSeconds()) + date.getMilliseconds() - beginDate.getMilliseconds();
+  summary.innerHTML = 'Tests completed in ' + time/1000 + ' seconds. ' + nTests + ' assertions, ' + nFailures + ' failures.';
 
 };
 
@@ -276,12 +387,12 @@ var title = function(str) {
 <style type="text/css">
 
 body {
-  font: 15px Helvetica, Arial, sans-serif;
+  font: 13px Helvetica, Arial, sans-serif;
 }
 
 li {
   font-weight: bold;
-  margin-bottom: 15px;
+  margin-bottom: 11px;
 }
 
 .success {

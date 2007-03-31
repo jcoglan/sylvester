@@ -31,7 +31,7 @@ var Vector = {
   
     // Returns element i of the vector
     this.e = function(i) {
-      return this.elements[i - 1];
+      return (i < 1 || i > this.dimensions()) ? null : this.elements[i - 1];
     };
     
     // Returns the number of elements the vector has
@@ -47,17 +47,6 @@ var Vector = {
       }
       return Math.sqrt(r);
     };
-    
-    // Set vector's elements from an array
-    this.setElements = function(args) {
-      this.elements = [];
-      for (var i = 0; i < args.length; i++) {
-        if (!isNaN(args[i])) { this.elements.push(args[i]); }
-      }
-    };
-    
-    // Construct the vector
-    this.setElements(args);
     
     // Returns true iff the vector is equal to the argument
     this.eql = function(vector) {
@@ -197,6 +186,14 @@ var Vector = {
     this.inspect = function() {
       return '[' + this.elements.join(', ') + ']';
     };
+    
+    // Set vector's elements from an array
+    this.setElements = function(args) {
+      this.elements = [];
+      for (var i = 0; i < args.length; i++) {
+        if (!isNaN(args[i])) { this.elements.push(args[i]); }
+      }
+    };
   },
   
   // Constructor function
@@ -213,7 +210,9 @@ var Vector = {
       if (elements.length < 1) {
         return null;
       } else {
-        return new Vector.Abstract(elements);
+        var V = new Vector.Abstract();
+        V.setElements(elements);
+        return V;
       }
     }
   }
@@ -233,7 +232,7 @@ Vector.Random = function(n) {
   return Vector.create(elements);
 };
 
-// Zero-length vector
+// Vector filled with zeros
 Vector.Zero = function(n) {
   var elements = [];
   for (var i = 0; i < n; i++) {
@@ -251,12 +250,16 @@ var Matrix = {
   
     // Returns element (i,j) of the matrix
     this.e = function(i,j) {
-      return this.elements[i - 1][j - 1];
+      if (i < 1 || i > this.rows() || j < 1 || j > this.cols()) {
+        return null;
+      } else {
+        return this.elements[i - 1][j - 1];
+      }
     };
     
     // Returns row k of the matrix as a vector
     this.row = function(k) {
-      if (k > this.dimensions().rows) {
+      if (k > this.rows()) {
         return null;
       } else {
         return Vector.create(this.elements[k - 1]);
@@ -265,11 +268,11 @@ var Matrix = {
     
     // Returns column k of the matrix as a vector
     this.col = function(k) {
-      if (k > this.dimensions().cols) {
+      if (k > this.cols()) {
         return null;
       } else {
         var col = [];
-        for (var i = 1; i <= this.dimensions().rows; i++) {
+        for (var i = 1; i <= this.rows(); i++) {
           col.push(this.e(i,k));
         }
         return Vector.create(col);
@@ -278,35 +281,18 @@ var Matrix = {
     
     // Returns the number of rows/columns the matrix has
     this.dimensions = function() {
-      return {rows: this.elements.length, cols: this.elements[0].length};
+      return {rows: this.rows(), cols: this.cols()};
     };
     
-    // Set the matrix's elements from an array. If the argument passed
-    // is a vector, the resulting matrix will be a single column.
-    this.setElements = function(els) {
-      var row, i, j, success = true;
-      this.elements = [];
-      if (els.elements) { els = els.elements; }
-      for (i = 0; i < els.length; i++) {
-        if (els[i][0] !== undefined) {
-          row = [];
-          for (j = 0; j < els[i].length; j++) {
-            if (!isNaN(els[i][j])) { row.push(els[i][j]); }
-          }
-          if (i > 0 && this.elements[i-1].length != row.length) {
-            success = false;
-          } else {
-            this.elements.push(row);
-          }
-        } else {
-          if (!isNaN(els[i])) { this.elements.push([els[i]]); }
-        }
-      }
-      if (!success) { this.elements = []; }
+    // Returns the number of rows in the matrix
+    this.rows = function() {
+      return this.elements.length;
     };
     
-    // Construct the matrix
-    this.setElements(els);
+    // Returns the number of columns in the matrix
+    this.cols = function() {
+      return this.elements[0].length;
+    };
     
     // Returns true iff the matrix is equal to the argument. You can supply
     // a vector as the argument, in which case the receiver must be a
@@ -324,8 +310,8 @@ var Matrix = {
     // Returns true iff the argument has the same dimensions as the matrix
     this.isSameSizeAs = function(matrix) {
       matrix = Matrix.create(matrix);
-      return (this.dimensions().rows == matrix.dimensions().rows &&
-          this.dimensions().cols == matrix.dimensions().cols);
+      return (this.rows() == matrix.rows() &&
+          this.cols() == matrix.cols());
     };
     
     // Returns the result of adding the argument to the matrix
@@ -335,9 +321,9 @@ var Matrix = {
         return null;
       } else {
         var new_els = [], i, j;
-        for (i = 1; i <= this.dimensions().rows; i++) {
+        for (i = 1; i <= this.rows(); i++) {
           new_els[i - 1] = [];
-          for (j = 1; j <= this.dimensions().cols; j++) {
+          for (j = 1; j <= this.cols(); j++) {
             new_els[i - 1].push(this.e(i,j) + matrix.e(i,j));
           }
         }
@@ -353,7 +339,7 @@ var Matrix = {
     // Returns true iff the matrix can multiply the argument from the left
     this.canMultiplyFromLeft = function(matrix) {
       var mat = Matrix.create(matrix);
-      return (this.dimensions().cols == mat.dimensions().rows);
+      return (this.cols() == mat.rows());
     };
     
     // Returns the result of multiplying the matrix from the right by the argument.
@@ -366,10 +352,10 @@ var Matrix = {
           return null;
         } else {
           var new_els = [], A, B;
-          for (i = 0; i < this.dimensions().rows; i++) {
+          for (i = 0; i < this.rows(); i++) {
             A = this.row(i+1);
             new_els[i] = [];
-            for (j = 0; j < matrix.dimensions().cols; j++) {
+            for (j = 0; j < matrix.cols(); j++) {
               B = matrix.col(j+1);
               new_els[i][j] = A.dot(B);
             }
@@ -378,8 +364,8 @@ var Matrix = {
         }
       } else {
         var M = this.dup();
-        for (i = 0; i < this.dimensions().rows; i++) {
-          for (j = 0; j < this.dimensions().cols; j++) {
+        for (i = 0; i < this.rows(); i++) {
+          for (j = 0; j < this.cols(); j++) {
             M.elements[i][j] = M.e(i+1,j+1) * matrix;
           }
         }
@@ -392,7 +378,7 @@ var Matrix = {
     // Returns a submatrix taken from the matrix
     // Argument order is: start row, start col, nrows, ncols
     this.minor = function(a, b, c, d) {
-      if (a < 1 || b < 1 || a + c - 1 > this.dimensions().rows || b + d - 1 > this.dimensions().cols) {
+      if (a < 1 || b < 1 || a + c - 1 > this.rows() || b + d - 1 > this.cols()) {
         return null;
       } else {
         var i, j, new_els = [];
@@ -408,14 +394,13 @@ var Matrix = {
     
     // Returns true iff the matrix is square
     this.isSquare = function() {
-      var d = this.dimensions();
-      return (d.rows == d.cols);
+      return (this.rows() == this.cols());
     };
     
     // Returns the (absolute) largest element of the matrix
     this.max = function() {
       var m = 0;
-      for (var i = 1; i <= this.dimensions().rows; i++) {
+      for (var i = 1; i <= this.rows(); i++) {
         if (Math.abs(this.row(i).max()) > Math.abs(m)) { m = this.row(i).max(); }
       }
       return m;
@@ -424,8 +409,8 @@ var Matrix = {
     // Returns the indeces of the first match found by reading row-by-row from left to right
     this.indexOf = function(x) {
       var index = null, i, j;
-      for (i = 1; i <= this.dimensions().rows; i++) {
-        for (j = 1; j <= this.dimensions().cols; j++) {
+      for (i = 1; i <= this.rows(); i++) {
+        for (j = 1; j <= this.cols(); j++) {
           if (index === null && this.e(i,j) == x) {
             index = {i: i, j: j};
           }
@@ -441,7 +426,7 @@ var Matrix = {
         return null;
       } else {
         var els = [];
-        for (var i = 1; i <= this.dimensions().rows; i++) {
+        for (var i = 1; i <= this.rows(); i++) {
           els.push(this.e(i,i));
         }
         return Vector.create(els);
@@ -453,9 +438,9 @@ var Matrix = {
     // switched, and the determinant is preserved.
     this.diagonalize = function() {
       var i, j;
-      for (i = 1; i < this.dimensions().rows; i++) {
+      for (i = 1; i < this.rows(); i++) {
         if (this.e(i,i) != 0) {
-          for (j = i + 1; j <= this.dimensions().rows; j++) {
+          for (j = i + 1; j <= this.rows(); j++) {
             this.elements[j - 1] = this.row(j).subtract(this.row(i).x(this.e(j,i) / this.e(i,i))).elements;
           }
         }
@@ -506,10 +491,10 @@ var Matrix = {
       matrix = Matrix.create(matrix); // Allows us to supply vectors
       var self = this.dup();
       var i, j;
-      if (self.dimensions().rows == matrix.dimensions().rows) {
-        for (i = 0; i < self.dimensions().rows; i++) {
-          for (j = 0; j < matrix.dimensions().cols; j++) {
-            self.elements[i][self.dimensions().rows + j] = matrix.e(i+1,j+1);
+      if (self.rows() == matrix.rows()) {
+        for (i = 0; i < self.rows(); i++) {
+          for (j = 0; j < matrix.cols(); j++) {
+            self.elements[i][self.rows() + j] = matrix.e(i+1,j+1);
           }
         }
         return self;
@@ -522,7 +507,7 @@ var Matrix = {
     this.inverse = function() {
       var i, j;
       if (this.isSquare() && !this.isSingular()) {
-        var n = this.dimensions().rows;
+        var n = this.rows();
         var M = this.augment(Matrix.I(n));
         M.diagonalize(); // Matrix is non-singular so there will be no zeros on the diagonal
         for (i = 1; i <= n; i++) {
@@ -544,9 +529,9 @@ var Matrix = {
     // Returns the result of rounding all the elements
     this.round = function() {
       var new_els = [], i, j;
-      for (i = 1; i < this.dimensions().rows; i++) {
+      for (i = 1; i < this.rows(); i++) {
         new_els[i - 1] = [];
-        for (j = 1; j < this.dimensions().cols; j++) {
+        for (j = 1; j < this.cols(); j++) {
           new_els[i - 1].push(Math.round(this.e(i,j)));
         }
       }
@@ -556,16 +541,50 @@ var Matrix = {
     // Returns a string representation of the matrix
     this.inspect = function() {
       var matrix = this.dup();
-      for (var i = 0; i < matrix.dimensions().rows; i++) {
+      for (var i = 0; i < matrix.rows(); i++) {
         matrix.elements[i] = Vector.create(matrix.elements[i]).inspect();
       }
       return matrix.elements.join('\n');
+    };
+    
+    // Set the matrix's elements from an array. If the argument passed
+    // is a vector, the resulting matrix will be a single column.
+    this.setElements = function(els) {
+      var row, i, j, success = true;
+      if (els == undefined) {
+        return null;
+      } else {
+        this.elements = [];
+        if (els.elements) { els = els.elements; }
+        for (i = 0; i < els.length; i++) {
+          if (els[i][0] !== undefined) {
+            row = [];
+            for (j = 0; j < els[i].length; j++) {
+              if (!isNaN(els[i][j])) { row.push(els[i][j]); }
+            }
+            if (i > 0 && this.elements[i-1].length != row.length) {
+              success = false;
+            } else {
+              this.elements.push(row);
+            }
+          } else {
+            if (!isNaN(els[i])) { this.elements.push([els[i]]); }
+          }
+        }
+        if (!success) {
+          this.elements = [];
+          return null;
+        } else {
+          return this;
+        }
+      }
     };
   },
 
   // Constructor function
   create: function(elements) {
-    return new Matrix.Abstract(elements);
+    var M = new Matrix.Abstract();
+    return M.setElements(elements);
   }
 };
 
@@ -662,10 +681,22 @@ Matrix.RotationZ = function(t) {
 // Random matrix of n rows, m columns
 Matrix.Random = function(n, m) {
   var els = [], i, j;
-  for (i = 0; i <= n; i++) {
+  for (i = 0; i < n; i++) {
     els[i] = [];
-    for (j = 0; j <= m; j++) {
+    for (j = 0; j < m; j++) {
       els[i][j] = Math.random();
+    }
+  }
+  return Matrix.create(els);
+};
+
+// Matrix filled with zeros
+Matrix.Zero = function(n, m) {
+  var els = [], i, j;
+  for (i = 0; i < n; i++) {
+    els[i] = [];
+    for (j = 0; j < m; j++) {
+      els[i][j] = 0;
     }
   }
   return Matrix.create(els);
