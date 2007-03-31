@@ -330,6 +330,28 @@ window.onload = function() {
     Matrix.create([0]).inspect() == '[0]'
   );
   
+  M1 = Matrix.create([
+    [2,3,8],
+    [7,0,2],
+    [6,3,0]
+  ]);
+  
+  M2 = M1.dup();
+  
+  assert('Equality and duplication',
+    M1.eql(M2)
+  );
+  
+  M2 = Matrix.Random(2,5);
+  assert('Not the same shape',
+    !M2.isSameSizeAs(M1)
+  );
+  
+  M1 = Matrix.Random(2,5);
+  assert('Is the same shape',
+    M1.isSameSizeAs(M2)
+  );
+  
   for (i = 1; i < 8; i++) {
     M = Matrix.Random(4,i);
     assert('Random matrix dimensions (4,'+i+')',
@@ -352,6 +374,85 @@ window.onload = function() {
       M.rows()
     );
   }
+  
+  M1 = Matrix.create([
+    [2,5,9,3],
+    [9,2,8,5]
+  ]);
+  
+  M2 = Matrix.create([
+    [7,1,0,8],
+    [0,4,3,8]
+  ]);
+  
+  M = Matrix.create([
+    [9,6,9,11],
+    [9,6.0,11,13]
+  ]);
+  
+  assert('Addition',
+    M1.add(M2).eql(M),
+    M1.add(M2).inspect()
+  );
+  
+  assert('Addition commutation',
+    M1.add(M2).eql(M2.add(M1)),
+    M1.add(M2).inspect()
+  );
+  
+  assert('Addition with different shapes',
+    Matrix.Zero(2,5).add(M1) === null
+  );
+  
+  M = Matrix.create([
+    [-5,4,9.0,-5],
+    [9,-2,5,-3]
+  ]);
+  
+  assert('Subtraction',
+    M1.subtract(M2).eql(M),
+    M1.subtract(M2).inspect()
+  );
+  
+  assert('Subtraction anticommutation',
+    M2.subtract(M1).eql(M.x(-1)),
+    M1.subtract(M2).inspect()
+  );
+  
+  assert('Subtraction with different shapes',
+    Matrix.Zero(3,4).subtract(M1) === null
+  );
+  
+  M = Matrix.create([
+    [14,2,0,16],
+    [0,8,6,16]
+  ]);
+  
+  assert('Multiplication by scalar',
+    M2.x(2).eql(M),
+    M2.x(2).inspect()
+  );
+  
+  M2 = Matrix.create([
+    [2,9],
+    [0,2],
+    [8,1],
+    [0,6]
+  ]);
+  
+  assert('Multiplication gives the right shape',
+    M1.x(M2).rows() == 2 && M1.x(M2).cols() == 2,
+    M1.x(M2).inspect()
+  );
+  
+  assert('Multiplication reversed',
+    M2.x(M1).rows() == 4 && M2.x(M1).cols() == 4,
+    M2.x(M1).inspect()
+  );
+  
+  assert('Multiplication with wrong shape',
+    M1.x(M) === null
+  );
   
   summary = document.getElementById('summary');
   var date = new Date();
