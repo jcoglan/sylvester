@@ -62,7 +62,7 @@ var Vector = {
     this.map = function(fn) {
       var elements = [];
       for (var i = 1; i <= this.dimensions(); i++) {
-        elements.push(fn(this.e(i)));
+        elements.push(fn(this.e(i), i));
       }
       return Vector.create(elements);
     };
@@ -329,9 +329,12 @@ var Matrix = {
     
     // Maps the matrix to another matrix (of the same dimensions) according to the given function
     this.map = function(fn) {
-      var els = [];
-      for (var i = 1; i <= this.rows(); i++) {
-        els.push(this.row(i).map(fn).elements);
+      var els = [], i, j;
+      for (i = 1; i <= this.rows(); i++) {
+        els[i - 1] = [];
+        for (j = 1; j <= this.cols(); j++) {
+          els[i - 1][j - 1] = fn(this.e(i,j), i, j);
+        }
       }
       return Matrix.create(els);
     };
