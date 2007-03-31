@@ -70,7 +70,8 @@ var Vector = {
     // Alters the vector so that its modulus is unity. Returns the vector
     this.normalize = function() {
       var r = this.modulus();
-      return this.map(function(x) { return x/r; });
+      this.setElements(this.map(function(x) { return x/r; }).elements);
+      return this;
     };
     
     // Returns a new vector created by normalizing the receiver
