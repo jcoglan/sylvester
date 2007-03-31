@@ -69,12 +69,8 @@ var Vector = {
     
     // Alters the vector so that its modulus is unity. Returns the vector
     this.normalize = function() {
-      var new_elements = [];
-      for (var i = 0; i < this.dimensions(); i++) {
-        new_elements.push(this.elements[i]/this.modulus());
-      }
-      this.setElements(new_elements);
-      return this;
+      var r = this.modulus();
+      return this.map(function(x) { return x/r; });
     };
     
     // Returns a new vector created by normalizing the receiver
@@ -105,11 +101,7 @@ var Vector = {
       if (this.dimensions() != vector.dimensions()) {
         return null;
       } else {
-        var elements = [];
-        for (var i = 1; i <= this.dimensions(); i++) {
-          elements.push(this.e(i) + vector.e(i));
-        }
-        return Vector.create(elements);
+        return this.map(function(x, i) { return x + vector.e(i); });
       }
     };
     
@@ -120,11 +112,7 @@ var Vector = {
     
     // Returns the result of multiplying the elements of the vector by the argument
     this.multiply = function(k) {
-      var new_elements = [];
-      for (var i = 1; i <= this.dimensions(); i++) {
-        new_elements.push(k * this.e(i));
-      }
-      return Vector.create(new_elements);
+      return this.map(function(x) { return x*k; });
     };
     
     this.x = function(k) { return this.multiply(k); };
@@ -184,21 +172,15 @@ var Vector = {
     
     // Returns the result of rounding the elements of the vector
     this.round = function() {
-      var new_elements = [];
-      for (var i = 1; i <= this.dimensions(); i++) {
-        new_elements.push(Math.round(this.e(i)));
-      }
-      return Vector.create(new_elements);
+      return this.map(function(x) { return Math.round(x); });
     };
     
     // Sets the elements of the vector to the given value if they
     // differ from it by less than jsMetric.precision
     this.snapTo = function(x) {
-      var elements = [];
-      for (var i = 1; i <= this.dimensions(); i++) {
-        elements.push(Math.abs(this.e(i) - x) <= jsMetric.precision ? x : this.e(i));
-      }
-      this.setElements(elements);
+      this.setElements(this.map(function(y) {
+        return (Math.abs(y - x) <= jsMetric.precision) ? x : y;
+      }).elements);
       return this;
     };
     
