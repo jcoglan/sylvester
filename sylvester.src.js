@@ -93,8 +93,8 @@ var Vector = {
     
     // Returns true iff the vector is perpendicular to the argument
     this.isPerpendicularTo = function(vector) {
-      var angle = this.angleFrom(vector);
-      return (angle === null) ? null : (Math.abs(this.angleFrom(vector) - Math.PI/2) <= Sylvester.precision);
+      var dot = this.dot(vector);
+      return (dot === null) ? null : (Math.abs(dot) <= Sylvester.precision);
     };
     
     // Returns the result of adding the argument to the vector
