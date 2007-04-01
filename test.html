@@ -476,6 +476,22 @@ window.onload = function() {
     );
   }
   
+  M1 = Matrix.create([
+    [3,9,8,4],
+    [2,0,1,5]
+  ]);
+  
+  M2 = Matrix.create([
+    [3,2],
+    [9,0],
+    [8,1],
+    [4,5]
+  ]);
+  
+  assert('Transpose',
+    M1.transpose().eql(M2) && M2.transpose().eql(M1)
+  );
+  
   summary = document.getElementById('summary');
   var date = new Date();
   var time = 1000*(date.getSeconds() - beginDate.getSeconds()) + date.getMilliseconds() - beginDate.getMilliseconds();

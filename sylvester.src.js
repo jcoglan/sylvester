@@ -380,6 +380,12 @@ var Matrix = {
       }
     };
     
+    // Returns the transpose of the matrix
+    this.transpose = function() {
+      var self = this;
+      return Matrix.Zero(this.cols(), this.rows()).map(function(x, i, j) { return self.e(j,i); });
+    };
+    
     // Returns true iff the matrix is square
     this.isSquare = function() {
       return (this.rows() == this.cols());
