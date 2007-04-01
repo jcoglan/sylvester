@@ -228,11 +228,7 @@ Vector.k = Vector.create(0,0,1);
 
 // Random vector of size n
 Vector.Random = function(n) {
-  var elements = [];
-  for (var i = 0; i < n; i++) {
-    elements.push(Math.random());
-  }
-  return Vector.create(elements);
+  return Vector.Zero(n).map(function() { return Math.random(); });
 };
 
 // Vector filled with zeros
@@ -335,14 +331,7 @@ var Matrix = {
       if (!this.isSameSizeAs(matrix)) {
         return null;
       } else {
-        var new_els = [], i, j;
-        for (i = 1; i <= this.rows(); i++) {
-          new_els[i - 1] = [];
-          for (j = 1; j <= this.cols(); j++) {
-            new_els[i - 1].push(this.e(i,j) + matrix.e(i,j));
-          }
-        }
-        return Matrix.create(new_els);
+        return this.map(function(x, i, j) { return x + matrix.e(i,j); });
       }
     };
     
@@ -366,25 +355,13 @@ var Matrix = {
         if (!this.canMultiplyFromLeft(matrix)) {
           return null;
         } else {
-          var new_els = [], A, B;
-          for (i = 0; i < this.rows(); i++) {
-            A = this.row(i+1);
-            new_els[i] = [];
-            for (j = 0; j < matrix.cols(); j++) {
-              B = matrix.col(j+1);
-              new_els[i][j] = A.dot(B);
-            }
-          }
-          return Matrix.create(new_els);
+          var self = this;
+          return Matrix.Zero(this.rows(), matrix.cols()).map(
+            function(x, i, j) { return self.row(i).dot(matrix.col(j)); }
+          );
         }
       } else {
-        var M = this.dup();
-        for (i = 0; i < this.rows(); i++) {
-          for (j = 0; j < this.cols(); j++) {
-            M.elements[i][j] = M.e(i+1,j+1) * matrix;
-          }
-        }
-        return M;
+        return this.map(function(x) { return x * matrix; });
       }
     };
     
@@ -396,14 +373,10 @@ var Matrix = {
       if (a < 1 || b < 1 || a + c - 1 > this.rows() || b + d - 1 > this.cols()) {
         return null;
       } else {
-        var i, j, new_els = [];
-        for (i = a; i <= a + c - 1; i++) {
-          new_els[i - a] = [];
-          for (j = b; j <= b + d - 1; j++) {
-            new_els[i - a][j - b] = this.e(i,j);
-          }
-        }
-        return Matrix.create(new_els);
+        var self = this;
+        return Matrix.Zero(c, d).map(
+          function(x, i, j) { return self.e(i + a - 1, j + b -1); }
+        );
       }
     };
     
@@ -453,11 +426,13 @@ var Matrix = {
     // scaled up or switched, and the determinant is preserved. Elements that
     // are within rounding error precision of zero are snapped to zero.
     this.toRightTriangular = function() {
-      var i, j, M = this.dup();
+      var i, j, M = this.dup(), nonzero;
       for (i = 1; i < M.rows(); i++) {
         if (M.e(i,i) == 0) {
+          nonzero = false;
           for (j = i + 1; j <= M.rows(); j++) {
-            if (M.e(j,i) != 0) {
+            if (M.e(j,i) != 0 && !nonzero) {
+              nonzero = true;
               M.elements[i - 1] = M.row(i).add(M.row(j)).elements;
             }
           }
@@ -548,14 +523,7 @@ var Matrix = {
     
     // Returns the result of rounding all the elements
     this.round = function() {
-      var new_els = [], i, j;
-      for (i = 1; i <= this.rows(); i++) {
-        new_els[i - 1] = [];
-        for (j = 1; j <= this.cols(); j++) {
-          new_els[i - 1].push(Math.round(this.e(i,j)));
-        }
-      }
-      return Matrix.create(new_els);
+      return this.map(function(x) { return Math.round(x); });
     };
     
     // Sets the elements of the matrix to the given value if they
@@ -709,14 +677,9 @@ Matrix.RotationZ = function(t) {
 
 // Random matrix of n rows, m columns
 Matrix.Random = function(n, m) {
-  var els = [], i, j;
-  for (i = 0; i < n; i++) {
-    els[i] = [];
-    for (j = 0; j < m; j++) {
-      els[i][j] = Math.random();
-    }
-  }
-  return Matrix.create(els);
+  return Matrix.Zero(n, m).map(
+    function() { return Math.random(); }
+  );
 };
 
 // Matrix filled with zeros
