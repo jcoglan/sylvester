@@ -95,11 +95,8 @@ var Vector = {
     
     // Returns the result of adding the argument to the vector
     this.add = function(vector) {
-      if (this.dimensions() != vector.dimensions()) {
-        return null;
-      } else {
-        return this.map(function(x, i) { return x + vector.e(i); });
-      }
+      if (this.dimensions() != vector.dimensions()) { return null; }
+      return this.map(function(x, i) { return x + vector.e(i); });
     };
     
     // Returns the result of subtracting the argument from the vector
@@ -118,28 +115,22 @@ var Vector = {
     // Both vectors must have equal dimensionality
     this.dot = function(vector) {
       var i, product = 0;
-      if (this.dimensions() != vector.dimensions()) {
-        return null;
-      } else {
-        for (i = 1; i <= this.dimensions(); i++) {
-          product += this.e(i) * vector.e(i);
-        }
-        return product;
+      if (this.dimensions() != vector.dimensions()) { return null; }
+      for (i = 1; i <= this.dimensions(); i++) {
+        product += this.e(i) * vector.e(i);
       }
+      return product;
     };
     
     // Returns the vector product of the vector with the argument
     // Both vectors must have dimensionality 3
     this.cross = function(vector) {
-      if (this.dimensions() != 3 || vector.dimensions() != 3) {
-        return null;
-      } else {
-        return Vector.create(
-          (this.e(2) * vector.e(3)) - (this.e(3) * vector.e(2)),
-          (this.e(3) * vector.e(1)) - (this.e(1) * vector.e(3)),
-          (this.e(1) * vector.e(2)) - (this.e(2) * vector.e(1))
-        );
-      }
+      if (this.dimensions() != 3 || vector.dimensions() != 3) { return null; }
+      return Vector.create(
+        (this.e(2) * vector.e(3)) - (this.e(3) * vector.e(2)),
+        (this.e(3) * vector.e(1)) - (this.e(1) * vector.e(3)),
+        (this.e(1) * vector.e(2)) - (this.e(2) * vector.e(1))
+      );
     };
     
     // Returns the (absolute) largest element of the vector
@@ -198,22 +189,16 @@ var Vector = {
   // Constructor function
   create: function() {
     var elements;
-    if (arguments[0] == undefined) {
-      return null;
+    if (arguments[0] == undefined) { return null; }
+    if (arguments[0][0] == undefined) {
+      elements = arguments;
     } else {
-      if (arguments[0][0] == undefined) {
-        elements = arguments;
-      } else {
-        elements = arguments[0];
-      }
-      if (elements.length < 1) {
-        return null;
-      } else {
-        var V = new Vector.Abstract();
-        V.setElements(elements);
-        return V;
-      }
+      elements = arguments[0];
     }
+    if (elements.length < 1) { return null; }
+    var V = new Vector.Abstract();
+    V.setElements(elements);
+    return V;
   }
 };
 
@@ -245,33 +230,24 @@ var Matrix = {
   
     // Returns element (i,j) of the matrix
     this.e = function(i,j) {
-      if (i < 1 || i > this.rows() || j < 1 || j > this.cols()) {
-        return null;
-      } else {
-        return this.elements[i - 1][j - 1];
-      }
+      if (i < 1 || i > this.rows() || j < 1 || j > this.cols()) { return null; }
+      return this.elements[i - 1][j - 1];
     };
     
     // Returns row k of the matrix as a vector
     this.row = function(k) {
-      if (k > this.rows()) {
-        return null;
-      } else {
-        return Vector.create(this.elements[k - 1]);
-      }
+      if (k > this.rows()) { return null; }
+      return Vector.create(this.elements[k - 1]);
     };
     
     // Returns column k of the matrix as a vector
     this.col = function(k) {
-      if (k > this.cols()) {
-        return null;
-      } else {
-        var col = [];
-        for (var i = 1; i <= this.rows(); i++) {
-          col.push(this.e(i,k));
-        }
-        return Vector.create(col);
+      if (k > this.cols()) { return null; }
+      var col = [];
+      for (var i = 1; i <= this.rows(); i++) {
+        col.push(this.e(i,k));
       }
+      return Vector.create(col);
     };
     
     // Returns the number of rows/columns the matrix has
@@ -324,11 +300,8 @@ var Matrix = {
     // Returns the result of adding the argument to the matrix
     this.add = function(matrix) {
       matrix = Matrix.create(matrix);
-      if (!this.isSameSizeAs(matrix)) {
-        return null;
-      } else {
-        return this.map(function(x, i, j) { return x + matrix.e(i,j); });
-      }
+      if (!this.isSameSizeAs(matrix)) { return null; }
+      return this.map(function(x, i, j) { return x + matrix.e(i,j); });
     };
     
     // Returns the result of subtracting the argument from the matrix
@@ -348,14 +321,11 @@ var Matrix = {
       var i, j;
       if (matrix.elements) {
         matrix = Matrix.create(matrix);
-        if (!this.canMultiplyFromLeft(matrix)) {
-          return null;
-        } else {
-          var self = this;
-          return Matrix.Zero(this.rows(), matrix.cols()).map(
-            function(x, i, j) { return self.row(i).dot(matrix.col(j)); }
-          );
-        }
+        if (!this.canMultiplyFromLeft(matrix)) { return null; }
+        var self = this;
+        return Matrix.Zero(this.rows(), matrix.cols()).map(
+          function(x, i, j) { return self.row(i).dot(matrix.col(j)); }
+        );
       } else {
         return this.map(function(x) { return x * matrix; });
       }
@@ -366,14 +336,11 @@ var Matrix = {
     // Returns a submatrix taken from the matrix
     // Argument order is: start row, start col, nrows, ncols
     this.minor = function(a, b, c, d) {
-      if (a < 1 || b < 1 || a + c - 1 > this.rows() || b + d - 1 > this.cols()) {
-        return null;
-      } else {
-        var self = this;
-        return Matrix.Zero(c, d).map(
-          function(x, i, j) { return self.e(i + a - 1, j + b -1); }
-        );
-      }
+      if (a < 1 || b < 1 || a + c - 1 > this.rows() || b + d - 1 > this.cols()) { return null; }
+      var self = this;
+      return Matrix.Zero(c, d).map(
+        function(x, i, j) { return self.e(i + a - 1, j + b -1); }
+      );
     };
     
     // Returns the transpose of the matrix
@@ -412,15 +379,12 @@ var Matrix = {
     // If the matrix is square, returns the diagonal elements as a vector.
     // Otherwise, returns null.
     this.diagonal = function() {
-      if (!this.isSquare) {
-        return null;
-      } else {
-        var els = [];
-        for (var i = 1; i <= this.rows(); i++) {
-          els.push(this.e(i,i));
-        }
-        return Vector.create(els);
+      if (!this.isSquare) { return null; }
+      var els = [];
+      for (var i = 1; i <= this.rows(); i++) {
+        els.push(this.e(i,i));
       }
+      return Vector.create(els);
     };
     
     // Make the matrix upper (right) triangular by Gaussian elimination.
@@ -452,14 +416,11 @@ var Matrix = {
     
     // Returns the determinant for square matrices
     this.determinant = function() {
-      if (!this.isSquare()) {
-        return null;
-      } else {
-        var els = this.toRightTriangular().diagonal().elements;
-        var det = els[0];
-        for (var i = 1; i < els.length; i++) { det = det * els[i]; }
-        return det;
-      }
+      if (!this.isSquare()) { return null; }
+      var els = this.toRightTriangular().diagonal().elements;
+      var det = els[0];
+      for (var i = 1; i < els.length; i++) { det = det * els[i]; }
+      return det;
     };
     
     this.det = function() { return this.determinant(); };
@@ -471,14 +432,11 @@ var Matrix = {
     
     // Returns the trace for square matrices
     this.trace = function() {
-      if (!this.isSquare()) {
-        return null;
-      } else {
-        var els = this.toRightTriangular().diagonal().elements;
-        var tr = els[0];
-        for (var i = 1; i < els.length; i++) { tr = tr + els[i]; }
-        return tr;
-      }
+      if (!this.isSquare()) { return null; }
+      var els = this.toRightTriangular().diagonal().elements;
+      var tr = els[0];
+      for (var i = 1; i < els.length; i++) { tr = tr + els[i]; }
+      return tr;
     };
     
     this.tr = function() { return this.trace(); };
@@ -488,37 +446,31 @@ var Matrix = {
       matrix = Matrix.create(matrix); // Allows us to supply vectors
       var self = this.dup();
       var i, j;
-      if (self.rows() == matrix.rows()) {
-        for (i = 0; i < self.rows(); i++) {
-          for (j = 0; j < matrix.cols(); j++) {
-            self.elements[i][self.rows() + j] = matrix.e(i+1,j+1);
-          }
+      if (self.rows() != matrix.rows()) { return null; }
+      for (i = 0; i < self.rows(); i++) {
+        for (j = 0; j < matrix.cols(); j++) {
+          self.elements[i][self.rows() + j] = matrix.e(i+1,j+1);
         }
-        return self;
-      } else {
-        return null;
       }
+      return self;
     };
     
     // Returns the inverse (if one exists) using Gauss-Jordan
     this.inverse = function() {
       var i, j;
-      if (this.isSquare() && !this.isSingular()) {
-        var n = this.rows();
-        var M = this.augment(Matrix.I(n)).toRightTriangular();
-        // Matrix is non-singular so there will be no zeros on the diagonal
-        for (i = 1; i <= n; i++) {
-          M.elements[i - 1] = M.row(i).x(1 / M.e(i,i)).elements;
-        }
-        for (i = n; i > 1; i--) {
-          for (j = 1; j < i; j++) {
-            M.elements[j - 1] = M.row(j).subtract(M.row(i).x(M.e(j,i))).elements;
-          }
-        }
-        return M.minor(1, n+1, n, n);
-      } else {
-        return null;
+      if (!this.isSquare() || this.isSingular()) { return null; }
+      var n = this.rows();
+      var M = this.augment(Matrix.I(n)).toRightTriangular();
+      // Matrix is non-singular so there will be no zeros on the diagonal
+      for (i = 1; i <= n; i++) {
+        M.elements[i - 1] = M.row(i).x(1 / M.e(i,i)).elements;
       }
+      for (i = n; i > 1; i--) {
+        for (j = 1; j < i; j++) {
+          M.elements[j - 1] = M.row(j).subtract(M.row(i).x(M.e(j,i))).elements;
+        }
+      }
+      return M.minor(1, n+1, n, n);
     };
     
     this.inv = function() { return this.inverse(); };
@@ -550,32 +502,29 @@ var Matrix = {
     // is a vector, the resulting matrix will be a single column.
     this.setElements = function(els) {
       var row, i, j, success = true;
-      if (els == undefined) {
+      if (els == undefined) { return null; }
+      this.elements = [];
+      if (els.elements) { els = els.elements; }
+      for (i = 0; i < els.length; i++) {
+        if (els[i][0] !== undefined) {
+          row = [];
+          for (j = 0; j < els[i].length; j++) {
+            if (!isNaN(els[i][j])) { row.push(els[i][j]); }
+          }
+          if (i > 0 && this.elements[i-1].length != row.length) {
+            success = false;
+          } else {
+            this.elements.push(row);
+          }
+        } else {
+          if (!isNaN(els[i])) { this.elements.push([els[i]]); }
+        }
+      }
+      if (!success) {
+        this.elements = [];
         return null;
       } else {
-        this.elements = [];
-        if (els.elements) { els = els.elements; }
-        for (i = 0; i < els.length; i++) {
-          if (els[i][0] !== undefined) {
-            row = [];
-            for (j = 0; j < els[i].length; j++) {
-              if (!isNaN(els[i][j])) { row.push(els[i][j]); }
-            }
-            if (i > 0 && this.elements[i-1].length != row.length) {
-              success = false;
-            } else {
-              this.elements.push(row);
-            }
-          } else {
-            if (!isNaN(els[i])) { this.elements.push([els[i]]); }
-          }
-        }
-        if (!success) {
-          this.elements = [];
-          return null;
-        } else {
-          return this;
-        }
+        return this;
       }
     };
   },
@@ -603,15 +552,12 @@ Matrix.I = function(n) {
 Matrix.Diagonal = function() {
   var V = (arguments[0][0] == undefined) ? Vector.create(arguments) : Vector.create(arguments[0]);
   var n = V.dimensions();
-  if (n > 0) {
-    var M = Matrix.I(n);
-    for (var i = 0; i < n; i++) {
-      M.elements[i][i] = V.elements[i];
-    }
-    return M;
-  } else {
-    return null;
+  if (n <= 0) { return null; }
+  var M = Matrix.I(n);
+  for (var i = 0; i < n; i++) {
+    M.elements[i][i] = V.elements[i];
   }
+  return M;
 };
 
 // Rotation matrix about some axis. If no axis is
@@ -624,32 +570,29 @@ Matrix.Rotation = function(t, a) {
       [Math.sin(t),   Math.cos(t)]
     ]);
   } else {
-    if (axis.dimensions() == 3) {
-      axis.normalize();
-      var rot = Matrix.RotationZ(t);
-      if (axis.isParallelTo(Vector.k)) {
-        // Axis is parallel to z-axis - just return that rotation
-        return rot;
-      } else {
-        var projectionOnXY = Vector.create(axis.e(1), axis.e(2), 0);
-        var z_rot = Matrix.I(3), inv_z_rot = Matrix.I(3);
-        if (!projectionOnXY.isParallelTo(Vector.i)) {
-          // Axis does not lie in X-Z plane - change co-ordinates through R(Z)
-          var Za = projectionOnXY.cross(Vector.i).normalize();
-          var Zt = Za.e(3) * projectionOnXY.angleFrom(Vector.i);
-          axis = Matrix.RotationZ(Zt).x(axis).col(1);
-          z_rot = Matrix.RotationZ(Zt);
-          inv_z_rot = Matrix.RotationZ(-Zt);
-        }
-        // Axis lies in X-Z plame - change co-ordinates so that axis = z-axis, through R(Y)
-        var Ya = axis.cross(Vector.k).normalize();
-        var Yt = Ya.e(2) * axis.angleFrom(Vector.k);
-        var y_rot = Matrix.RotationY(Yt);
-        var inv_y_rot = Matrix.RotationY(-Yt);
-        return inv_z_rot.x(inv_y_rot).x(rot).x(y_rot).x(z_rot);
-      }
+    if (axis.dimensions() != 3) { return null; }
+    axis.normalize();
+    var rot = Matrix.RotationZ(t);
+    if (axis.isParallelTo(Vector.k)) {
+      // Axis is parallel to z-axis - just return that rotation
+      return rot;
     } else {
-      return null;
+      var projectionOnXY = Vector.create(axis.e(1), axis.e(2), 0);
+      var z_rot = Matrix.I(3), inv_z_rot = Matrix.I(3);
+      if (!projectionOnXY.isParallelTo(Vector.i)) {
+        // Axis does not lie in X-Z plane - change co-ordinates through R(Z)
+        var Za = projectionOnXY.cross(Vector.i).normalize();
+        var Zt = Za.e(3) * projectionOnXY.angleFrom(Vector.i);
+        axis = Matrix.RotationZ(Zt).x(axis).col(1);
+        z_rot = Matrix.RotationZ(Zt);
+        inv_z_rot = Matrix.RotationZ(-Zt);
+      }
+      // Axis lies in X-Z plame - change co-ordinates so that axis = z-axis, through R(Y)
+      var Ya = axis.cross(Vector.k).normalize();
+      var Yt = Ya.e(2) * axis.angleFrom(Vector.k);
+      var y_rot = Matrix.RotationY(Yt);
+      var inv_y_rot = Matrix.RotationY(-Yt);
+      return inv_z_rot.x(inv_y_rot).x(rot).x(y_rot).x(z_rot);
     }
   }
 };
