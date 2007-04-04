@@ -41,11 +41,7 @@ var Vector = {
     
     // Returns the modulus ('length') of the vector
     this.modulus = function() {
-      var r = 0;
-      for (i = 1; i <= this.dimensions(); i++) {
-        r += Math.pow(this.e(i), 2);
-      }
-      return Math.sqrt(r);
+      return Math.sqrt(this.dot(this));
     };
     
     // Returns true iff the vector is equal to the argument
