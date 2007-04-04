@@ -21,7 +21,7 @@
 // DEALINGS IN THE SOFTWARE.
 
 var Sylvester = {
-  precision: 1e-12
+  precision: 1e-6
 };
 
 var Vector = {
@@ -180,6 +180,16 @@ var Vector = {
         return (Math.abs(y - x) <= Sylvester.precision) ? x : y;
       }).elements);
       return this;
+    };
+    
+    // Unitily to make sure vectors are 3D. If they are 2D, a zero z-component is added
+    this.to3D = function() {
+      var V = this.dup();
+      if (V.dimensions() == 3) { return V; }
+      if (V.dimensions() == 2) {
+        return Vector.create([V.e(1), V.e(2), 0]);
+      }
+      return null;
     };
     
     // Returns a string representation of the vector
@@ -646,3 +656,103 @@ Matrix.Zero = function(n, m) {
   }
   return Matrix.create(els);
 };
+
+
+
+var Line = {
+
+  // Generic line class
+  Abstract: function() {
+  
+    // Shifts the line by the given vector
+    this.shift = function(vector) {
+      vector = Vector.create(vector).to3D();
+      if (vector === null) { return null; }
+      this.anchor = this.anchor.add(vector);
+      return this;
+    };
+    
+    // Returns true if the line is parallel to the argument. Here, 'parallel to'
+    // means that the argument's direction is either parallel or antiparallel to
+    // the line's own direction.
+    this.isParallelTo = function(obj) {
+      return (this.direction.isParallelTo(obj.direction) || this.direction.isAntiparallelTo(obj.direction));
+    };
+    
+    // Returns the line's perpendicular distance from the argument,
+    //which can be a point (a vector) or another line.
+    // TODO: add support for planes
+    this.distanceFrom = function(obj) {
+      if (obj.direction) {
+        // obj is a line
+        if (this.isParallelTo(obj)) { return this.distanceFrom(obj.anchor); }
+        var N = this.direction.cross(obj.direction).toUnitVector();
+        return Math.abs(this.anchor.subtract(obj.anchor).dot(N));
+      } else {
+        // obj is a point
+        var P = Vector.create(obj).to3D();
+        if (P === null) { return null; }
+        var A = P.subtract(this.anchor);
+        return Math.abs(A.modulus() * Math.sin(A.angleFrom(this.direction)));
+      }
+    };
+    
+    // Returns true iff the argument is a point on the line
+    this.includes = function(point) {
+      var dist = this.distanceFrom(point);
+      return (dist !== null && dist <= Sylvester.precision);
+    };
+    
+    // Returns true iff the line has a unique point of intersection with the argument
+    // TODO: add support for planes
+    this.intersects = function(line) {
+      return (!this.isParallelTo(line) && this.distanceFrom(line) <= Sylvester.precision);
+    };
+    
+    // Returns true if the argument occupies the same space as the line
+    this.eql = function(line) {
+      return (this.isParallelTo(line) && this.includes(line.anchor));
+    };
+    
+    // Returns a copy of the line
+    this.dup = function() {
+      return Line.create(this.anchor, this.direction);
+    };
+    
+    // Returns the point on the line that is closest to the given point
+    // TODO: add plane and line support
+    this.pointClosestTo = function(point) {
+      point = Vector.create(point).to3D();
+      if (point === null) { return null; }
+      if (this.includes(point)) { return point; }
+      var A = point.subtract(this.anchor);
+      return point.add(this.direction.cross(this.direction.cross(A)).toUnitVector().x(this.distanceFrom(point)));
+    };
+    
+    // Set the line's anchor point and direction.
+    this.setVectors = function(anchor, direction) {
+      anchor = Vector.create(anchor).to3D();
+      direction = Vector.create(direction).to3D();
+      if (anchor === null || direction === null) { return null; }
+      this.anchor = anchor;
+      this.direction = direction.toUnitVector();
+      return this;
+    };
+  },
+  
+  // Constructor function
+  create: function(anchor, direction) {
+    var L = new Line.Abstract();
+    return L.setVectors(anchor, direction);
+  }
+};
+
+// Axes
+Line.X = Line.create(Vector.Zero(3), Vector.i);
+Line.Y = Line.create(Vector.Zero(3), Vector.j);
+Line.Z = Line.create(Vector.Zero(3), Vector.k);
+
+// Utility functions
+$V = Vector.create;
+$M = Matrix.create;
+$L = Line.create;
