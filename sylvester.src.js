@@ -560,8 +560,9 @@ Matrix.I = function(n) {
 };
 
 // Diagonal matrix - all off-diagonal elements are zero
-Matrix.Diagonal = function() {
-  var V = (arguments[0][0] == undefined) ? Vector.create(arguments) : Vector.create(arguments[0]);
+Matrix.Diagonal = function(elements) {
+  if (elements == undefined) { return null; }
+  var V = Vector.create(elements);
   var n = V.dimensions();
   if (n <= 0) { return null; }
   var M = Matrix.I(n);
@@ -574,38 +575,34 @@ Matrix.Diagonal = function() {
 // Rotation matrix about some axis. If no axis is
 // supplied, assume we're after a 2D transform
 Matrix.Rotation = function(t, a) {
-  var axis = a.dup();
-  if (!axis) {
+  if (!a) {
     return Matrix.create([
       [Math.cos(t),  -Math.sin(t)],
       [Math.sin(t),   Math.cos(t)]
     ]);
-  } else {
-    if (axis.dimensions() != 3) { return null; }
-    axis.normalize();
-    var rot = Matrix.RotationZ(t);
-    if (axis.isParallelTo(Vector.k)) {
-      // Axis is parallel to z-axis - just return that rotation
-      return rot;
-    } else {
-      var projectionOnXY = Vector.create(axis.e(1), axis.e(2), 0);
-      var z_rot = Matrix.I(3), inv_z_rot = Matrix.I(3);
-      if (!projectionOnXY.isParallelTo(Vector.i)) {
-        // Axis does not lie in X-Z plane - change co-ordinates through R(Z)
-        var Za = projectionOnXY.cross(Vector.i).normalize();
-        var Zt = Za.e(3) * projectionOnXY.angleFrom(Vector.i);
-        axis = Matrix.RotationZ(Zt).x(axis).col(1);
-        z_rot = Matrix.RotationZ(Zt);
-        inv_z_rot = Matrix.RotationZ(-Zt);
-      }
-      // Axis lies in X-Z plame - change co-ordinates so that axis = z-axis, through R(Y)
-      var Ya = axis.cross(Vector.k).normalize();
-      var Yt = Ya.e(2) * axis.angleFrom(Vector.k);
-      var y_rot = Matrix.RotationY(Yt);
-      var inv_y_rot = Matrix.RotationY(-Yt);
-      return inv_z_rot.x(inv_y_rot).x(rot).x(y_rot).x(z_rot);
-    }
   }
+  axis = a.dup();
+  if (axis.dimensions() != 3) { return null; }
+  axis.normalize();
+  var rot = Matrix.RotationZ(t);
+  // Axis is parallel to z-axis - just return that rotation
+  if (axis.isParallelTo(Vector.k)) { return rot; }
+  var projectionOnXY = Vector.create([axis.e(1), axis.e(2), 0]);
+  var z_rot = Matrix.I(3), inv_z_rot = Matrix.I(3);
+  if (!projectionOnXY.isParallelTo(Vector.i)) {
+    // Axis does not lie in X-Z plane - change co-ordinates through R(Z)
+    var Za = projectionOnXY.cross(Vector.i).normalize();
+    var Zt = Za.e(3) * projectionOnXY.angleFrom(Vector.i);
+    axis = Matrix.RotationZ(Zt).x(axis).col(1);
+    z_rot = Matrix.RotationZ(Zt);
+    inv_z_rot = Matrix.RotationZ(-Zt);
+  }
+  // Axis lies in X-Z plame - change co-ordinates so that axis = z-axis, through R(Y)
+  var Ya = axis.cross(Vector.k).normalize();
+  var Yt = Ya.e(2) * axis.angleFrom(Vector.k);
+  var y_rot = Matrix.RotationY(Yt);
+  var inv_y_rot = Matrix.RotationY(-Yt);
+  return inv_z_rot.x(inv_y_rot).x(rot).x(y_rot).x(z_rot);
 };
 
 // Special case rotations

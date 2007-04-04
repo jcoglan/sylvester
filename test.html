@@ -568,10 +568,35 @@ window.onload = function() {
     M = Matrix.Random(3,3);
     if (!M.isSingular()) {
       assert('Inversion test ' + i,
-        M.x(M.inv()).eql(Matrix.I(3))
+        M.inv().x(M).eql(Matrix.I(3)),
+        M.inv().x(M).inspect()
       );
     }
   }
+  
+  assert('Rotation in 2D',
+    Matrix.Rotation(Math.PI/2).eql(Matrix.create([
+      [0,-1],
+      [1,0]
+    ]))
+  );
+  
+  assert('Rotation in 3D',
+    Matrix.Rotation(Math.PI/2, Vector.j).eql(Matrix.create([
+      [0,0,1],
+      [0,1,0],
+      [-1,0,0]
+    ]))
+  );
+  
+  assert('Diagonal',
+    Matrix.Diagonal([3,9,5,7]).eql(Matrix.create([
+      [3,0,0,0],
+      [0,9,0,0],
+      [0,0,5,0],
+      [0,0,0,7]
+    ]))
+  );
   
   summary = document.getElementById('summary');
   var date = new Date();
