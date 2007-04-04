@@ -345,11 +345,12 @@ var Matrix = {
     
     // Returns a submatrix taken from the matrix
     // Argument order is: start row, start col, nrows, ncols
+    // Element selection wraps if the required index is outside the matrix's bounds, so you could
+    // use this to perform row/column cycling or copy-augmenting.
     this.minor = function(a, b, c, d) {
-      if (a < 1 || b < 1 || a + c - 1 > this.rows() || b + d - 1 > this.cols()) { return null; }
       var self = this;
       return Matrix.Zero(c, d).map(
-        function(x, i, j) { return self.e(i + a - 1, j + b -1); }
+        function(x, i, j) { return self.e((i + a - 2)%self.rows() + 1, (j + b - 2)%self.cols() + 1); }
       );
     };
     

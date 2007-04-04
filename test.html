@@ -480,6 +480,43 @@ window.onload = function() {
     M1.x(M) === null
   );
   
+  M = Matrix.create([
+    [9,2,9],
+    [2,0,2],
+    [1,8,1]
+  ]);
+  
+  assert('Minor with wrapping',
+    M2.minor(1, 2, 3, 3).eql(M),
+    M2.minor(1, 2, 3, 3).inspect()
+  );
+  
+  assert('Squareness',
+    M.isSquare()
+  );
+  
+  M1 = Matrix.create([
+    [3,9,8,4],
+    [2,0,1,5]
+  ]);
+  
+  assert('Non-squareness',
+    !M1.isSquare()
+  );
+  
+  assert('Find maximum',
+    M1.max() == 9
+  );
+  
+  assert('Index of',
+    M1.indexOf(0).i == 2 && M1.indexOf(0).j == 2
+  );
+  
+  assert('Diagonal vector',
+    M.diagonal().eql(Vector.create([9,0,1])),
+    M.diagonal().inspect()
+  );
+  
   for (i = 0; i < 10; i++) {
     M = Matrix.Random(3,3).x(100).round();
     assert('Triangulation',
@@ -487,11 +524,6 @@ window.onload = function() {
       M.toRightTriangular().snapTo(0).inspect()
     );
   }
-  
-  M1 = Matrix.create([
-    [3,9,8,4],
-    [2,0,1,5]
-  ]);
   
   M2 = Matrix.create([
     [3,2],
@@ -503,6 +535,43 @@ window.onload = function() {
   assert('Transpose',
     M1.transpose().eql(M2) && M2.transpose().eql(M1)
   );
+  
+  M = Matrix.create([
+    [9,2,0],
+    [0,6,2],
+    [0,0,3]
+  ]);
+  
+  assert('Determinant',
+    M.det() == 162
+  );
+  
+  M.elements[2][2] = 0;
+  
+  assert('Zero determinant',
+    M.det() === 0
+  );
+  
+  assert('Singularity',
+    M.isSingular()
+  );
+  
+  assert('Non-square matrix is not singular',
+    !M.augment(Vector.create([4,3,9])).isSingular()
+  );
+  
+  assert('Trace',
+    M.tr() == 15
+  );
+  
+  for (i = 1; i <= 50; i++) {
+    M = Matrix.Random(3,3);
+    if (!M.isSingular()) {
+      assert('Inversion test ' + i,
+        M.x(M.inv()).eql(Matrix.I(3))
+      );
+    }
+  }
   
   summary = document.getElementById('summary');
   var date = new Date();
