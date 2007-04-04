@@ -158,6 +158,11 @@ window.onload = function() {
     Vector.i.angleFrom(Vector.i.x(235457))
   );
   
+  assert('Antiparallelity',
+    Vector.i.isAntiparallelTo(Vector.i.x(-235457)),
+    Vector.i.angleFrom(Vector.i.x(-235457))
+  );
+  
   assert('Perpendicularity',
     Vector.i.isPerpendicularTo(Vector.k),
     Vector.i.angleFrom(Vector.k)

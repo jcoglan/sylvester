@@ -84,7 +84,13 @@ var Vector = {
     // Returns true iff the vector is parallel to the argument
     this.isParallelTo = function(vector) {
       var angle = this.angleFrom(vector);
-      return (angle === null) ? null : (this.angleFrom(vector) <= Sylvester.precision);
+      return (angle === null) ? null : (angle <= Sylvester.precision);
+    };
+    
+    // Returns true iff the vector is antiparallel to the argument
+    this.isAntiparallelTo = function(vector) {
+      var angle = this.angleFrom(vector);
+      return (angle === null) ? null : (Math.abs(angle - Math.PI) <= Sylvester.precision);
     };
     
     // Returns true iff the vector is perpendicular to the argument
