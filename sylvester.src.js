@@ -747,7 +747,7 @@ var Line = {
     this.setVectors = function(anchor, direction) {
       anchor = Vector.create(anchor).to3D();
       direction = Vector.create(direction).to3D();
-      if (anchor === null || direction === null) { return null; }
+      if (anchor === null || direction === null || direction.modulus() === 0) { return null; }
       this.anchor = anchor;
       this.direction = direction.toUnitVector();
       return this;
