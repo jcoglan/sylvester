@@ -250,6 +250,18 @@ window.onload = function() {
     V.indexOf(7) === null
   );
   
+  M = Matrix.create([
+    [2,0,0,0],
+    [0,6,0,0],
+    [0,0,0,0],
+    [0,0,0,3]
+  ]);
+  
+  assert('Convert vector to diagonal matrix',
+    V.toDiagonalMatrix().eql(M),
+    V.toDiagonalMatrix().inspect()
+  );
+  
   assert('Rounding',
     Vector.create([2.56, 3.5, 3.49]).round().eql(Vector.create([3,4,3]))
   );

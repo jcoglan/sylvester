@@ -46,7 +46,11 @@ var Vector = {
     
     // Returns true iff the vector is equal to the argument
     this.eql = function(vector) {
-      return (this.inspect() == vector.inspect());
+      if (this.dimensions() != vector.dimensions()) { return false; }
+      for (var i = 1; i <= this.dimensions(); i++) {
+        if (Math.abs(this.e(i) - vector.e(i)) > Sylvester.precision) { return false; }
+      }
+      return true;
     };
     
     // Returns a copy of the vector
@@ -271,7 +275,12 @@ var Matrix = {
     // one-column matrix equal to the vector.
     this.eql = function(matrix) {
       matrix = Matrix.create(matrix);
-      return (this.inspect() == matrix.inspect());
+      if (this.rows() != matrix.rows() || this.cols() != matrix.cols()) { return false; }
+      var i, j;
+      for (i = 1; i <= this.rows(); i++) {
+        if (!this.row(i).eql(matrix.row(i))) { return false; }
+      }
+      return true;
     };
     
     // Returns a copy of the matrix
