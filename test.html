@@ -19,24 +19,19 @@ window.onload = function() {
   
   title('Vector tests');
   
-  V = Vector.create(0, 1, 7, 5);
+  V = Vector.create([0, 1, 7, 5]);
   assert('Creation with integers',
     V.inspect() == '[0, 1, 7, 5]',
     V.inspect()
   );
   
-  V = Vector.create(0, 1.4, 7.034, 5.28638);
+  V = Vector.create([0, 1.4, 7.034, 5.28638]);
   assert('Creation with floats',
     V.inspect() == '[0, 1.4, 7.034, 5.28638]',
     V.inspect()
   );
   
-  A = [0,3,4,5];
-  V = Vector.create(A);
-  assert('Creation from array',
-    V.inspect() == '[' + A.join(', ') + ']',
-    V.inspect()
-  );
+  V = Vector.create([0,3,4,5]);
   
   assert('Element retrieval: first element',
     V.e(1) === 0,
@@ -94,18 +89,18 @@ window.onload = function() {
   );
   
   assert('Equality with zero vector',
-    Vector.Zero(3).eql(Vector.create(0,0,0))
+    Vector.Zero(3).eql(Vector.create([0,0,0]))
   );
   
   assert('Equality with integers vs floats',
-    Vector.create(3,6,9).eql(Vector.create(3.0,6.0,9.0))
+    Vector.create([3,6,9]).eql(Vector.create([3.0,6.0,9.0]))
   );
   
   assert('Inequality',
-    !Vector.create(3,6,9).eql(Vector.create(3.0,6.01,9.0))
+    !Vector.create([3,6,9]).eql(Vector.create([3.0,6.01,9.0]))
   );
   
-  V = Vector.create(4);
+  V = Vector.create([4]);
   assert('Single element',
     V.inspect() == '[4]',
     V.inspect()
@@ -123,13 +118,13 @@ window.onload = function() {
     V.dup().eql(V)
   );
   
-  V = Vector.create(1,6,3,9);
+  V = Vector.create([1,6,3,9]);
   assert('Mapping by squaring values',
-    V.map(function(x) { return Math.pow(x,2); }).eql(Vector.create(1,36,9,81)),
+    V.map(function(x) { return Math.pow(x,2); }).eql(Vector.create([1,36,9,81])),
     V.map(function(x) { return Math.pow(x,2); }).inspect()
   );
   
-  V = Vector.create(8,2,9,4);
+  V = Vector.create([8,2,9,4]);
   assert('Normalization: modulus',
     V.toUnitVector().modulus() == 1,
     V.toUnitVector().modulus()
@@ -154,8 +149,8 @@ window.onload = function() {
   );
   
   assert('Angle in 2D', // Approximate - rounding errors appear at very small scale otherwise
-    Math.round((Vector.create(1,0).angleFrom(Vector.create(1,1)))*1000000)/1000000 == Math.round(1000000*Math.PI/4)/1000000,
-    Math.round((Vector.create(1,0).angleFrom(Vector.create(1,1)))*1000000)/1000000 + ' is not equal to ' + Math.round(1000000*Math.PI/4)/1000000
+    Math.round((Vector.create([1,0]).angleFrom(Vector.create([1,1])))*1000000)/1000000 == Math.round(1000000*Math.PI/4)/1000000,
+    Math.round((Vector.create([1,0]).angleFrom(Vector.create([1,1])))*1000000)/1000000 + ' is not equal to ' + Math.round(1000000*Math.PI/4)/1000000
   );
   
   assert('Parallelity',
@@ -168,20 +163,20 @@ window.onload = function() {
     Vector.i.angleFrom(Vector.k)
   );
   
-  V1 = Vector.create(2,9,4);
-  V2 = Vector.create(0,13,7);
+  V1 = Vector.create([2,9,4]);
+  V2 = Vector.create([0,13,7]);
   assert('Addition with equal dimensions',
-    V1.add(V2).eql(Vector.create(2,22,11)),
+    V1.add(V2).eql(Vector.create([2,22,11])),
     V1.add(V2).inspect()
   );
   
   assert('Subtraction',
-    V1.subtract(V2).eql(Vector.create(2,-4,-3)),
+    V1.subtract(V2).eql(Vector.create([2,-4,-3])),
     V1.subtract(V2).inspect()
   );
   
   assert('Multiplication by a scalar',
-    V1.x(12).eql(Vector.create(24, 108, 48)),
+    V1.x(12).eql(Vector.create([24, 108, 48])),
     V1.x(12).inspect()
   );
   
@@ -191,11 +186,11 @@ window.onload = function() {
   );
   
   assert('Cross product',
-    V1.cross(V2).eql(Vector.create(9*7-4*13, 4*0-2*7, 2*13-9*0)),
+    V1.cross(V2).eql(Vector.create([9*7-4*13, 4*0-2*7, 2*13-9*0])),
     V1.cross(V2).inspect()
   );
   
-  V2 = Vector.create(2);
+  V2 = Vector.create([2]);
   
   assert('Addition with unequal dimensions',
     V1.add(V2) === null
@@ -221,19 +216,19 @@ window.onload = function() {
     V1.isPerpendicularTo(V2) === null
   );
   
-  V = Vector.create(2,8,5,9,3,7,12);
+  V = Vector.create([2,8,5,9,3,7,12]);
   assert('Maximum element',
     V.max() == 12,
     V.max
   );
   
-  V = Vector.create(-17,8,5,9,3,7,12);
+  V = Vector.create([-17,8,5,9,3,7,12]);
   assert('Maximum element (negative)',
     V.max() == -17,
     V.max
   );
   
-  V = Vector.create(2,6,0,3);
+  V = Vector.create([2,6,0,3]);
   assert('indexOf',
     V.indexOf(2) == 1
   );
@@ -251,7 +246,7 @@ window.onload = function() {
   );
   
   assert('Rounding',
-    Vector.create(2.56, 3.5, 3.49).round().eql(Vector.create(3,4,3))
+    Vector.create([2.56, 3.5, 3.49]).round().eql(Vector.create([3,4,3]))
   );
   
   title('Matrix tests');
@@ -277,7 +272,7 @@ window.onload = function() {
   )
   
   assert('Row retrieval',
-    M.row(2).eql(Vector.create(3,9,7,3)),
+    M.row(2).eql(Vector.create([3,9,7,3])),
     M.row(2).inspect()
   );
   
@@ -286,7 +281,7 @@ window.onload = function() {
   );
   
   assert('Column retrieval',
-    M.col(2).eql(Vector.create(3,9)),
+    M.col(2).eql(Vector.create([3,9])),
     M.col(2).inspect()
   );
   

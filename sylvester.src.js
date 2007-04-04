@@ -126,11 +126,11 @@ var Vector = {
     // Both vectors must have dimensionality 3
     this.cross = function(vector) {
       if (this.dimensions() != 3 || vector.dimensions() != 3) { return null; }
-      return Vector.create(
+      return Vector.create([
         (this.e(2) * vector.e(3)) - (this.e(3) * vector.e(2)),
         (this.e(3) * vector.e(1)) - (this.e(1) * vector.e(3)),
         (this.e(1) * vector.e(2)) - (this.e(2) * vector.e(1))
-      );
+      ]);
     };
     
     // Returns the (absolute) largest element of the vector
@@ -178,34 +178,29 @@ var Vector = {
     };
     
     // Set vector's elements from an array
-    this.setElements = function(args) {
+    this.setElements = function(els) {
+      if (els == undefined) { return null; }
       this.elements = [];
-      for (var i = 0; i < args.length; i++) {
-        if (!isNaN(args[i])) { this.elements.push(args[i]); }
+      if (els.elements) { els = els.elements; }
+      for (var i = 0; i < els.length; i++) {
+        if (!isNaN(els[i])) { this.elements.push(els[i]); }
       }
+      if (this.elements.length === 0) { return null; }
+      return this;
     };
   },
   
   // Constructor function
-  create: function() {
-    var elements;
-    if (arguments[0] == undefined) { return null; }
-    if (arguments[0][0] == undefined) {
-      elements = arguments;
-    } else {
-      elements = arguments[0];
-    }
-    if (elements.length < 1) { return null; }
+  create: function(elements) {
     var V = new Vector.Abstract();
-    V.setElements(elements);
-    return V;
+    return V.setElements(elements);
   }
 };
 
 // i, j, k unit vectors
-Vector.i = Vector.create(1,0,0);
-Vector.j = Vector.create(0,1,0);
-Vector.k = Vector.create(0,0,1);
+Vector.i = Vector.create([1,0,0]);
+Vector.j = Vector.create([0,1,0]);
+Vector.k = Vector.create([0,0,1]);
 
 // Random vector of size n
 Vector.Random = function(n) {
