@@ -82,7 +82,11 @@ var Vector = {
     // Returns the angle between the vector and the argument (also a vector)
     this.angleFrom = function(vector) {
       var dot = this.dot(vector);
-      return (dot === null) ? null : Math.acos(this.dot(vector) / (this.modulus() * vector.modulus()));
+      if (dot === null || this.modulus() === 0 || vector.modulus() === 0) { return null; }
+      var theta = this.dot(vector) / (this.modulus() * vector.modulus());
+      if (theta < -1) { theta = -1; }
+      if (theta > 1) { theta = 1; }
+      return Math.acos(theta);
     };
     
     // Returns true iff the vector is parallel to the argument
@@ -664,6 +668,16 @@ var Line = {
   // Generic line class
   Abstract: function() {
   
+    // Returns true if the argument occupies the same space as the line
+    this.eql = function(line) {
+      return (this.isParallelTo(line) && this.includes(line.anchor));
+    };
+    
+    // Returns a copy of the line
+    this.dup = function() {
+      return Line.create(this.anchor, this.direction);
+    };
+    
     // Shifts the line by the given vector
     this.shift = function(vector) {
       vector = Vector.create(vector).to3D();
@@ -709,18 +723,18 @@ var Line = {
       return (!this.isParallelTo(line) && this.distanceFrom(line) <= Sylvester.precision);
     };
     
-    // Returns true if the argument occupies the same space as the line
-    this.eql = function(line) {
-      return (this.isParallelTo(line) && this.includes(line.anchor));
-    };
-    
-    // Returns a copy of the line
-    this.dup = function() {
-      return Line.create(this.anchor, this.direction);
+    // Returns the unique intersection point with the argument, if one exists
+    // TODO: add plane support
+    this.intersectionWith = function(obj) {
+      if (!this.intersects(obj)) { return null; }
+      var P = this.anchor, X = this.direction, Q = obj.anchor, Y = obj.direction;
+      var a = (X.dot(Q.subtract(P)) * Math.pow(Y.modulus() / X.modulus(), 2)) + (X.dot(Y) * Y.dot(P.subtract(Q)));
+      var s = a / (Math.pow(Y.modulus(), 2) - Math.pow(X.dot(Y), 2));
+      return P.add(X.x(s));
     };
     
     // Returns the point on the line that is closest to the given point
-    // TODO: add plane and line support
+    // TODO: add line support
     this.pointClosestTo = function(point) {
       point = Vector.create(point).to3D();
       if (point === null) { return null; }

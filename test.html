@@ -598,6 +598,23 @@ window.onload = function() {
     ]))
   );
   
+  title('Line tests');
+  
+  for (i = 1; i <= 50; i++) {
+    var O = Vector.create([-5,-5,-5]);
+    V = O.add(Vector.Random(3).x(10));
+    V1 = O.add(Vector.Random(3).x(10));
+    V2 = O.add(Vector.Random(3).x(10));
+    L1 = Line.create(V, V1);
+    L2 = Line.create(V.add(V1.x(-20 + 40*Math.random())), V2);
+    V = L1.intersectionWith(L2);
+    p = V.subtract(L2.anchor), q = L2.direction;
+    assert('Intersection test ' + i,
+      L1.includes(V) && L2.includes(V),
+      ' Intersection: ' + V.inspect() + '\n\nDistance from L1: ' + L1.distanceFrom(V) + ', from L2: ' + L2.distanceFrom(V)
+    );
+  }
+  
   summary = document.getElementById('summary');
   var date = new Date();
   var time = 1000*(date.getSeconds() - beginDate.getSeconds()) + date.getMilliseconds() - beginDate.getMilliseconds();
