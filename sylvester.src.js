@@ -187,6 +187,7 @@ var Vector = {
     };
     
     // Returns the vector's distance from the argument, when considered as a point in space
+    // TODO: add plane support
     this.distanceFrom = function(obj) {
       if (obj.direction) { return obj.distanceFrom(this); }
       if (obj.dimensions() != this.dimensions()) { return null; }
@@ -196,6 +197,27 @@ var Vector = {
     // Returns true if the vector is point on the given line
     this.liesOn = function(line) {
       return line.includes(this);
+    };
+    
+    // Return true iff the vector is a point in the given plane
+    this.liesIn = function(plane) {
+      // TODO: implement this
+    };
+    
+    // Returns the result of reflecting the point in the given point or line
+    // TODO: add plane support
+    this.reflectionIn = function(obj) {
+      if (obj.direction) {
+        // obj is a line
+        var P = this.to3D();
+        if (P === null) { return null; }
+        var C = obj.pointClosestTo(P);
+        return C.add(C.subtract(P));
+      } else {
+        // obj is a point
+        if (this.dimensions() != obj.dimensions()) { return null; }
+        return obj.add(obj.subtract(this));
+      }
     };
     
     // Unitily to make sure vectors are 3D. If they are 2D, a zero z-component is added
