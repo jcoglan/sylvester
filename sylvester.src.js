@@ -478,6 +478,17 @@ var Matrix = {
     
     this.tr = function() { return this.trace(); };
     
+    // Returns the rank for square matrices
+    this.rank = function() {
+      if (!this.isSquare()) { return null; }
+      var M = this.toRightTriangular(), rank = this.rows();
+      for (var i = this.rows(); i >= 1; i--) {
+        // toRightTriangular snaps values to zero
+        if (M.row(i).modulus() === 0) { rank--; }
+      }
+      return rank;
+    };
+    
     // Returns the result of attaching the given argument to the right-hand side of the matrix
     this.augment = function(matrix) {
       matrix = Matrix.create(matrix); // Allows us to supply vectors
