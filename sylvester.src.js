@@ -759,18 +759,21 @@ var Line = {
     // Returns the point on the line that is closest to the given point or line
     this.pointClosestTo = function(obj) {
       if (obj.direction) {
+        // obj is a line
         if (this.insersects(obj)) { return this.intersectionWith(obj); }
         if (this.isParallelTo(obj)) { return null; }
         var S = this.direction.cross(obj.direction).toUnitVector().x(this.distanceFrom(obj));
         var L = obj.dup().translate(S);
         if (L.distanceFrom(this) > obj.distanceFrom(this)) { L = obj.dup().translate(S.x(-1)); }
         return this.intersectionWith(L);
+      } else {
+        // obj is a point
+        obj = Vector.create(obj).to3D();
+        if (obj === null) { return null; }
+        if (this.includes(obj)) { return obj; }
+        var A = obj.subtract(this.anchor);
+        return obj.add(this.direction.cross(this.direction.cross(A)).toUnitVector().x(this.distanceFrom(obj)));
       }
-      obj = Vector.create(obj).to3D();
-      if (obj === null) { return null; }
-      if (this.includes(obj)) { return obj; }
-      var A = obj.subtract(this.anchor);
-      return obj.add(this.direction.cross(this.direction.cross(A)).toUnitVector().x(this.distanceFrom(obj)));
     };
     
     // Set the line's anchor point and direction.
