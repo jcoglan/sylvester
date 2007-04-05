@@ -186,6 +186,18 @@ var Vector = {
       return this;
     };
     
+    // Returns the vector's distance from the argument, when considered as a point in space
+    this.distanceFrom = function(obj) {
+      if (obj.direction) { return obj.distanceFrom(this); }
+      if (obj.dimensions() != this.dimensions()) { return null; }
+      return this.subtract(obj).modulus();
+    };
+    
+    // Returns true if the vector is point on the given line
+    this.liesOn = function(line) {
+      return line.includes(this);
+    };
+    
     // Unitily to make sure vectors are 3D. If they are 2D, a zero z-component is added
     this.to3D = function() {
       var V = this.dup();
@@ -678,8 +690,8 @@ var Line = {
       return Line.create(this.anchor, this.direction);
     };
     
-    // Shifts the line by the given vector
-    this.shift = function(vector) {
+    // Translates the line by the given vector
+    this.translate = function(vector) {
       vector = Vector.create(vector).to3D();
       if (vector === null) { return null; }
       this.anchor = this.anchor.add(vector);
@@ -733,14 +745,21 @@ var Line = {
       return P.add(X.x(s));
     };
     
-    // Returns the point on the line that is closest to the given point
-    // TODO: add line support
-    this.pointClosestTo = function(point) {
-      point = Vector.create(point).to3D();
-      if (point === null) { return null; }
-      if (this.includes(point)) { return point; }
-      var A = point.subtract(this.anchor);
-      return point.add(this.direction.cross(this.direction.cross(A)).toUnitVector().x(this.distanceFrom(point)));
+    // Returns the point on the line that is closest to the given point or line
+    this.pointClosestTo = function(obj) {
+      if (obj.direction) {
+        if (this.insersects(obj)) { return this.intersectionWith(obj); }
+        if (this.isParallelTo(obj)) { return null; }
+        var S = this.direction.cross(obj.direction).toUnitVector().x(this.distanceFrom(obj));
+        var L = obj.dup().translate(S);
+        if (L.distanceFrom(this) > obj.distanceFrom(this)) { L = obj.dup().translate(S.x(-1)); }
+        return this.intersectionWith(L);
+      }
+      obj = Vector.create(obj).to3D();
+      if (obj === null) { return null; }
+      if (this.includes(obj)) { return obj; }
+      var A = obj.subtract(this.anchor);
+      return obj.add(this.direction.cross(this.direction.cross(A)).toUnitVector().x(this.distanceFrom(obj)));
     };
     
     // Set the line's anchor point and direction.
