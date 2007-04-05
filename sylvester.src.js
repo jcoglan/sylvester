@@ -728,8 +728,8 @@ var Line = {
     this.intersectionWith = function(obj) {
       if (!this.intersects(obj)) { return null; }
       var P = this.anchor, X = this.direction, Q = obj.anchor, Y = obj.direction;
-      var a = (X.dot(Q.subtract(P)) * Math.pow(Y.modulus() / X.modulus(), 2)) + (X.dot(Y) * Y.dot(P.subtract(Q)));
-      var s = a / (Math.pow(Y.modulus(), 2) - Math.pow(X.dot(Y), 2));
+      var a = (X.dot(Q.subtract(P)) * Y.dot(Y) / X.dot(X)) + (X.dot(Y) * Y.dot(P.subtract(Q)));
+      var s = a / (Y.dot(Y) - (X.dot(Y) * X.dot(Y)));
       return P.add(X.x(s));
     };
     
