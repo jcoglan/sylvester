@@ -19,19 +19,19 @@ window.onload = function() {
   
   title('Vector tests');
   
-  V = Vector.create([0, 1, 7, 5]);
+  V = $V([0, 1, 7, 5]);
   assert('Creation with integers',
     V.inspect() == '[0, 1, 7, 5]',
     V.inspect()
   );
   
-  V = Vector.create([0, 1.4, 7.034, 5.28638]);
+  V = $V([0, 1.4, 7.034, 5.28638]);
   assert('Creation with floats',
     V.inspect() == '[0, 1.4, 7.034, 5.28638]',
     V.inspect()
   );
   
-  V = Vector.create([0,3,4,5]);
+  V = $V([0,3,4,5]);
   
   assert('Element retrieval: first element',
     V.e(1) === 0,
@@ -89,18 +89,18 @@ window.onload = function() {
   );
   
   assert('Equality with zero vector',
-    Vector.Zero(3).eql(Vector.create([0,0,0]))
+    Vector.Zero(3).eql($V([0,0,0]))
   );
   
   assert('Equality with integers vs floats',
-    Vector.create([3,6,9]).eql(Vector.create([3.0,6.0,9.0]))
+    $V([3,6,9]).eql($V([3.0,6.0,9.0]))
   );
   
   assert('Inequality',
-    !Vector.create([3,6,9]).eql(Vector.create([3.0,6.01,9.0]))
+    !$V([3,6,9]).eql($V([3.0,6.01,9.0]))
   );
   
-  V = Vector.create([4]);
+  V = $V([4]);
   assert('Single element',
     V.inspect() == '[4]',
     V.inspect()
@@ -111,20 +111,20 @@ window.onload = function() {
   );
   
   assert('Zero elements',
-    Vector.create() === null
+    $V() === null
   );
   
   assert('Duplication',
     V.dup().eql(V)
   );
   
-  V = Vector.create([1,6,3,9]);
+  V = $V([1,6,3,9]);
   assert('Mapping by squaring values',
-    V.map(function(x) { return Math.pow(x,2); }).eql(Vector.create([1,36,9,81])),
+    V.map(function(x) { return Math.pow(x,2); }).eql($V([1,36,9,81])),
     V.map(function(x) { return Math.pow(x,2); }).inspect()
   );
   
-  V = Vector.create([8,2,9,4]);
+  V = $V([8,2,9,4]);
   assert('Normalization: modulus',
     V.toUnitVector().modulus() == 1,
     V.toUnitVector().modulus()
@@ -149,8 +149,8 @@ window.onload = function() {
   );
   
   assert('Angle in 2D', // Approximate - rounding errors appear at very small scale otherwise
-    Math.round((Vector.create([1,0]).angleFrom(Vector.create([1,1])))*1000000)/1000000 == Math.round(1000000*Math.PI/4)/1000000,
-    Math.round((Vector.create([1,0]).angleFrom(Vector.create([1,1])))*1000000)/1000000 + ' is not equal to ' + Math.round(1000000*Math.PI/4)/1000000
+    Math.round(($V([1,0]).angleFrom($V([1,1])))*1000000)/1000000 == Math.round(1000000*Math.PI/4)/1000000,
+    Math.round(($V([1,0]).angleFrom($V([1,1])))*1000000)/1000000 + ' is not equal to ' + Math.round(1000000*Math.PI/4)/1000000
   );
   
   assert('Parallelity',
@@ -168,20 +168,20 @@ window.onload = function() {
     Vector.i.angleFrom(Vector.k)
   );
   
-  V1 = Vector.create([2,9,4]);
-  V2 = Vector.create([0,13,7]);
+  V1 = $V([2,9,4]);
+  V2 = $V([0,13,7]);
   assert('Addition with equal dimensions',
-    V1.add(V2).eql(Vector.create([2,22,11])),
+    V1.add(V2).eql($V([2,22,11])),
     V1.add(V2).inspect()
   );
   
   assert('Subtraction',
-    V1.subtract(V2).eql(Vector.create([2,-4,-3])),
+    V1.subtract(V2).eql($V([2,-4,-3])),
     V1.subtract(V2).inspect()
   );
   
   assert('Multiplication by a scalar',
-    V1.x(12).eql(Vector.create([24, 108, 48])),
+    V1.x(12).eql($V([24, 108, 48])),
     V1.x(12).inspect()
   );
   
@@ -191,11 +191,11 @@ window.onload = function() {
   );
   
   assert('Cross product',
-    V1.cross(V2).eql(Vector.create([9*7-4*13, 4*0-2*7, 2*13-9*0])),
+    V1.cross(V2).eql($V([9*7-4*13, 4*0-2*7, 2*13-9*0])),
     V1.cross(V2).inspect()
   );
   
-  V2 = Vector.create([2]);
+  V2 = $V([2]);
   
   assert('Addition with unequal dimensions',
     V1.add(V2) === null
@@ -221,19 +221,19 @@ window.onload = function() {
     V1.isPerpendicularTo(V2) === null
   );
   
-  V = Vector.create([2,8,5,9,3,7,12]);
+  V = $V([2,8,5,9,3,7,12]);
   assert('Maximum element',
     V.max() == 12,
     V.max
   );
   
-  V = Vector.create([-17,8,5,9,3,7,12]);
+  V = $V([-17,8,5,9,3,7,12]);
   assert('Maximum element (negative)',
     V.max() == -17,
     V.max
   );
   
-  V = Vector.create([2,6,0,3]);
+  V = $V([2,6,0,3]);
   assert('indexOf',
     V.indexOf(2) == 1
   );
@@ -250,7 +250,7 @@ window.onload = function() {
     V.indexOf(7) === null
   );
   
-  M = Matrix.create([
+  M = $M([
     [2,0,0,0],
     [0,6,0,0],
     [0,0,0,0],
@@ -263,12 +263,28 @@ window.onload = function() {
   );
   
   assert('Rounding',
-    Vector.create([2.56, 3.5, 3.49]).round().eql(Vector.create([3,4,3]))
+    $V([2.56, 3.5, 3.49]).round().eql($V([3,4,3]))
+  );
+  
+  assert('Distance from point',
+    $V([3,9,4,6]).distanceFrom($V([2,0,4,-7])) == $V([1,9,0,13]).modulus()
+  );
+  
+  assert('Distance from line',
+    $V([2,8,7]).distanceFrom(Line.X) == Math.sqrt(64 + 49)
+  );
+  
+  assert('Point lies on line',
+    $V([12,0,0]).liesOn(Line.X)
+  );
+  
+  assert('Reflection in a point',
+    $V([3,0,0]).reflectionIn($V([0,3,0])).eql($V([-3,6,0]))
   );
   
   title('Matrix tests');
   
-  M = Matrix.create([
+  M = $M([
     [0,3,4,8],
     [3,9,7,3]
   ]);
@@ -289,7 +305,7 @@ window.onload = function() {
   )
   
   assert('Row retrieval',
-    M.row(2).eql(Vector.create([3,9,7,3])),
+    M.row(2).eql($V([3,9,7,3])),
     M.row(2).inspect()
   );
   
@@ -298,7 +314,7 @@ window.onload = function() {
   );
   
   assert('Column retrieval',
-    M.col(2).eql(Vector.create([3,9])),
+    M.col(2).eql($V([3,9])),
     M.col(2).inspect()
   );
   
@@ -317,10 +333,10 @@ window.onload = function() {
   );
   
   assert('Creation with no elements',
-    Matrix.create() === null
+    $M() === null
   );
   
-  M = Matrix.create([
+  M = $M([
     [0,2,7,5]
   ]);
   assert('Create with single row',
@@ -328,7 +344,7 @@ window.onload = function() {
     M.inspect()
   );
   
-  M = Matrix.create([
+  M = $M([
     [0],[2],[7],[5]
   ]);
   assert('Create with single column',
@@ -336,7 +352,7 @@ window.onload = function() {
     M.inspect()
   );
   
-  M = Matrix.create([
+  M = $M([
     [0,3,4,8,7],
     [3,9,7,3]
   ]);
@@ -345,10 +361,10 @@ window.onload = function() {
   );
   
   assert('Create with one element',
-    Matrix.create([0]).inspect() == '[0]'
+    $M([0]).inspect() == '[0]'
   );
   
-  M1 = Matrix.create([
+  M1 = $M([
     [2,3,8],
     [7,0,2],
     [6,3,0]
@@ -361,7 +377,7 @@ window.onload = function() {
   );
   
   assert('Mapping by adding 3 to all values',
-    M1.map(function(x) { return x + 3; }).eql(Matrix.create([
+    M1.map(function(x) { return x + 3; }).eql($M([
       [5,6,11],
       [10,3,5],
       [9,6,3]
@@ -401,17 +417,17 @@ window.onload = function() {
     );
   }
   
-  M1 = Matrix.create([
+  M1 = $M([
     [2,5,9,3],
     [9,2,8,5]
   ]);
   
-  M2 = Matrix.create([
+  M2 = $M([
     [7,1,0,8],
     [0,4,3,8]
   ]);
   
-  M = Matrix.create([
+  M = $M([
     [9,6,9,11],
     [9,6.0,11,13]
   ]);
@@ -430,7 +446,7 @@ window.onload = function() {
     Matrix.Zero(2,5).add(M1) === null
   );
   
-  M = Matrix.create([
+  M = $M([
     [-5,4,9.0,-5],
     [9,-2,5,-3]
   ]);
@@ -449,7 +465,7 @@ window.onload = function() {
     Matrix.Zero(3,4).subtract(M1) === null
   );
   
-  M = Matrix.create([
+  M = $M([
     [14,2,0,16],
     [0,8,6,16]
   ]);
@@ -459,7 +475,7 @@ window.onload = function() {
     M2.x(2).inspect()
   );
   
-  M2 = Matrix.create([
+  M2 = $M([
     [2,9],
     [0,2],
     [8,1],
@@ -480,7 +496,7 @@ window.onload = function() {
     M1.x(M) === null
   );
   
-  M = Matrix.create([
+  M = $M([
     [9,2,9],
     [2,0,2],
     [1,8,1]
@@ -495,7 +511,7 @@ window.onload = function() {
     M.isSquare()
   );
   
-  M1 = Matrix.create([
+  M1 = $M([
     [3,9,8,4],
     [2,0,1,5]
   ]);
@@ -513,7 +529,7 @@ window.onload = function() {
   );
   
   assert('Diagonal vector',
-    M.diagonal().eql(Vector.create([9,0,1])),
+    M.diagonal().eql($V([9,0,1])),
     M.diagonal().inspect()
   );
   
@@ -525,7 +541,7 @@ window.onload = function() {
     );
   }
   
-  M2 = Matrix.create([
+  M2 = $M([
     [3,2],
     [9,0],
     [8,1],
@@ -536,7 +552,7 @@ window.onload = function() {
     M1.transpose().eql(M2) && M2.transpose().eql(M1)
   );
   
-  M = Matrix.create([
+  M = $M([
     [9,2,0],
     [0,6,2],
     [0,0,3]
@@ -557,7 +573,7 @@ window.onload = function() {
   );
   
   assert('Non-square matrix is not singular',
-    !M.augment(Vector.create([4,3,9])).isSingular()
+    !M.augment($V([4,3,9])).isSingular()
   );
   
   assert('Trace',
@@ -575,14 +591,14 @@ window.onload = function() {
   }
   
   assert('Rotation in 2D',
-    Matrix.Rotation(Math.PI/2).eql(Matrix.create([
+    Matrix.Rotation(Math.PI/2).eql($M([
       [0,-1],
       [1,0]
     ]))
   );
   
   assert('Rotation in 3D',
-    Matrix.Rotation(Math.PI/2, Vector.j).eql(Matrix.create([
+    Matrix.Rotation(Math.PI/2, Vector.j).eql($M([
       [0,0,1],
       [0,1,0],
       [-1,0,0]
@@ -590,7 +606,7 @@ window.onload = function() {
   );
   
   assert('Diagonal',
-    Matrix.Diagonal([3,9,5,7]).eql(Matrix.create([
+    Matrix.Diagonal([3,9,5,7]).eql($M([
       [3,0,0,0],
       [0,9,0,0],
       [0,0,5,0],
@@ -601,16 +617,16 @@ window.onload = function() {
   title('Line tests');
   
   for (i = 1; i <= 50; i++) {
-    var O = Vector.create([-5,-5,-5]);
+    var O = $V([-5,-5,-5]);
     V = O.add(Vector.Random(3).x(10));
     V1 = O.add(Vector.Random(3).x(10));
     V2 = O.add(Vector.Random(3).x(10));
-    L1 = Line.create(V, V1);
-    L2 = Line.create(V.add(V1.x(-20 + 40*Math.random())), V2);
+    L1 = $L(V, V1);
+    L2 = $L(V.add(V1.x(-20 + 40*Math.random())), V2);
     V = L1.intersectionWith(L2);
     p = V.subtract(L2.anchor), q = L2.direction;
     assert('Intersection test ' + i,
-      L1.includes(V) && L2.includes(V),
+      L1.contains(V) && L2.contains(V),
       ' Intersection: ' + V.inspect() + '\n\nDistance from L1: ' + L1.distanceFrom(V) + ', from L2: ' + L2.distanceFrom(V)
     );
   }
