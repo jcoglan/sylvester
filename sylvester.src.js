@@ -779,11 +779,28 @@ function Line() {
       return this.intersectionWith(L);
     } else {
       // obj is a point
-      obj = Vector.create(obj).to3D();
-      if (obj === null) { return null; }
-      if (this.contains(obj)) { return obj; }
-      var A = obj.subtract(this.anchor);
-      return obj.add(this.direction.cross(this.direction.cross(A)).toUnitVector().x(this.distanceFrom(obj)));
+      var P = Vector.create(obj).to3D();
+      if (P === null) { return null; }
+      if (this.contains(P)) { return P; }
+      var A = P.subtract(this.anchor);
+      return P.add(this.direction.cross(this.direction.cross(A)).toUnitVector().x(this.distanceFrom(P)));
+    }
+  };
+  
+  // Returns the line's reflection in the given point or line
+  // TODO: add plane support
+  this.reflectionIn = function(obj) {
+    if (obj.direction) {
+      // obj is a line - reflect this line's anchor in obj's closest point to it,
+      // and rotate this line's direction by 180 about obj's direction
+      var new_anchor = this.anchor.reflectionIn(obj.pointClosestTo(this.anchor));
+      var new_direction = Matrix.Rotation(Math.PI, obj.direction).x(this.direction);
+      return Line.create(new_anchor, new_direction);
+    } else {
+      // obj is a point - just reflect the line's anchor in it
+      var P = Vector.create(obj).to3D();
+      if (P === null) { return null; }
+      return Line.create(this.anchor.reflectionIn(P), this.direction);
     }
   };
   

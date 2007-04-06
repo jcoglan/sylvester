@@ -282,6 +282,11 @@ window.onload = function() {
     $V([3,0,0]).reflectionIn($V([0,3,0])).eql($V([-3,6,0]))
   );
   
+  assert('Reflection in a line',
+    $V([3,0,0]).reflectionIn($L([0,0,0], [1,0,1])).eql($V([0,0,3])),
+    $V([3,0,0]).reflectionIn($L([0,0,0], [1,0,1])).inspect()
+  );
+  
   title('Matrix tests');
   
   M = $M([
@@ -630,6 +635,14 @@ window.onload = function() {
       ' Intersection: ' + V.inspect() + '\n\nDistance from L1: ' + L1.distanceFrom(V) + ', from L2: ' + L2.distanceFrom(V)
     );
   }
+  
+  assert('Line reflection in a line',
+    Line.X.reflectionIn($L([0,0,0],[1,0,1])).eql(Line.Z)
+  );
+  
+  assert('Line reflection in a point',
+    Line.Z.reflectionIn($V([24,0,0])).eql(Line.create($V([48,0,0]), Vector.k))
+  );
   
   summary = document.getElementById('summary');
   var date = new Date();
