@@ -201,6 +201,25 @@ function Vector() {
     // TODO: implement this
   };
   
+  // Rotates the vector about the given object. The object should be a 
+  // point if the vector is 2D, and a line if it is 3D. Be careful with line directions!
+  this.rotate = function(t, obj) {
+    switch (this.dimensions()) {
+      case 2:
+        if (!obj.dimensions() == 2) { return null; }
+        return obj.add(Matrix.Rotation(t).x(this.subtract(obj)));
+        break;
+      case 3:
+        if (!obj.direction) { return null; }
+        var C = obj.pointClosestTo(this);
+        var R = Matrix.Rotation(t, obj.direction);
+        return C.add(R.x(this.subtract(C)));
+        break;
+      default:
+        return null;
+    }
+  };
+  
   // Returns the result of reflecting the point in the given point or line
   // TODO: add plane support
   this.reflectionIn = function(obj) {
@@ -367,16 +386,20 @@ function Matrix() {
   };
   
   // Returns the result of multiplying the matrix from the right by the argument.
-  // If the argument is a scalar then just multiply all the elements.
+  // If the argument is a scalar then just multiply all the elements. If the argument is
+  // a vector, a vector is returned, which saves you having to remember calling
+  // col(1) on the result.
   this.multiply = function(matrix) {
     var i, j;
     if (matrix.elements) {
+      var returnVector = matrix.modulus ? true : false;
       matrix = Matrix.create(matrix);
       if (!this.canMultiplyFromLeft(matrix)) { return null; }
       var self = this;
-      return Matrix.Zero(this.rows(), matrix.cols()).map(
+      var M = Matrix.Zero(this.rows(), matrix.cols()).map(
         function(x, i, j) { return self.row(i).dot(matrix.col(j)); }
       );
+      return returnVector ? M.col(1) : M;
     } else {
       return this.map(function(x) { return x * matrix; });
     }
@@ -644,7 +667,7 @@ Matrix.Rotation = function(t, a) {
     // Axis does not lie in X-Z plane - change co-ordinates through R(Z)
     var Za = projectionOnXY.cross(Vector.i).normalize();
     var Zt = Za.e(3) * projectionOnXY.angleFrom(Vector.i);
-    axis = Matrix.RotationZ(Zt).x(axis).col(1);
+    axis = Matrix.RotationZ(Zt).x(axis);
     z_rot = Matrix.RotationZ(Zt);
     inv_z_rot = Matrix.RotationZ(-Zt);
   }
@@ -793,7 +816,7 @@ function Line() {
   this.rotate = function(t, line) {
     var R = Matrix.Rotation(t, line.direction);
     var C = line.pointClosestTo(this.anchor);
-    return Line.create(C.add(R.x(this.anchor.subtract(C)).col(1)), R.x(this.direction));
+    return Line.create(C.add(R.x(this.anchor.subtract(C))), R.x(this.direction));
   };
   
   // Returns the line's reflection in the given point or line

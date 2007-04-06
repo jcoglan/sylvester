@@ -287,6 +287,15 @@ window.onload = function() {
     $V([3,0,0]).reflectionIn($L([0,0,0], [1,0,1])).inspect()
   );
   
+  assert('Rotation about a point',
+    $V([12,1]).rotate(Math.PI/2, $V([5,1])).eql($V([5,8])),
+    $V([12,1]).rotate(Math.PI/2, $V([5,1])).inspect()
+  );
+  
+  assert('Rotation about a line',
+    Vector.i.rotate(-Math.PI/2, $L([10, 0, 100], Vector.k)).eql($V([10,9,0]))
+  );
+  
   title('Matrix tests');
   
   M = $M([
