@@ -652,6 +652,10 @@ window.onload = function() {
     Line.X.reflectionIn($L([0,0,0],[1,0,1])).eql(Line.Z)
   );
   
+  assert('Line rotation',
+    Line.X.rotate(Math.PI, $L([12,0,0],[1,0,1])).eql($L([12,0,0], Vector.k))
+  );
+  
   assert('Line reflection in a point',
     Line.Z.reflectionIn($V([24,0,0])).eql(Line.create([48,0,0], Vector.k))
   );

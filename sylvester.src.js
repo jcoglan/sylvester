@@ -786,15 +786,22 @@ function Line() {
     }
   };
   
+  // Returns a copy of the line rotated by t radians about the given line. Works by
+  // finding the argument's closest point to this line's anchor point (call this C) and
+  // rotating the anchor about C. Also rotates the line's direction about the argument's.
+  // Be careful with this - the rotation axis' direction affects the outcome!
+  this.rotate = function(t, line) {
+    var R = Matrix.Rotation(t, line.direction);
+    var C = line.pointClosestTo(this.anchor);
+    return Line.create(C.add(R.x(this.anchor.subtract(C)).col(1)), R.x(this.direction));
+  };
+  
   // Returns the line's reflection in the given point or line
   // TODO: add plane support
   this.reflectionIn = function(obj) {
     if (obj.direction) {
-      // obj is a line - reflect this line's anchor in obj's closest point to it,
-      // and rotate this line's direction by 180 about obj's direction
-      var new_anchor = this.anchor.reflectionIn(obj.pointClosestTo(this.anchor));
-      var new_direction = Matrix.Rotation(Math.PI, obj.direction).x(this.direction);
-      return Line.create(new_anchor, new_direction);
+      // obj is a line - reflection obtained by rotating PI radians about obj
+      return this.rotate(Math.PI, obj);
     } else {
       // obj is a point - just reflect the line's anchor in it
       var P = obj.to3D();
