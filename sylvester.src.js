@@ -716,8 +716,7 @@ function Line() {
   this.translate = function(vector) {
     vector = Vector.create(vector).to3D();
     if (vector === null) { return null; }
-    this.anchor = this.anchor.add(vector);
-    return this;
+    return Line.create(this.anchor.add(vector), this.direction);
   };
   
   // Returns true if the line is parallel to the argument. Here, 'parallel to'
@@ -738,7 +737,7 @@ function Line() {
       return Math.abs(this.anchor.subtract(obj.anchor).dot(N));
     } else {
       // obj is a point
-      var P = Vector.create(obj).to3D();
+      var P = obj.to3D();
       if (P === null) { return null; }
       var A = P.subtract(this.anchor);
       return Math.abs(A.modulus() * Math.sin(A.angleFrom(this.direction)));
@@ -779,7 +778,7 @@ function Line() {
       return this.intersectionWith(L);
     } else {
       // obj is a point
-      var P = Vector.create(obj).to3D();
+      var P = obj.to3D();
       if (P === null) { return null; }
       if (this.contains(P)) { return P; }
       var A = P.subtract(this.anchor);
@@ -798,7 +797,7 @@ function Line() {
       return Line.create(new_anchor, new_direction);
     } else {
       // obj is a point - just reflect the line's anchor in it
-      var P = Vector.create(obj).to3D();
+      var P = obj.to3D();
       if (P === null) { return null; }
       return Line.create(this.anchor.reflectionIn(P), this.direction);
     }
