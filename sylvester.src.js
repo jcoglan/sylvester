@@ -64,16 +64,10 @@ function Vector() {
     return Vector.create(elements);
   };
   
-  // Alters the vector so that its modulus is unity. Returns the vector
-  this.normalize = function() {
-    var r = this.modulus();
-    this.setElements(this.map(function(x) { return x/r; }).elements);
-    return this;
-  };
-  
   // Returns a new vector created by normalizing the receiver
   this.toUnitVector = function() {
-    return this.dup().normalize();
+    var r = this.modulus();
+    return this.map(function(x) { return x/r; });
   };
   
   // Returns the angle between the vector and the argument (also a vector)
@@ -177,10 +171,9 @@ function Vector() {
   // Sets the elements of the vector to the given value if they
   // differ from it by less than Sylvester.precision
   this.snapTo = function(x) {
-    this.setElements(this.map(function(y) {
+    return this.map(function(y) {
       return (Math.abs(y - x) <= Sylvester.precision) ? x : y;
-    }).elements);
-    return this;
+    });
   };
   
   // Returns the vector's distance from the argument, when considered as a point in space
@@ -655,7 +648,7 @@ Matrix.Rotation = function(t, a) {
   }
   axis = a.dup();
   if (axis.dimensions() != 3) { return null; }
-  axis.normalize();
+  axis = axis.toUnitVector();
   var rot = Matrix.RotationZ(t);
   // Axis is parallel to z-axis - just return that rotation
   if (axis.isParallelTo(Vector.k)) { return rot; }
@@ -663,14 +656,14 @@ Matrix.Rotation = function(t, a) {
   var z_rot = Matrix.I(3), inv_z_rot = Matrix.I(3);
   if (!projectionOnXY.isParallelTo(Vector.i)) {
     // Axis does not lie in X-Z plane - change co-ordinates through R(Z)
-    var Za = projectionOnXY.cross(Vector.i).normalize();
+    var Za = projectionOnXY.cross(Vector.i).toUnitVector();
     var Zt = Za.e(3) * projectionOnXY.angleFrom(Vector.i);
     axis = Matrix.RotationZ(Zt).x(axis);
     z_rot = Matrix.RotationZ(Zt);
     inv_z_rot = Matrix.RotationZ(-Zt);
   }
   // Axis lies in X-Z plame - change co-ordinates so that axis = z-axis, through R(Y)
-  var Ya = axis.cross(Vector.k).normalize();
+  var Ya = axis.cross(Vector.k).toUnitVector();
   var Yt = Ya.e(2) * axis.angleFrom(Vector.k);
   var y_rot = Matrix.RotationY(Yt);
   var inv_y_rot = Matrix.RotationY(-Yt);
