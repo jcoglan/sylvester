@@ -184,9 +184,8 @@ function Vector() {
   };
   
   // Returns the vector's distance from the argument, when considered as a point in space
-  // TODO: add plane support
   this.distanceFrom = function(obj) {
-    if (obj.direction) { return obj.distanceFrom(this); }
+    if (obj.anchor) { return obj.distanceFrom(this); }
     if (obj.dimensions() != this.dimensions()) { return null; }
     return this.subtract(obj).modulus();
   };
@@ -198,7 +197,7 @@ function Vector() {
   
   // Return true iff the vector is a point in the given plane
   this.liesIn = function(plane) {
-    // TODO: implement this
+    return plane.contains(this);
   };
   
   // Rotates the vector about the given object. The object should be a 
@@ -220,11 +219,10 @@ function Vector() {
     }
   };
   
-  // Returns the result of reflecting the point in the given point or line
-  // TODO: add plane support
+  // Returns the result of reflecting the point in the given point, line or plane.
   this.reflectionIn = function(obj) {
-    if (obj.direction) {
-      // obj is a line
+    if (obj.anchor) {
+      // obj is a plane or line
       var P = this.to3D();
       if (P === null) { return null; }
       var C = obj.pointClosestTo(P);
@@ -239,11 +237,11 @@ function Vector() {
   // Unitily to make sure vectors are 3D. If they are 2D, a zero z-component is added
   this.to3D = function() {
     var V = this.dup();
-    if (V.dimensions() == 3) { return V; }
-    if (V.dimensions() == 2) {
-      return Vector.create([V.e(1), V.e(2), 0]);
+    switch (V.dimensions()) {
+      case 3: return V; break;
+      case 2: return Vector.create([V.e(1), V.e(2), 0]); break;
+      default: return null;
     }
-    return null;
   };
   
   // Returns a string representation of the vector
@@ -735,7 +733,7 @@ function Line() {
     return Line.create(this.anchor, this.direction);
   };
   
-  // Translates the line by the given vector
+  // Returns the result of translating the line by the given vector
   this.translate = function(vector) {
     vector = Vector.create(vector).to3D();
     if (vector === null) { return null; }
@@ -744,15 +742,17 @@ function Line() {
   
   // Returns true if the line is parallel to the argument. Here, 'parallel to'
   // means that the argument's direction is either parallel or antiparallel to
-  // the line's own direction.
+  // the line's own direction. A line is parallel to a plane if the two do not
+  // have a unique intersection.
   this.isParallelTo = function(obj) {
+    if (obj.normal) { return obj.isParallelTo(this); }
     return (this.direction.isParallelTo(obj.direction) || this.direction.isAntiparallelTo(obj.direction));
   };
   
   // Returns the line's perpendicular distance from the argument,
-  //which can be a point (a vector) or another line.
-  // TODO: add support for planes
+  //which can be a point, a line or a plane
   this.distanceFrom = function(obj) {
+    if (obj.normal) { return obj.distanceFrom(this); }
     if (obj.direction) {
       // obj is a line
       if (this.isParallelTo(obj)) { return this.distanceFrom(obj.anchor); }
@@ -773,16 +773,21 @@ function Line() {
     return (dist !== null && dist <= Sylvester.precision);
   };
   
+  // Returns true iff the line lies in the given plane
+  this.liesIn = function(plane) {
+    return plane.contains(this);
+  };
+  
   // Returns true iff the line has a unique point of intersection with the argument
-  // TODO: add support for planes
-  this.intersects = function(line) {
-    return (!this.isParallelTo(line) && this.distanceFrom(line) <= Sylvester.precision);
+  this.intersects = function(obj) {
+    if (obj.normal) { return obj.intersects(this); }
+    return (!this.isParallelTo(obj) && this.distanceFrom(obj) <= Sylvester.precision);
   };
   
   // Returns the unique intersection point with the argument, if one exists
-  // TODO: add plane support
   this.intersectionWith = function(obj) {
     if (!this.intersects(obj)) { return null; }
+    if (obj.normal) { return obj.intersectionWith(this); }
     var P = this.anchor, X = this.direction, Q = obj.anchor, Y = obj.direction;
     var a = (X.dot(Q.subtract(P)) * Y.dot(Y) / X.dot(X)) + (X.dot(Y) * Y.dot(P.subtract(Q)));
     var s = a / (Y.dot(Y) - (X.dot(Y) * X.dot(Y)));
@@ -793,7 +798,7 @@ function Line() {
   this.pointClosestTo = function(obj) {
     if (obj.direction) {
       // obj is a line
-      if (this.insersects(obj)) { return this.intersectionWith(obj); }
+      if (this.intersects(obj)) { return this.intersectionWith(obj); }
       if (this.isParallelTo(obj)) { return null; }
       var S = this.direction.cross(obj.direction).toUnitVector().x(this.distanceFrom(obj));
       var L = obj.dup().translate(S);
@@ -820,9 +825,13 @@ function Line() {
   };
   
   // Returns the line's reflection in the given point or line
-  // TODO: add plane support
   this.reflectionIn = function(obj) {
-    if (obj.direction) {
+    if (obj.normal) {
+      // obj is a plane
+      var A = this.anchor.reflectionIn(obj);
+      var D = obj.anchor.add(this.direction).reflectionIn(obj).subtract(obj.anchor);
+      return Line.create(A, D);
+    } else if (obj.direction) {
       // obj is a line - reflection obtained by rotating PI radians about obj
       return this.rotate(Math.PI, obj);
     } else {
@@ -844,7 +853,7 @@ function Line() {
   };
 }
   
-  // Constructor function
+// Constructor function
 Line.create = function(anchor, direction) {
   var L = new Line();
   return L.setVectors(anchor, direction);
@@ -855,7 +864,172 @@ Line.X = Line.create(Vector.Zero(3), Vector.i);
 Line.Y = Line.create(Vector.Zero(3), Vector.j);
 Line.Z = Line.create(Vector.Zero(3), Vector.k);
 
+
+
+function Plane() {
+
+  // Returns true iff the plane occupies the same space as the argument
+  this.eql = function(plane) {
+    return (this.contains(plane.anchor) && this.isParallelTo(plane));
+  };
+  
+  // Returns a copy of the plane
+  this.dup = function() {
+    return Plane.create(this.anchor, this.normal);
+  };
+  
+  // Returns the result of translating the plane by the given vector
+  this.translate = function(vector) {
+    vector = Vector.create(vector).to3D();
+    if (vector === null) { return null; }
+    return Plane.create(this.anchor.add(vector), this.normal);
+  };
+  
+  // Returns true iff the plane is parallel to the argument. Will return true
+  // if the planes are equal, or if you give a line and it lies in the plane.
+  this.isParallelTo = function(obj) {
+    if (obj.normal) {
+      // obj is a plane
+      return (this.normal.isParallelTo(obj.normal) || this.normal.isAntiparallelTo(obj.normal));
+    } else if (obj.direction) {
+      // obj is a line
+      return this.normal.isPerpendicularTo(obj.direction);
+    }
+    return null;
+  };
+  
+  // Returns the plane's distance from the given object (point, line or plane)
+  this.distanceFrom = function(obj) {
+    if (this.intersects(obj) || this.contains(obj)) { return 0; }
+    if (obj.anchor) {
+      // obj is a plane or line
+      return Math.abs(this.anchor.subtract(obj.anchor).dot(this.normal));
+    } else {
+      // obj is a point
+      var P = obj.to3D();
+      if (P === null) { return null; }
+      return Math.abs(this.anchor.subtract(P).dot(this.normal))
+    }
+  };
+  
+  // Returns true iff the plane contains the given point or line
+  this.contains = function(obj) {
+    if (obj.direction) {
+      return (this.contains(obj.anchor) && this.normal.isPerpendicularTo(obj.direction));
+    } else {
+      var P = obj.to3D();
+      if (P === null) { return null; }
+      return (Math.abs(this.normal.dot(this.anchor) - this.normal.dot(P)) <= Sylvester.precision);
+    }
+  };
+  
+  // Returns true iff the plane has a unique point/line of intersection with the argument
+  this.intersects = function(obj) {
+    if (obj.direction == undefined && obj.normal == undefined) { return null; }
+    return !this.isParallelTo(obj);
+  };
+  
+  // Returns the unique intersection with the argument, if one exists. The result
+  // will be a vector if a line is supplied, and a line if a plane is supplied.
+  this.intersectionWith = function(obj) {
+    if (!this.intersects(obj)) { return null; }
+    if (obj.direction) {
+      // obj is a line
+      var A = obj.anchor, D = obj.direction, P = this.anchor, N = this.normal;
+      return A.add(D.x(N.dot(P.subtract(A)) / N.dot(D)));
+    } else if (obj.normal) {
+      // obj is a plane
+      var direction = this.normal.cross(obj.normal).toUnitVector();
+      // To find an anchor point, we find one co-ordinate that has a value
+      // of zero somewhere on the intersection, and remember which one we picked
+      var N = Matrix.Zero(2,2), i = 0;
+      while (N.isSingular()) {
+        i++;
+        N = Matrix.create([
+          [ this.normal.e(i%3 + 1), this.normal.e((i+1)%3 + 1) ],
+          [ obj.normal.e(i%3 + 1),  obj.normal.e((i+1)%3 + 1)  ]
+        ]);
+      }
+      // Then we solve the simultaneous equations in the remaining dimensions
+      var intersection = N.inv().x(Vector.create([this.normal.dot(this.anchor), obj.normal.dot(obj.anchor)]));
+      var anchor = [];
+      for (var j = 1; j <= 3; j++) {
+        // This formula picks the right element from intersection by
+        // cycling depending on which element we set to zero above
+        anchor.push((i == j) ? 0 : intersection.e((j + (5 - i)%3)%3 + 1));
+      }
+      return Line.create(anchor, direction);
+    }
+  };
+  
+  // Returns the point in the plane closest to the given point
+  this.pointClosestTo = function(point) {
+    point = point.to3D();
+    if (point === null) { return null; }
+    return point.add(this.normal.x(this.anchor.subtract(point).dot(this.normal)));
+  };
+  
+  // Returns a copy of the plane, rotated by t radians about the given line
+  // See notes on Line#rotate.
+  this.rotate = function(t, line) {
+    var R = Matrix.Rotation(t, line.direction);
+    var C = line.pointClosestTo(this.anchor);
+    return Plane.create(C.add(R.x(this.anchor.subtract(C))), R.x(this.normal));
+  };
+  
+  // Returns the reflection of the plane in the given point, line or plane.
+  this.reflectionIn = function(obj) {
+    if (obj.normal) {
+      // obj is a plane
+      var A = this.anchor.reflectionIn(obj);
+      var N = obj.anchor.add(this.normal).reflectionIn(obj).subtract(obj.anchor);
+      return Plane.create(A, N);
+    } else if (obj.direction) {
+      // obj is a line
+      return this.rotate(Math.PI, line);
+    } else {
+      // obj is a point
+      var P = obj.to3D();
+      if (P === null) { return null; }
+      return Plane.create(this.anchor.reflectionIn(P), this.normal);
+    }
+  };
+
+  // Sets the anchor point and normal to the plane. If three arguments are specified,
+  // the normal is calculated by assuming the three points should lie in the same plane.
+  // If only two are sepcified, the second is taken to be the normal. Normal vector is
+  // normalised before storage.
+  this.setVectors = function(anchor, v1, v2) {
+    anchor = Vector.create(anchor).to3D();
+    v1 = Vector.create(v1).to3D();
+    v2 = (v2 == undefined) ? null : Vector.create(v2).to3D();
+    if (anchor === null || v1 === null || v1.modulus() === 0) { return null; }
+    if (v2 !== null) {
+      if (v2.modulus() === 0) { return null; }
+      normal = (v1.subtract(anchor)).cross(v2.subtract(anchor)).toUnitVector();
+    } else {
+      normal = v1.toUnitVector();
+    }
+    this.anchor = anchor;
+    this.normal = normal;
+    return this;
+  };
+}
+
+// Constructor function
+Plane.create = function(anchor, v1, v2) {
+  var P = new Plane();
+  return P.setVectors(anchor, v1, v2);
+};
+
+// X-Y-Z planes
+Plane.XY = Plane.create(Vector.Zero(3), Vector.k);
+Plane.YZ = Plane.create(Vector.Zero(3), Vector.i);
+Plane.ZX = Plane.create(Vector.Zero(3), Vector.j);
+Plane.YX = Plane.XY; Plane.ZY = Plane.YZ; Plane.XZ = Plane.ZX;
+
 // Utility functions
-$V = Vector.create;
-$M = Matrix.create;
-$L = Line.create;
+var $V = Vector.create;
+var $M = Matrix.create;
+var $L = Line.create;
+var $P = Plane.create;
