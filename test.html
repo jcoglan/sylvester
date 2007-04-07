@@ -730,8 +730,8 @@ window.onload = function() {
   title('Plane tests');
   
   for (i = 1; i <= 10; i++) {
-    P1 = $P($V([-50,-50,-50]).add(Vector.Random(3).x(100)), Vector.Random(3));
-    P2 = $P($V([-50,-50,-50]).add(Vector.Random(3).x(100)), Vector.Random(3));
+    P1 = $P($V([-50,-50,-50]).add(Vector.Random(3).x(100)), $V([-50,-50,-50]).add(Vector.Random(3).x(100)));
+    P2 = $P($V([-50,-50,-50]).add(Vector.Random(3).x(100)), $V([-50,-50,-50]).add(Vector.Random(3).x(100)));
     if (P1.intersects(P2)) {
       L1 = P1.intersectionWith(P2);
       L2 = P2.intersectionWith(P1);
