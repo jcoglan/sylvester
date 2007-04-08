@@ -281,329 +281,328 @@ Vector.Zero = function(n) {
 
 
 
-function Matrix() {
+function Matrix() {}
 
-  // Returns element (i,j) of the matrix
-  this.e = function(i,j) {
-    if (i < 1 || i > this.rows() || j < 1 || j > this.cols()) { return null; }
-    return this.elements[i - 1][j - 1];
-  };
-  
-  // Returns row k of the matrix as a vector
-  this.row = function(k) {
-    if (k > this.rows()) { return null; }
-    return Vector.create(this.elements[k - 1]);
-  };
-  
-  // Returns column k of the matrix as a vector
-  this.col = function(k) {
-    if (k > this.cols()) { return null; }
-    var col = [];
-    for (var i = 1; i <= this.rows(); i++) {
-      col.push(this.e(i,k));
+// Returns element (i,j) of the matrix
+Matrix.prototype.e = function(i,j) {
+  if (i < 1 || i > this.rows() || j < 1 || j > this.cols()) { return null; }
+  return this.elements[i - 1][j - 1];
+};
+
+// Returns row k of the matrix as a vector
+Matrix.prototype.row = function(k) {
+  if (k > this.rows()) { return null; }
+  return Vector.create(this.elements[k - 1]);
+};
+
+// Returns column k of the matrix as a vector
+Matrix.prototype.col = function(k) {
+  if (k > this.cols()) { return null; }
+  var col = [];
+  for (var i = 1; i <= this.rows(); i++) {
+    col.push(this.e(i,k));
+  }
+  return Vector.create(col);
+};
+
+// Returns the number of rows/columns the matrix has
+Matrix.prototype.dimensions = function() {
+  return {rows: this.rows(), cols: this.cols()};
+};
+
+// Returns the number of rows in the matrix
+Matrix.prototype.rows = function() {
+  return this.elements.length;
+};
+
+// Returns the number of columns in the matrix
+Matrix.prototype.cols = function() {
+  return this.elements[0].length;
+};
+
+// Returns true iff the matrix is equal to the argument. You can supply
+// a vector as the argument, in which case the receiver must be a
+// one-column matrix equal to the vector.
+Matrix.prototype.eql = function(matrix) {
+  matrix = Matrix.create(matrix);
+  if (this.rows() != matrix.rows() || this.cols() != matrix.cols()) { return false; }
+  var i, j;
+  for (i = 1; i <= this.rows(); i++) {
+    if (!this.row(i).eql(matrix.row(i))) { return false; }
+  }
+  return true;
+};
+
+// Returns a copy of the matrix
+Matrix.prototype.dup = function() {
+  return Matrix.create(this.elements);
+};
+
+// Maps the matrix to another matrix (of the same dimensions) according to the given function
+Matrix.prototype.map = function(fn) {
+  var els = [], i, j;
+  for (i = 1; i <= this.rows(); i++) {
+    els[i - 1] = [];
+    for (j = 1; j <= this.cols(); j++) {
+      els[i - 1][j - 1] = fn(this.e(i,j), i, j);
     }
-    return Vector.create(col);
-  };
-  
-  // Returns the number of rows/columns the matrix has
-  this.dimensions = function() {
-    return {rows: this.rows(), cols: this.cols()};
-  };
-  
-  // Returns the number of rows in the matrix
-  this.rows = function() {
-    return this.elements.length;
-  };
-  
-  // Returns the number of columns in the matrix
-  this.cols = function() {
-    return this.elements[0].length;
-  };
-  
-  // Returns true iff the matrix is equal to the argument. You can supply
-  // a vector as the argument, in which case the receiver must be a
-  // one-column matrix equal to the vector.
-  this.eql = function(matrix) {
+  }
+  return Matrix.create(els);
+};
+
+// Returns true iff the argument has the same dimensions as the matrix
+Matrix.prototype.isSameSizeAs = function(matrix) {
+  matrix = Matrix.create(matrix);
+  return (this.rows() == matrix.rows() &&
+      this.cols() == matrix.cols());
+};
+
+// Returns the result of adding the argument to the matrix
+Matrix.prototype.add = function(matrix) {
+  matrix = Matrix.create(matrix);
+  if (!this.isSameSizeAs(matrix)) { return null; }
+  return this.map(function(x, i, j) { return x + matrix.e(i,j); });
+};
+
+// Returns the result of subtracting the argument from the matrix
+Matrix.prototype.subtract = function(matrix) {
+  return this.add(matrix.x(-1));
+};
+
+// Returns true iff the matrix can multiply the argument from the left
+Matrix.prototype.canMultiplyFromLeft = function(matrix) {
+  var mat = Matrix.create(matrix);
+  return (this.cols() == mat.rows());
+};
+
+// Returns the result of multiplying the matrix from the right by the argument.
+// If the argument is a scalar then just multiply all the elements. If the argument is
+// a vector, a vector is returned, which saves you having to remember calling
+// col(1) on the result.
+Matrix.prototype.multiply = function(matrix) {
+  var i, j;
+  if (matrix.elements) {
+    var returnVector = matrix.modulus ? true : false;
     matrix = Matrix.create(matrix);
-    if (this.rows() != matrix.rows() || this.cols() != matrix.cols()) { return false; }
-    var i, j;
-    for (i = 1; i <= this.rows(); i++) {
-      if (!this.row(i).eql(matrix.row(i))) { return false; }
-    }
-    return true;
-  };
-  
-  // Returns a copy of the matrix
-  this.dup = function() {
-    return Matrix.create(this.elements);
-  };
-  
-  // Maps the matrix to another matrix (of the same dimensions) according to the given function
-  this.map = function(fn) {
-    var els = [], i, j;
-    for (i = 1; i <= this.rows(); i++) {
-      els[i - 1] = [];
-      for (j = 1; j <= this.cols(); j++) {
-        els[i - 1][j - 1] = fn(this.e(i,j), i, j);
-      }
-    }
-    return Matrix.create(els);
-  };
-  
-  // Returns true iff the argument has the same dimensions as the matrix
-  this.isSameSizeAs = function(matrix) {
-    matrix = Matrix.create(matrix);
-    return (this.rows() == matrix.rows() &&
-        this.cols() == matrix.cols());
-  };
-  
-  // Returns the result of adding the argument to the matrix
-  this.add = function(matrix) {
-    matrix = Matrix.create(matrix);
-    if (!this.isSameSizeAs(matrix)) { return null; }
-    return this.map(function(x, i, j) { return x + matrix.e(i,j); });
-  };
-  
-  // Returns the result of subtracting the argument from the matrix
-  this.subtract = function(matrix) {
-    return this.add(matrix.x(-1));
-  };
-  
-  // Returns true iff the matrix can multiply the argument from the left
-  this.canMultiplyFromLeft = function(matrix) {
-    var mat = Matrix.create(matrix);
-    return (this.cols() == mat.rows());
-  };
-  
-  // Returns the result of multiplying the matrix from the right by the argument.
-  // If the argument is a scalar then just multiply all the elements. If the argument is
-  // a vector, a vector is returned, which saves you having to remember calling
-  // col(1) on the result.
-  this.multiply = function(matrix) {
-    var i, j;
-    if (matrix.elements) {
-      var returnVector = matrix.modulus ? true : false;
-      matrix = Matrix.create(matrix);
-      if (!this.canMultiplyFromLeft(matrix)) { return null; }
-      var self = this;
-      var M = Matrix.Zero(this.rows(), matrix.cols()).map(
-        function(x, i, j) { return self.row(i).dot(matrix.col(j)); }
-      );
-      return returnVector ? M.col(1) : M;
-    } else {
-      return this.map(function(x) { return x * matrix; });
-    }
-  };
-  
-  this.x = function(matrix) { return this.multiply(matrix); };
-  
-  // Returns a submatrix taken from the matrix
-  // Argument order is: start row, start col, nrows, ncols
-  // Element selection wraps if the required index is outside the matrix's bounds, so you could
-  // use this to perform row/column cycling or copy-augmenting.
-  this.minor = function(a, b, c, d) {
+    if (!this.canMultiplyFromLeft(matrix)) { return null; }
     var self = this;
-    return Matrix.Zero(c, d).map(
-      function(x, i, j) { return self.e((i + a - 2)%self.rows() + 1, (j + b - 2)%self.cols() + 1); }
+    var M = Matrix.Zero(this.rows(), matrix.cols()).map(
+      function(x, i, j) { return self.row(i).dot(matrix.col(j)); }
     );
-  };
-  
-  // Returns the transpose of the matrix
-  this.transpose = function() {
-    var self = this;
-    return Matrix.Zero(this.cols(), this.rows()).map(function(x, i, j) { return self.e(j,i); });
-  };
-  
-  // Returns true iff the matrix is square
-  this.isSquare = function() {
-    return (this.rows() == this.cols());
-  };
-  
-  // Returns the (absolute) largest element of the matrix
-  this.max = function() {
-    var m = 0;
-    for (var i = 1; i <= this.rows(); i++) {
-      if (Math.abs(this.row(i).max()) > Math.abs(m)) { m = this.row(i).max(); }
+    return returnVector ? M.col(1) : M;
+  } else {
+    return this.map(function(x) { return x * matrix; });
+  }
+};
+
+Matrix.prototype.x = function(matrix) { return this.multiply(matrix); };
+
+// Returns a submatrix taken from the matrix
+// Argument order is: start row, start col, nrows, ncols
+// Element selection wraps if the required index is outside the matrix's bounds, so you could
+// use this to perform row/column cycling or copy-augmenting.
+Matrix.prototype.minor = function(a, b, c, d) {
+  var self = this;
+  return Matrix.Zero(c, d).map(
+    function(x, i, j) { return self.e((i + a - 2)%self.rows() + 1, (j + b - 2)%self.cols() + 1); }
+  );
+};
+
+// Returns the transpose of the matrix
+Matrix.prototype.transpose = function() {
+  var self = this;
+  return Matrix.Zero(this.cols(), this.rows()).map(function(x, i, j) { return self.e(j,i); });
+};
+
+// Returns true iff the matrix is square
+Matrix.prototype.isSquare = function() {
+  return (this.rows() == this.cols());
+};
+
+// Returns the (absolute) largest element of the matrix
+Matrix.prototype.max = function() {
+  var m = 0;
+  for (var i = 1; i <= this.rows(); i++) {
+    if (Math.abs(this.row(i).max()) > Math.abs(m)) { m = this.row(i).max(); }
+  }
+  return m;
+};
+
+// Returns the indeces of the first match found by reading row-by-row from left to right
+Matrix.prototype.indexOf = function(x) {
+  var index = null, i, j;
+  for (i = 1; i <= this.rows(); i++) {
+    for (j = 1; j <= this.cols(); j++) {
+      if (index === null && this.e(i,j) == x) {
+        index = {i: i, j: j};
+      }
     }
-    return m;
-  };
-  
-  // Returns the indeces of the first match found by reading row-by-row from left to right
-  this.indexOf = function(x) {
-    var index = null, i, j;
-    for (i = 1; i <= this.rows(); i++) {
-      for (j = 1; j <= this.cols(); j++) {
-        if (index === null && this.e(i,j) == x) {
-          index = {i: i, j: j};
+  }
+  return index;
+};
+
+// If the matrix is square, returns the diagonal elements as a vector.
+// Otherwise, returns null.
+Matrix.prototype.diagonal = function() {
+  if (!this.isSquare) { return null; }
+  var els = [];
+  for (var i = 1; i <= this.rows(); i++) {
+    els.push(this.e(i,i));
+  }
+  return Vector.create(els);
+};
+
+// Make the matrix upper (right) triangular by Gaussian elimination.
+// This method only adds multiples of rows to other rows. No rows are
+// scaled up or switched, and the determinant is preserved. Elements that
+// are within rounding error precision of zero are snapped to zero.
+Matrix.prototype.toRightTriangular = function() {
+  var i, j, M = this.dup(), nonzero;
+  for (i = 1; i < M.rows(); i++) {
+    if (M.e(i,i) == 0) {
+      nonzero = false;
+      for (j = i + 1; j <= M.rows(); j++) {
+        if (M.e(j,i) != 0 && !nonzero) {
+          nonzero = true;
+          M.elements[i - 1] = M.row(i).add(M.row(j)).elements;
         }
       }
     }
-    return index;
-  };
-  
-  // If the matrix is square, returns the diagonal elements as a vector.
-  // Otherwise, returns null.
-  this.diagonal = function() {
-    if (!this.isSquare) { return null; }
-    var els = [];
-    for (var i = 1; i <= this.rows(); i++) {
-      els.push(this.e(i,i));
-    }
-    return Vector.create(els);
-  };
-  
-  // Make the matrix upper (right) triangular by Gaussian elimination.
-  // This method only adds multiples of rows to other rows. No rows are
-  // scaled up or switched, and the determinant is preserved. Elements that
-  // are within rounding error precision of zero are snapped to zero.
-  this.toRightTriangular = function() {
-    var i, j, M = this.dup(), nonzero;
-    for (i = 1; i < M.rows(); i++) {
-      if (M.e(i,i) == 0) {
-        nonzero = false;
-        for (j = i + 1; j <= M.rows(); j++) {
-          if (M.e(j,i) != 0 && !nonzero) {
-            nonzero = true;
-            M.elements[i - 1] = M.row(i).add(M.row(j)).elements;
-          }
-        }
-      }
-      if (M.e(i,i) != 0) {
-        for (j = i + 1; j <= M.rows(); j++) {
-          M.elements[j - 1] = M.row(j).subtract(M.row(i).x(M.e(j,i) / M.e(i,i))).elements;
-        }
+    if (M.e(i,i) != 0) {
+      for (j = i + 1; j <= M.rows(); j++) {
+        M.elements[j - 1] = M.row(j).subtract(M.row(i).x(M.e(j,i) / M.e(i,i))).elements;
       }
     }
-    return M.snapTo(0);
-  };
-  
-  this.toUpperTriangular = function() { return this.toRightTriangular(); };
-  
-  // Returns the determinant for square matrices
-  this.determinant = function() {
-    if (!this.isSquare()) { return null; }
-    var els = this.toRightTriangular().diagonal().elements;
-    var det = els[0];
-    for (var i = 1; i < els.length; i++) { det = det * els[i]; }
-    return det;
-  };
-  
-  this.det = function() { return this.determinant(); };
-  
-  // Returns true iff the matrix is singular
-  this.isSingular = function() {
-    return (this.isSquare() && this.determinant() === 0);
-  };
-  
-  // Returns the trace for square matrices
-  this.trace = function() {
-    if (!this.isSquare()) { return null; }
-    var els = this.toRightTriangular().diagonal().elements;
-    var tr = els[0];
-    for (var i = 1; i < els.length; i++) { tr = tr + els[i]; }
-    return tr;
-  };
-  
-  this.tr = function() { return this.trace(); };
-  
-  // Returns the rank for square matrices
-  this.rank = function() {
-    if (!this.isSquare()) { return null; }
-    var M = this.toRightTriangular(), rank = this.rows();
-    for (var i = this.rows(); i >= 1; i--) {
-      // toRightTriangular snaps values to zero
-      if (M.row(i).modulus() === 0) { rank--; }
+  }
+  return M.snapTo(0);
+};
+
+Matrix.prototype.toUpperTriangular = function() { return this.toRightTriangular(); };
+
+// Returns the determinant for square matrices
+Matrix.prototype.determinant = function() {
+  if (!this.isSquare()) { return null; }
+  var els = this.toRightTriangular().diagonal().elements;
+  var det = els[0];
+  for (var i = 1; i < els.length; i++) { det = det * els[i]; }
+  return det;
+};
+
+Matrix.prototype.det = function() { return this.determinant(); };
+
+// Returns true iff the matrix is singular
+Matrix.prototype.isSingular = function() {
+  return (this.isSquare() && this.determinant() === 0);
+};
+
+// Returns the trace for square matrices
+Matrix.prototype.trace = function() {
+  if (!this.isSquare()) { return null; }
+  var els = this.toRightTriangular().diagonal().elements;
+  var tr = els[0];
+  for (var i = 1; i < els.length; i++) { tr = tr + els[i]; }
+  return tr;
+};
+
+Matrix.prototype.tr = function() { return this.trace(); };
+
+// Returns the rank for square matrices
+Matrix.prototype.rank = function() {
+  if (!this.isSquare()) { return null; }
+  var M = this.toRightTriangular(), rank = this.rows();
+  for (var i = this.rows(); i >= 1; i--) {
+    // toRightTriangular snaps values to zero
+    if (M.row(i).modulus() === 0) { rank--; }
+  }
+  return rank;
+};
+
+// Returns the result of attaching the given argument to the right-hand side of the matrix
+Matrix.prototype.augment = function(matrix) {
+  matrix = Matrix.create(matrix); // Allows us to supply vectors
+  var self = this.dup();
+  var i, j;
+  if (self.rows() != matrix.rows()) { return null; }
+  for (i = 0; i < self.rows(); i++) {
+    for (j = 0; j < matrix.cols(); j++) {
+      self.elements[i][self.rows() + j] = matrix.e(i+1,j+1);
     }
-    return rank;
-  };
-  
-  // Returns the result of attaching the given argument to the right-hand side of the matrix
-  this.augment = function(matrix) {
-    matrix = Matrix.create(matrix); // Allows us to supply vectors
-    var self = this.dup();
-    var i, j;
-    if (self.rows() != matrix.rows()) { return null; }
-    for (i = 0; i < self.rows(); i++) {
-      for (j = 0; j < matrix.cols(); j++) {
-        self.elements[i][self.rows() + j] = matrix.e(i+1,j+1);
+  }
+  return self;
+};
+
+// Returns the inverse (if one exists) using Gauss-Jordan
+Matrix.prototype.inverse = function() {
+  var i, j;
+  if (!this.isSquare() || this.isSingular()) { return null; }
+  var n = this.rows();
+  var M = this.augment(Matrix.I(n)).toRightTriangular();
+  // Matrix is non-singular so there will be no zeros on the diagonal
+  for (i = 1; i <= n; i++) {
+    M.elements[i - 1] = M.row(i).x(1 / M.e(i,i)).elements;
+  }
+  for (i = n; i > 1; i--) {
+    for (j = 1; j < i; j++) {
+      M.elements[j - 1] = M.row(j).subtract(M.row(i).x(M.e(j,i))).elements;
+    }
+  }
+  return M.minor(1, n+1, n, n);
+};
+
+Matrix.prototype.inv = function() { return this.inverse(); };
+
+// Returns the result of rounding all the elements
+Matrix.prototype.round = function() {
+  return this.map(function(x) { return Math.round(x); });
+};
+
+// Sets the elements of the matrix to the given value if they
+// differ from it by less than Sylvester.precision
+Matrix.prototype.snapTo = function(x) {
+  for (var i = 1; i <= this.rows(); i++) {
+    this.elements[i - 1] = this.row(i).snapTo(x).elements;
+  }
+  return this;
+};
+
+// Returns a string representation of the matrix
+Matrix.prototype.inspect = function() {
+  var matrix = this.dup();
+  for (var i = 0; i < matrix.rows(); i++) {
+    matrix.elements[i] = Vector.create(matrix.elements[i]).inspect();
+  }
+  return matrix.elements.join('\n');
+};
+
+// Set the matrix's elements from an array. If the argument passed
+// is a vector, the resulting matrix will be a single column.
+Matrix.prototype.setElements = function(els) {
+  var row, i, j, success = true;
+  if (els == undefined) { return null; }
+  this.elements = [];
+  if (els.elements) { els = els.elements; }
+  for (i = 0; i < els.length; i++) {
+    if (els[i][0] !== undefined) {
+      row = [];
+      for (j = 0; j < els[i].length; j++) {
+        if (!isNaN(els[i][j])) { row.push(els[i][j]); }
       }
-    }
-    return self;
-  };
-  
-  // Returns the inverse (if one exists) using Gauss-Jordan
-  this.inverse = function() {
-    var i, j;
-    if (!this.isSquare() || this.isSingular()) { return null; }
-    var n = this.rows();
-    var M = this.augment(Matrix.I(n)).toRightTriangular();
-    // Matrix is non-singular so there will be no zeros on the diagonal
-    for (i = 1; i <= n; i++) {
-      M.elements[i - 1] = M.row(i).x(1 / M.e(i,i)).elements;
-    }
-    for (i = n; i > 1; i--) {
-      for (j = 1; j < i; j++) {
-        M.elements[j - 1] = M.row(j).subtract(M.row(i).x(M.e(j,i))).elements;
-      }
-    }
-    return M.minor(1, n+1, n, n);
-  };
-  
-  this.inv = function() { return this.inverse(); };
-  
-  // Returns the result of rounding all the elements
-  this.round = function() {
-    return this.map(function(x) { return Math.round(x); });
-  };
-  
-  // Sets the elements of the matrix to the given value if they
-  // differ from it by less than Sylvester.precision
-  this.snapTo = function(x) {
-    for (var i = 1; i <= this.rows(); i++) {
-      this.elements[i - 1] = this.row(i).snapTo(x).elements;
-    }
-    return this;
-  };
-  
-  // Returns a string representation of the matrix
-  this.inspect = function() {
-    var matrix = this.dup();
-    for (var i = 0; i < matrix.rows(); i++) {
-      matrix.elements[i] = Vector.create(matrix.elements[i]).inspect();
-    }
-    return matrix.elements.join('\n');
-  };
-  
-  // Set the matrix's elements from an array. If the argument passed
-  // is a vector, the resulting matrix will be a single column.
-  this.setElements = function(els) {
-    var row, i, j, success = true;
-    if (els == undefined) { return null; }
-    this.elements = [];
-    if (els.elements) { els = els.elements; }
-    for (i = 0; i < els.length; i++) {
-      if (els[i][0] !== undefined) {
-        row = [];
-        for (j = 0; j < els[i].length; j++) {
-          if (!isNaN(els[i][j])) { row.push(els[i][j]); }
-        }
-        if (i > 0 && this.elements[i-1].length != row.length) {
-          success = false;
-        } else {
-          this.elements.push(row);
-        }
+      if (i > 0 && this.elements[i-1].length != row.length) {
+        success = false;
       } else {
-        if (!isNaN(els[i])) { this.elements.push([els[i]]); }
+        this.elements.push(row);
       }
-    }
-    if (!success) {
-      this.elements = [];
-      return null;
     } else {
-      return this;
+      if (!isNaN(els[i])) { this.elements.push([els[i]]); }
     }
-  };
-}
+  }
+  if (!success) {
+    this.elements = [];
+    return null;
+  } else {
+    return this;
+  }
+};
 
 // Constructor function
 Matrix.create = function(elements) {
@@ -713,137 +712,136 @@ Matrix.Zero = function(n, m) {
 
 
 
-function Line() {
+function Line() {}
 
-  // Returns true if the argument occupies the same space as the line
-  this.eql = function(line) {
-    return (this.isParallelTo(line) && this.contains(line.anchor));
-  };
-  
-  // Returns a copy of the line
-  this.dup = function() {
-    return Line.create(this.anchor, this.direction);
-  };
-  
-  // Returns the result of translating the line by the given vector
-  this.translate = function(vector) {
-    vector = Vector.create(vector).to3D();
-    if (vector === null) { return null; }
-    return Line.create(this.anchor.add(vector), this.direction);
-  };
-  
-  // Returns true if the line is parallel to the argument. Here, 'parallel to'
-  // means that the argument's direction is either parallel or antiparallel to
-  // the line's own direction. A line is parallel to a plane if the two do not
-  // have a unique intersection.
-  this.isParallelTo = function(obj) {
-    if (obj.normal) { return obj.isParallelTo(this); }
-    return (this.direction.isParallelTo(obj.direction) || this.direction.isAntiparallelTo(obj.direction));
-  };
-  
-  // Returns the line's perpendicular distance from the argument,
-  //which can be a point, a line or a plane
-  this.distanceFrom = function(obj) {
-    if (obj.normal) { return obj.distanceFrom(this); }
-    if (obj.direction) {
-      // obj is a line
-      if (this.isParallelTo(obj)) { return this.distanceFrom(obj.anchor); }
-      var N = this.direction.cross(obj.direction).toUnitVector();
-      return Math.abs(this.anchor.subtract(obj.anchor).dot(N));
-    } else {
-      // obj is a point
-      var P = obj.to3D();
-      if (P === null) { return null; }
-      var A = P.subtract(this.anchor);
-      return Math.abs(A.modulus() * Math.sin(A.angleFrom(this.direction)));
-    }
-  };
-  
-  // Returns true iff the argument is a point on the line
-  this.contains = function(point) {
-    var dist = this.distanceFrom(point);
-    return (dist !== null && dist <= Sylvester.precision);
-  };
-  
-  // Returns true iff the line lies in the given plane
-  this.liesIn = function(plane) {
-    return plane.contains(this);
-  };
-  
-  // Returns true iff the line has a unique point of intersection with the argument
-  this.intersects = function(obj) {
-    if (obj.normal) { return obj.intersects(this); }
-    return (!this.isParallelTo(obj) && this.distanceFrom(obj) <= Sylvester.precision);
-  };
-  
-  // Returns the unique intersection point with the argument, if one exists
-  this.intersectionWith = function(obj) {
-    if (!this.intersects(obj)) { return null; }
-    if (obj.normal) { return obj.intersectionWith(this); }
-    var P = this.anchor, X = this.direction, Q = obj.anchor, Y = obj.direction;
-    var a = (X.dot(Q.subtract(P)) * Y.dot(Y) / X.dot(X)) + (X.dot(Y) * Y.dot(P.subtract(Q)));
-    var s = a / (Y.dot(Y) - (X.dot(Y) * X.dot(Y)));
-    return P.add(X.x(s));
-  };
-  
-  // Returns the point on the line that is closest to the given point or line
-  this.pointClosestTo = function(obj) {
-    if (obj.direction) {
-      // obj is a line
-      if (this.intersects(obj)) { return this.intersectionWith(obj); }
-      if (this.isParallelTo(obj)) { return null; }
-      var S = this.direction.cross(obj.direction).toUnitVector().x(this.distanceFrom(obj));
-      var L = obj.dup().translate(S);
-      if (L.distanceFrom(this) > obj.distanceFrom(this)) { L = obj.dup().translate(S.x(-1)); }
-      return this.intersectionWith(L);
-    } else {
-      // obj is a point
-      var P = obj.to3D();
-      if (P === null) { return null; }
-      if (this.contains(P)) { return P; }
-      var A = P.subtract(this.anchor);
-      return P.add(this.direction.cross(this.direction.cross(A)).toUnitVector().x(this.distanceFrom(P)));
-    }
-  };
-  
-  // Returns a copy of the line rotated by t radians about the given line. Works by
-  // finding the argument's closest point to this line's anchor point (call this C) and
-  // rotating the anchor about C. Also rotates the line's direction about the argument's.
-  // Be careful with this - the rotation axis' direction affects the outcome!
-  this.rotate = function(t, line) {
-    var R = Matrix.Rotation(t, line.direction);
-    var C = line.pointClosestTo(this.anchor);
-    return Line.create(C.add(R.x(this.anchor.subtract(C))), R.x(this.direction));
-  };
-  
-  // Returns the line's reflection in the given point or line
-  this.reflectionIn = function(obj) {
-    if (obj.normal) {
-      // obj is a plane
-      var A = this.anchor.reflectionIn(obj);
-      var D = obj.anchor.add(this.direction).reflectionIn(obj).subtract(obj.anchor);
-      return Line.create(A, D);
-    } else if (obj.direction) {
-      // obj is a line - reflection obtained by rotating PI radians about obj
-      return this.rotate(Math.PI, obj);
-    } else {
-      // obj is a point - just reflect the line's anchor in it
-      var P = obj.to3D();
-      if (P === null) { return null; }
-      return Line.create(this.anchor.reflectionIn(P), this.direction);
-    }
-  };
-  
-  // Set the line's anchor point and direction.
-  this.setVectors = function(anchor, direction) {
-    anchor = Vector.create(anchor).to3D();
-    direction = Vector.create(direction).to3D();
-    if (anchor === null || direction === null || direction.modulus() === 0) { return null; }
-    this.anchor = anchor;
-    this.direction = direction.toUnitVector();
-    return this;
-  };
-}
+// Returns true if the argument occupies the same space as the line
+Line.prototype.eql = function(line) {
+  return (this.isParallelTo(line) && this.contains(line.anchor));
+};
+
+// Returns a copy of the line
+Line.prototype.dup = function() {
+  return Line.create(this.anchor, this.direction);
+};
+
+// Returns the result of translating the line by the given vector
+Line.prototype.translate = function(vector) {
+  vector = Vector.create(vector).to3D();
+  if (vector === null) { return null; }
+  return Line.create(this.anchor.add(vector), this.direction);
+};
+
+// Returns true if the line is parallel to the argument. Here, 'parallel to'
+// means that the argument's direction is either parallel or antiparallel to
+// the line's own direction. A line is parallel to a plane if the two do not
+// have a unique intersection.
+Line.prototype.isParallelTo = function(obj) {
+  if (obj.normal) { return obj.isParallelTo(this); }
+  return (this.direction.isParallelTo(obj.direction) || this.direction.isAntiparallelTo(obj.direction));
+};
+
+// Returns the line's perpendicular distance from the argument,
+//which can be a point, a line or a plane
+Line.prototype.distanceFrom = function(obj) {
+  if (obj.normal) { return obj.distanceFrom(this); }
+  if (obj.direction) {
+    // obj is a line
+    if (this.isParallelTo(obj)) { return this.distanceFrom(obj.anchor); }
+    var N = this.direction.cross(obj.direction).toUnitVector();
+    return Math.abs(this.anchor.subtract(obj.anchor).dot(N));
+  } else {
+    // obj is a point
+    var P = obj.to3D();
+    if (P === null) { return null; }
+    var A = P.subtract(this.anchor);
+    return Math.abs(A.modulus() * Math.sin(A.angleFrom(this.direction)));
+  }
+};
+
+// Returns true iff the argument is a point on the line
+Line.prototype.contains = function(point) {
+  var dist = this.distanceFrom(point);
+  return (dist !== null && dist <= Sylvester.precision);
+};
+
+// Returns true iff the line lies in the given plane
+Line.prototype.liesIn = function(plane) {
+  return plane.contains(this);
+};
+
+// Returns true iff the line has a unique point of intersection with the argument
+Line.prototype.intersects = function(obj) {
+  if (obj.normal) { return obj.intersects(this); }
+  return (!this.isParallelTo(obj) && this.distanceFrom(obj) <= Sylvester.precision);
+};
+
+// Returns the unique intersection point with the argument, if one exists
+Line.prototype.intersectionWith = function(obj) {
+  if (!this.intersects(obj)) { return null; }
+  if (obj.normal) { return obj.intersectionWith(this); }
+  var P = this.anchor, X = this.direction, Q = obj.anchor, Y = obj.direction;
+  var a = (X.dot(Q.subtract(P)) * Y.dot(Y) / X.dot(X)) + (X.dot(Y) * Y.dot(P.subtract(Q)));
+  var s = a / (Y.dot(Y) - (X.dot(Y) * X.dot(Y)));
+  return P.add(X.x(s));
+};
+
+// Returns the point on the line that is closest to the given point or line
+Line.prototype.pointClosestTo = function(obj) {
+  if (obj.direction) {
+    // obj is a line
+    if (this.intersects(obj)) { return this.intersectionWith(obj); }
+    if (this.isParallelTo(obj)) { return null; }
+    var S = this.direction.cross(obj.direction).toUnitVector().x(this.distanceFrom(obj));
+    var L = obj.dup().translate(S);
+    if (L.distanceFrom(this) > obj.distanceFrom(this)) { L = obj.dup().translate(S.x(-1)); }
+    return this.intersectionWith(L);
+  } else {
+    // obj is a point
+    var P = obj.to3D();
+    if (P === null) { return null; }
+    if (this.contains(P)) { return P; }
+    var A = P.subtract(this.anchor);
+    return P.add(this.direction.cross(this.direction.cross(A)).toUnitVector().x(this.distanceFrom(P)));
+  }
+};
+
+// Returns a copy of the line rotated by t radians about the given line. Works by
+// finding the argument's closest point to this line's anchor point (call this C) and
+// rotating the anchor about C. Also rotates the line's direction about the argument's.
+// Be careful with this - the rotation axis' direction affects the outcome!
+Line.prototype.rotate = function(t, line) {
+  var R = Matrix.Rotation(t, line.direction);
+  var C = line.pointClosestTo(this.anchor);
+  return Line.create(C.add(R.x(this.anchor.subtract(C))), R.x(this.direction));
+};
+
+// Returns the line's reflection in the given point or line
+Line.prototype.reflectionIn = function(obj) {
+  if (obj.normal) {
+    // obj is a plane
+    var A = this.anchor.reflectionIn(obj);
+    var D = obj.anchor.add(this.direction).reflectionIn(obj).subtract(obj.anchor);
+    return Line.create(A, D);
+  } else if (obj.direction) {
+    // obj is a line - reflection obtained by rotating PI radians about obj
+    return this.rotate(Math.PI, obj);
+  } else {
+    // obj is a point - just reflect the line's anchor in it
+    var P = obj.to3D();
+    if (P === null) { return null; }
+    return Line.create(this.anchor.reflectionIn(P), this.direction);
+  }
+};
+
+// Set the line's anchor point and direction.
+Line.prototype.setVectors = function(anchor, direction) {
+  anchor = Vector.create(anchor).to3D();
+  direction = Vector.create(direction).to3D();
+  if (anchor === null || direction === null || direction.modulus() === 0) { return null; }
+  this.anchor = anchor;
+  this.direction = direction.toUnitVector();
+  return this;
+};
   
 // Constructor function
 Line.create = function(anchor, direction) {
@@ -858,155 +856,154 @@ Line.Z = Line.create(Vector.Zero(3), Vector.k);
 
 
 
-function Plane() {
+function Plane() {}
 
-  // Returns true iff the plane occupies the same space as the argument
-  this.eql = function(plane) {
-    return (this.contains(plane.anchor) && this.isParallelTo(plane));
-  };
-  
-  // Returns a copy of the plane
-  this.dup = function() {
-    return Plane.create(this.anchor, this.normal);
-  };
-  
-  // Returns the result of translating the plane by the given vector
-  this.translate = function(vector) {
-    vector = Vector.create(vector).to3D();
-    if (vector === null) { return null; }
-    return Plane.create(this.anchor.add(vector), this.normal);
-  };
-  
-  // Returns true iff the plane is parallel to the argument. Will return true
-  // if the planes are equal, or if you give a line and it lies in the plane.
-  this.isParallelTo = function(obj) {
-    if (obj.normal) {
-      // obj is a plane
-      return (this.normal.isParallelTo(obj.normal) || this.normal.isAntiparallelTo(obj.normal));
-    } else if (obj.direction) {
-      // obj is a line
-      return this.normal.isPerpendicularTo(obj.direction);
-    }
-    return null;
-  };
-  
-  // Returns the plane's distance from the given object (point, line or plane)
-  this.distanceFrom = function(obj) {
-    if (this.intersects(obj) || this.contains(obj)) { return 0; }
-    if (obj.anchor) {
-      // obj is a plane or line
-      return Math.abs(this.anchor.subtract(obj.anchor).dot(this.normal));
-    } else {
-      // obj is a point
-      var P = obj.to3D();
-      if (P === null) { return null; }
-      return Math.abs(this.anchor.subtract(P).dot(this.normal))
-    }
-  };
-  
-  // Returns true iff the plane contains the given point or line
-  this.contains = function(obj) {
-    if (obj.direction) {
-      return (this.contains(obj.anchor) && this.normal.isPerpendicularTo(obj.direction));
-    } else {
-      var P = obj.to3D();
-      if (P === null) { return null; }
-      return (Math.abs(this.normal.dot(this.anchor) - this.normal.dot(P)) <= Sylvester.precision);
-    }
-  };
-  
-  // Returns true iff the plane has a unique point/line of intersection with the argument
-  this.intersects = function(obj) {
-    if (obj.direction == undefined && obj.normal == undefined) { return null; }
-    return !this.isParallelTo(obj);
-  };
-  
-  // Returns the unique intersection with the argument, if one exists. The result
-  // will be a vector if a line is supplied, and a line if a plane is supplied.
-  this.intersectionWith = function(obj) {
-    if (!this.intersects(obj)) { return null; }
-    if (obj.direction) {
-      // obj is a line
-      var A = obj.anchor, D = obj.direction, P = this.anchor, N = this.normal;
-      return A.add(D.x(N.dot(P.subtract(A)) / N.dot(D)));
-    } else if (obj.normal) {
-      // obj is a plane
-      var direction = this.normal.cross(obj.normal).toUnitVector();
-      // To find an anchor point, we find one co-ordinate that has a value
-      // of zero somewhere on the intersection, and remember which one we picked
-      var N = Matrix.Zero(2,2), i = 0;
-      while (N.isSingular()) {
-        i++;
-        N = Matrix.create([
-          [ this.normal.e(i%3 + 1), this.normal.e((i+1)%3 + 1) ],
-          [ obj.normal.e(i%3 + 1),  obj.normal.e((i+1)%3 + 1)  ]
-        ]);
-      }
-      // Then we solve the simultaneous equations in the remaining dimensions
-      var intersection = N.inv().x(Vector.create([this.normal.dot(this.anchor), obj.normal.dot(obj.anchor)]));
-      var anchor = [];
-      for (var j = 1; j <= 3; j++) {
-        // This formula picks the right element from intersection by
-        // cycling depending on which element we set to zero above
-        anchor.push((i == j) ? 0 : intersection.e((j + (5 - i)%3)%3 + 1));
-      }
-      return Line.create(anchor, direction);
-    }
-  };
-  
-  // Returns the point in the plane closest to the given point
-  this.pointClosestTo = function(point) {
-    point = point.to3D();
-    if (point === null) { return null; }
-    return point.add(this.normal.x(this.anchor.subtract(point).dot(this.normal)));
-  };
-  
-  // Returns a copy of the plane, rotated by t radians about the given line
-  // See notes on Line#rotate.
-  this.rotate = function(t, line) {
-    var R = Matrix.Rotation(t, line.direction);
-    var C = line.pointClosestTo(this.anchor);
-    return Plane.create(C.add(R.x(this.anchor.subtract(C))), R.x(this.normal));
-  };
-  
-  // Returns the reflection of the plane in the given point, line or plane.
-  this.reflectionIn = function(obj) {
-    if (obj.normal) {
-      // obj is a plane
-      var A = this.anchor.reflectionIn(obj);
-      var N = obj.anchor.add(this.normal).reflectionIn(obj).subtract(obj.anchor);
-      return Plane.create(A, N);
-    } else if (obj.direction) {
-      // obj is a line
-      return this.rotate(Math.PI, line);
-    } else {
-      // obj is a point
-      var P = obj.to3D();
-      if (P === null) { return null; }
-      return Plane.create(this.anchor.reflectionIn(P), this.normal);
-    }
-  };
+// Returns true iff the plane occupies the same space as the argument
+Plane.prototype.eql = function(plane) {
+  return (this.contains(plane.anchor) && this.isParallelTo(plane));
+};
 
-  // Sets the anchor point and normal to the plane. If three arguments are specified,
-  // the normal is calculated by assuming the three points should lie in the same plane.
-  // If only two are sepcified, the second is taken to be the normal. Normal vector is
-  // normalised before storage.
-  this.setVectors = function(anchor, v1, v2) {
-    anchor = Vector.create(anchor).to3D();
-    v1 = Vector.create(v1).to3D();
-    v2 = (v2 == undefined) ? null : Vector.create(v2).to3D();
-    if (anchor === null || v1 === null || v1.modulus() === 0) { return null; }
-    if (v2 !== null) {
-      if (v2.modulus() === 0) { return null; }
-      normal = (v1.subtract(anchor)).cross(v2.subtract(anchor)).toUnitVector();
-    } else {
-      normal = v1.toUnitVector();
+// Returns a copy of the plane
+Plane.prototype.dup = function() {
+  return Plane.create(this.anchor, this.normal);
+};
+
+// Returns the result of translating the plane by the given vector
+Plane.prototype.translate = function(vector) {
+  vector = Vector.create(vector).to3D();
+  if (vector === null) { return null; }
+  return Plane.create(this.anchor.add(vector), this.normal);
+};
+
+// Returns true iff the plane is parallel to the argument. Will return true
+// if the planes are equal, or if you give a line and it lies in the plane.
+Plane.prototype.isParallelTo = function(obj) {
+  if (obj.normal) {
+    // obj is a plane
+    return (this.normal.isParallelTo(obj.normal) || this.normal.isAntiparallelTo(obj.normal));
+  } else if (obj.direction) {
+    // obj is a line
+    return this.normal.isPerpendicularTo(obj.direction);
+  }
+  return null;
+};
+
+// Returns the plane's distance from the given object (point, line or plane)
+Plane.prototype.distanceFrom = function(obj) {
+  if (this.intersects(obj) || this.contains(obj)) { return 0; }
+  if (obj.anchor) {
+    // obj is a plane or line
+    return Math.abs(this.anchor.subtract(obj.anchor).dot(this.normal));
+  } else {
+    // obj is a point
+    var P = obj.to3D();
+    if (P === null) { return null; }
+    return Math.abs(this.anchor.subtract(P).dot(this.normal))
+  }
+};
+
+// Returns true iff the plane contains the given point or line
+Plane.prototype.contains = function(obj) {
+  if (obj.direction) {
+    return (this.contains(obj.anchor) && this.normal.isPerpendicularTo(obj.direction));
+  } else {
+    var P = obj.to3D();
+    if (P === null) { return null; }
+    return (Math.abs(this.normal.dot(this.anchor) - this.normal.dot(P)) <= Sylvester.precision);
+  }
+};
+
+// Returns true iff the plane has a unique point/line of intersection with the argument
+Plane.prototype.intersects = function(obj) {
+  if (obj.direction == undefined && obj.normal == undefined) { return null; }
+  return !this.isParallelTo(obj);
+};
+
+// Returns the unique intersection with the argument, if one exists. The result
+// will be a vector if a line is supplied, and a line if a plane is supplied.
+Plane.prototype.intersectionWith = function(obj) {
+  if (!this.intersects(obj)) { return null; }
+  if (obj.direction) {
+    // obj is a line
+    var A = obj.anchor, D = obj.direction, P = this.anchor, N = this.normal;
+    return A.add(D.x(N.dot(P.subtract(A)) / N.dot(D)));
+  } else if (obj.normal) {
+    // obj is a plane
+    var direction = this.normal.cross(obj.normal).toUnitVector();
+    // To find an anchor point, we find one co-ordinate that has a value
+    // of zero somewhere on the intersection, and remember which one we picked
+    var N = Matrix.Zero(2,2), i = 0;
+    while (N.isSingular()) {
+      i++;
+      N = Matrix.create([
+        [ this.normal.e(i%3 + 1), this.normal.e((i+1)%3 + 1) ],
+        [ obj.normal.e(i%3 + 1),  obj.normal.e((i+1)%3 + 1)  ]
+      ]);
     }
-    this.anchor = anchor;
-    this.normal = normal;
-    return this;
-  };
-}
+    // Then we solve the simultaneous equations in the remaining dimensions
+    var intersection = N.inv().x(Vector.create([this.normal.dot(this.anchor), obj.normal.dot(obj.anchor)]));
+    var anchor = [];
+    for (var j = 1; j <= 3; j++) {
+      // This formula picks the right element from intersection by
+      // cycling depending on which element we set to zero above
+      anchor.push((i == j) ? 0 : intersection.e((j + (5 - i)%3)%3 + 1));
+    }
+    return Line.create(anchor, direction);
+  }
+};
+
+// Returns the point in the plane closest to the given point
+Plane.prototype.pointClosestTo = function(point) {
+  point = point.to3D();
+  if (point === null) { return null; }
+  return point.add(this.normal.x(this.anchor.subtract(point).dot(this.normal)));
+};
+
+// Returns a copy of the plane, rotated by t radians about the given line
+// See notes on Line#rotate.
+Plane.prototype.rotate = function(t, line) {
+  var R = Matrix.Rotation(t, line.direction);
+  var C = line.pointClosestTo(this.anchor);
+  return Plane.create(C.add(R.x(this.anchor.subtract(C))), R.x(this.normal));
+};
+
+// Returns the reflection of the plane in the given point, line or plane.
+Plane.prototype.reflectionIn = function(obj) {
+  if (obj.normal) {
+    // obj is a plane
+    var A = this.anchor.reflectionIn(obj);
+    var N = obj.anchor.add(this.normal).reflectionIn(obj).subtract(obj.anchor);
+    return Plane.create(A, N);
+  } else if (obj.direction) {
+    // obj is a line
+    return this.rotate(Math.PI, line);
+  } else {
+    // obj is a point
+    var P = obj.to3D();
+    if (P === null) { return null; }
+    return Plane.create(this.anchor.reflectionIn(P), this.normal);
+  }
+};
+
+// Sets the anchor point and normal to the plane. If three arguments are specified,
+// the normal is calculated by assuming the three points should lie in the same plane.
+// If only two are sepcified, the second is taken to be the normal. Normal vector is
+// normalised before storage.
+Plane.prototype.setVectors = function(anchor, v1, v2) {
+  anchor = Vector.create(anchor).to3D();
+  v1 = Vector.create(v1).to3D();
+  v2 = (v2 == undefined) ? null : Vector.create(v2).to3D();
+  if (anchor === null || v1 === null || v1.modulus() === 0) { return null; }
+  if (v2 !== null) {
+    if (v2.modulus() === 0) { return null; }
+    normal = (v1.subtract(anchor)).cross(v2.subtract(anchor)).toUnitVector();
+  } else {
+    normal = v1.toUnitVector();
+  }
+  this.anchor = anchor;
+  this.normal = normal;
+  return this;
+};
 
 // Constructor function
 Plane.create = function(anchor, v1, v2) {
