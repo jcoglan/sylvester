@@ -723,11 +723,92 @@ window.onload = function() {
     Line.X.rotate(Math.PI, $L([12,0,0],[1,0,1])).eql($L([12,0,0], Vector.k))
   );
   
+  assert('Rotation again',
+    $L([10,0,0], [0,1,1]).rotate(-Math.PI/2, Line.Y).eql($L([0,0,10], [1,-1,0]))
+  );
+  
+  assert('2D rotation, about a point',
+    $L([9,0], Vector.j).rotate(Math.PI/2, $V([9,9])).eql($L([0,9], Vector.i))
+  );
+  
+  assert('2D intersection',
+    $L([5,0], [0,1]).intersectionWith($L([0,0], [-1,-1])).eql($V([5,5,0])),
+    $L([5,0], [0,1]).intersectionWith($L([0,0], [-1,-1])).inspect()
+  );
+  
+  assert('2D reflection',
+    $L([-4,3], [0,-1]).reflectionIn($V([0,0])).eql($L([4,100], [0,4]))
+  );
+  
   assert('Parallel to plane',
     Line.X.isParallelTo($P([0,0,-4], Vector.k))
   );
   
   title('Plane tests');
+  
+  assert('Equality and duplication',
+    Plane.XY.dup().eql($P([34,-99,0], [0,0,-4]))
+  );
+  
+  assert('Translation',
+    Plane.XY.dup().translate([5,12,-14]).eql($P([89,-34,-14], Vector.k))
+  );
+  
+  assert('Parallel to plane',
+    Plane.XY.dup().translate([5,12,-14]).isParallelTo(Plane.XY)
+  );
+  
+  assert('Parallel to line',
+    Plane.XY.isParallelTo($L([4,8,10], [2,-6,0]))
+  );
+  
+  assert('Distance from plane',
+    Plane.XY.dup().translate([5,12,-14]).distanceFrom(Plane.XY) == 14
+  );
+  
+  assert('Distance from intersecting plane',
+    Plane.XY.dup().translate([5,12,-14]).distanceFrom($P([0,0,0], [1,0,1])) === 0
+  );
+  
+  assert('Distance from line',
+    Plane.XY.distanceFrom($L([4,8,10], [2,-6,0])) == 10
+  );
+  
+  assert('Distance from intersecting line',
+    Plane.XY.distanceFrom($L([4,8,10], [2,-6,2])) === 0
+  );
+  
+  assert('Contains line',
+    Plane.XY.contains(Line.X)
+  );
+  
+  assert('Contains point',
+    Plane.XY.contains(Vector.i)
+  );
+  
+  assert('Closest point',
+   Plane.YZ.pointClosestTo($V([3,6,-3])).eql($V([0,6,-3]))
+  );
+  
+  assert('Rotation',
+    Plane.XY.rotate(Math.PI/2, Line.Y).eql(Plane.YZ)
+  );
+  
+  assert('Reflection in a point',
+    Plane.XY.reflectionIn($V([12,65,-4])).eql($P([0,0,-8], Vector.k))
+  );
+  
+  assert('Reflection in a perpendicular line',
+    Plane.XY.reflectionIn(Line.Z).eql(Plane.XY)
+  );
+  
+  assert('Reflection in some line',
+    Plane.XY.reflectionIn($L([0,0,0], [1,0,1])).eql(Plane.YZ)
+  );
+  
+  assert('Reflection in a plane',
+    Plane.XY.reflectionIn($P([0,0,0], [-1,0,1])).eql(Plane.YZ)
+  );
   
   for (i = 1; i <= 10; i++) {
     P1 = $P($V([-50,-50,-50]).add(Vector.Random(3).x(100)), $V([-50,-50,-50]).add(Vector.Random(3).x(100)));
@@ -736,7 +817,7 @@ window.onload = function() {
       L1 = P1.intersectionWith(P2);
       L2 = P2.intersectionWith(P1);
       assert('Intersection test ' + i,
-        L1.eql(L2) && L1.liesIn(P1) && L1.liesIn(P2)
+        L1.eql(L2) && L1.liesIn(P1) && P2.contains(L1)
       );
     }
   }

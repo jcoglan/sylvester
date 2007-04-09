@@ -810,6 +810,8 @@ Line.prototype.pointClosestTo = function(obj) {
 // rotating the anchor about C. Also rotates the line's direction about the argument's.
 // Be careful with this - the rotation axis' direction affects the outcome!
 Line.prototype.rotate = function(t, line) {
+  // If we're working in 2D
+  if (line.direction == undefined) { line = Line.create(line.to3D(), Vector.k); }
   var R = Matrix.Rotation(t, line.direction);
   var C = line.pointClosestTo(this.anchor);
   return Line.create(C.add(R.x(this.anchor.subtract(C))), R.x(this.direction));
@@ -904,6 +906,7 @@ Plane.prototype.distanceFrom = function(obj) {
 
 // Returns true iff the plane contains the given point or line
 Plane.prototype.contains = function(obj) {
+  if (obj.normal) { return null; }
   if (obj.direction) {
     return (this.contains(obj.anchor) && this.normal.isPerpendicularTo(obj.direction));
   } else {
@@ -976,7 +979,7 @@ Plane.prototype.reflectionIn = function(obj) {
     return Plane.create(A, N);
   } else if (obj.direction) {
     // obj is a line
-    return this.rotate(Math.PI, line);
+    return this.rotate(Math.PI, obj);
   } else {
     // obj is a point
     var P = obj.to3D();
