@@ -199,7 +199,7 @@ Vector.prototype = {
   rotate: function(t, obj) {
     switch (this.dimensions()) {
       case 2:
-        if (!obj.dimensions() == 2) { return null; }
+        if (obj.dimensions() != 2) { return null; }
         return obj.add(Matrix.Rotation(t).x(this.subtract(obj)));
         break;
       case 3:
