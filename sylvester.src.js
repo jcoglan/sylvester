@@ -649,7 +649,7 @@ Matrix.Rotation = function(t, a) {
       [Math.sin(t),   Math.cos(t)]
     ]);
   }
-  axis = a.dup();
+  var axis = a.dup();
   if (axis.dimensions() != 3) { return null; }
   axis = axis.toUnitVector();
   var rot = Matrix.RotationZ(t);
