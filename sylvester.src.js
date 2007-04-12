@@ -509,16 +509,17 @@ Matrix.prototype = {
 
   tr: function() { return this.trace(); },
 
-  // Returns the rank for square matrices
+  // Returns the rank of the matrix
   rank: function() {
-    if (!this.isSquare()) { return null; }
-    var M = this.toRightTriangular(), rank = this.rows();
-    for (var i = this.rows(); i >= 1; i--) {
+    var M = this.toRightTriangular(), rank = 0;
+    for (var i = 1; i <= this.rows(); i++) {
       // toRightTriangular snaps values to zero
-      if (M.row(i).modulus() === 0) { rank--; }
+      if (M.row(i).modulus() > 0) { rank++; }
     }
     return rank;
   },
+  
+  rk: function() { return this.rank(); },
 
   // Returns the result of attaching the given argument to the right-hand side of the matrix
   augment: function(matrix) {
