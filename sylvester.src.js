@@ -245,7 +245,7 @@ Vector.prototype = {
 
   // Set vector's elements from an array
   setElements: function(els) {
-    if (els == undefined) { return null; }
+    if (typeof(els) == 'undefined') { return null; }
     this.elements = [];
     if (els.elements) { els = els.elements; }
     for (var i = 0; i < els.length; i++) {
@@ -583,11 +583,11 @@ Matrix.prototype = {
   // is a vector, the resulting matrix will be a single column.
   setElements: function(els) {
     var row, i, j, success = true;
-    if (els == undefined) { return null; }
+    if (typeof(els) == 'undefined') { return null; }
     this.elements = [];
     if (els.elements) { els = els.elements; }
     for (i = 0; i < els.length; i++) {
-      if (els[i][0] !== undefined) {
+      if (typeof(els[i][0]) != 'undefined') {
         row = [];
         for (j = 0; j < els[i].length; j++) {
           if (!isNaN(els[i][j])) { row.push(els[i][j]); }
@@ -630,7 +630,7 @@ Matrix.I = function(n) {
 
 // Diagonal matrix - all off-diagonal elements are zero
 Matrix.Diagonal = function(elements) {
-  if (elements == undefined) { return null; }
+  if (typeof(elements) == 'undefined') { return null; }
   var V = Vector.create(elements);
   var n = V.dimensions();
   if (n <= 0) { return null; }
@@ -818,7 +818,7 @@ Line.prototype = {
   // Be careful with this - the rotation axis' direction affects the outcome!
   rotate: function(t, line) {
     // If we're working in 2D
-    if (line.direction == undefined) { line = Line.create(line.to3D(), Vector.k); }
+    if (typeof(line.direction) == 'undefined') { line = Line.create(line.to3D(), Vector.k); }
     var R = Matrix.Rotation(t, line.direction);
     var C = line.pointClosestTo(this.anchor);
     return Line.create(C.add(R.x(this.anchor.subtract(C))), R.x(this.direction));
@@ -928,7 +928,7 @@ Plane.prototype = {
 
   // Returns true iff the plane has a unique point/line of intersection with the argument
   intersects: function(obj) {
-    if (obj.direction == undefined && obj.normal == undefined) { return null; }
+    if (typeof(obj.direction) == 'undefined' && typeof(obj.normal) == 'undefined') { return null; }
     return !this.isParallelTo(obj);
   },
 
@@ -1005,7 +1005,7 @@ Plane.prototype = {
   setVectors: function(anchor, v1, v2) {
     anchor = Vector.create(anchor).to3D();
     v1 = Vector.create(v1).to3D();
-    v2 = (v2 == undefined) ? null : Vector.create(v2).to3D();
+    v2 = (typeof(v2) == 'undefined') ? null : Vector.create(v2).to3D();
     if (anchor === null || v1 === null || v1.modulus() === 0) { return null; }
     if (v2 !== null) {
       if (v2.modulus() === 0) { return null; }
