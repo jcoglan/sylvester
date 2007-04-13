@@ -8,7 +8,7 @@
 <script type="text/javascript">
 
 var resultList, summary, nTests = 0, nFailures = 0, i, A, V, V1, V2, M, M1, M2, L, L1, L2, P, P1, P2;
-var beginDate = new Date();
+var begin = new Date().getTime();
 
 window.onload = function() {
 
@@ -823,8 +823,8 @@ window.onload = function() {
   }
   
   summary = document.getElementById('summary');
-  var date = new Date();
-  var time = 1000*(date.getSeconds() - beginDate.getSeconds()) + date.getMilliseconds() - beginDate.getMilliseconds();
+  var fin = new Date().getTime();
+  var time = fin - begin;
   summary.innerHTML = 'Tests completed in ' + time/1000 + ' seconds. ' + nTests + ' assertions, ' + nFailures + ' failures.';
 
 };
