@@ -220,6 +220,18 @@ Line.Segment.prototype = {
     return V.isParallelTo(this.toVector()) && V.modulus() <= this.toVector().modulus();
   },
   
+  // Returns true iff the line segment intersects the argument
+  intersects: function(obj) {
+    if (!this.line.intersects(obj)) { return false; }
+    var P = this.line.intersectionWith(obj);
+    return this.contains(P);
+  },
+  
+  // Returns the unique point of intersection with the argument
+  intersectionWith: function(obj) {
+    return this.intersects(obj) ? this.line.intersectionWith(obj) : null;
+  },
+  
   // Set the start and end-points of the segment
   setPoints: function(startPoint, endPoint) {
     startPoint = Vector.create(startPoint).to3D();
@@ -441,20 +453,216 @@ var $P = Plane.create;
 
 
 
+function Polygon() {}
+Polygon.prototype = {
+
+  // Returns the vertex with the given ID. Vertices are numbered from 1.
+  v: function(i) {
+    if (i < 1 || i > this.vertices.length) { return null; }
+    var node = this.vertices.first, j = 0;
+    while (++j < i) { node = node.next; }
+    return node;
+  },
+
+  // Returns a copy of the polygon
+  dup: function() {
+    return Polygon.create(this.vertices);
+  },
+  
+  // Returns a copy of the polygon rotated about the given line
+  rotate: function(t, line) {
+    var poly = this.dup();
+    poly.vertices.each(function(vertex) {
+      vertex.setElements(vertex.rotate(t, line).elements);
+    } );
+    return poly;
+  },
+  
+  // Returns true iff the polygon is a triangle
+  isTriangle: function() {
+    return this.vertices.length == 3;
+  },
+  
+  // Removes the given vertex from the polygon as long as it's not triangular.
+  // Warning: vertices are renumbered when removal happens.
+  removeVertex: function(i) {
+    var vertex = this.v(i);
+    if (vertex === null) { return null; }
+    if (!this.isTriangle()) {
+      this.clearCache();
+      if (vertex.isConvex()) {
+        this.convexVertices.remove(vertex.copy);
+      } else {
+        this.reflexVertices.remove(vertex.copy);
+      }
+      this.vertices.remove(vertex);
+    }
+    return this;
+  },
+  
+  // Returns the polygon's projection on the given plane as another polygon
+  projectionOn: function(plane) {
+    var points = [];
+    this.vertices.each(function(vertex) { points.push(plane.pointClosestTo(vertex)); });
+    return Polygon.create(points);
+  },
+  
+  // Returns true iff the point in inside the polygon
+  contains: function(point) {
+    point = point.to3D();
+    if (point === null) { return null; }
+    if (!this.plane.contains(point)) { return false; }
+    var axis = this.plane.normal.indexOf(this.plane.normal.max());
+    var normal = Vector.create([(axis == 1) ? 1 : 0, (axis == 2) ? 1 : 0, (axis == 3) ? 1 : 0]);
+    var rayDir = Vector.create([(axis == 3) ? 1 : 0, (axis == 1) ? 1 : 0, (axis == 2) ? 1 : 0]);
+    var plane = Plane.create([0,0,0], normal);
+    var projectedPoly = this.projectionOn(plane);
+    var projectedPoint = plane.pointClosestTo(point);
+    var ray = Line.create(projectedPoint, rayDir);
+    var line, intersection, cuts = 0, vertex = this.vertices.first;
+    for (var i = 0; i < this.vertices.length; i++) {
+      if (point.eql(vertex)) { return true; }
+      line = Line.Segment.create(vertex, vertex.next);
+      intersection = line.intersectionWith(ray);
+      if (intersection !== null) {
+        if (intersection.eql(line.start) || intersection.eql(line.end)) {
+          return this.rotate(Math.PI/180, Line.create(projectedPoint, normal)).contains(point);
+        }
+        if (ray.positionOf(intersection) >= 0) { cuts++; }
+      } else if (ray.contains(line.start) && ray.contains(line.end)) {
+        return this.rotate(Math.PI/180, Line.create(projectedPoint, normal)).contains(point);
+      }
+      vertex = vertex.next;
+    }
+    return (cuts%2 != 0);
+  },
+  
+  // Returns an array of 3-vertex polygons that the original has been split into
+  toTriangles: function() {
+    return this.triangulateByEarClipping();
+  },
+  
+  // Implementation of ear clipping algorithm
+  // Found in 'Triangulation by ear clipping', by David Eberly
+  // at http://www.geometrictools.com
+  triangulateByEarClipping: function() {
+    if (this.cached.triangles !== null) { return this.cached.triangles; }
+    var poly = this.dup(), triangles = [];
+    while (!poly.isTriangle()) {
+      // Collect ears
+    }
+    triangles.push(poly);
+    return triangles;
+  },
+  
+  // Sets the polygon's vertices
+  setVertices: function(points) {
+    if (points.toArray) { points = points.toArray(); }
+    var P = Plane.fromPoints(points);
+    if (P === null) { return null; }
+    if (P.plane === null) { return null; }
+    this.plane = P.plane;
+    this.vertices = new LinkedList.Circular();
+    var i, n = P.points.length, newVertex;
+    // Construct linked list of vertices
+    for (i = 0; i < n; i++) {
+      this.vertices.append(new Polygon.Vertex(this, P.points[i]));
+    }
+    this.convexVertices = new LinkedList.Circular();
+    this.reflexVertices = new LinkedList.Circular();
+    var vertex = this.vertices.first;
+    for (i = 0; i < n; i++ ){
+      // Split vertices into convex / reflex groups
+      // Each vertex has a copy property, which is a vector copied from the vertex.
+      // The copy has a parent property which is the original vertex. This allows linking
+      // between the vertex list and these category lists.
+      if (vertex.isConvex()) {
+        this.convexVertices.append(vertex.copy);
+      } else {
+        this.reflexVertices.append(vertex.copy);
+      }
+      vertex = vertex.next;
+    }
+    this.clearCache();
+    return this;
+  },
+  
+  // Clear any cached properties
+  clearCache: function() {
+    this.cached = {
+      triangles: null
+    };
+  },
+  
+  // Set cached value and return the value
+  setCache: function(key, value) {
+    this.cached[key] = value;
+    return value;
+  }
+};
+
+// Constructor function
+Polygon.create = function(points) {
+  var P = new Polygon();
+  return P.setVertices(points);
+};
+
+
+
+// The Polygon.Vertex class. This is used internally when dealing with polygon operations.
+Polygon.Vertex = function(polygon, point) {
+  this.polygon = polygon;
+  this.setElements(point);
+  this.copy = this.dup();
+  this.copy.parent = this;
+};
+Polygon.Vertex.prototype = new Vector;
+
+// Returns true iff the vertex's internal angle is 0 >= x >= 180
+Polygon.Vertex.prototype.isConvex = function() {
+  var N = this.next.subtract(this).cross(this.prev.subtract(this));
+  if (N.angleFrom(this.polygon.plane.normal) === null) { return true; }
+  return N.isParallelTo(this.polygon.plane.normal);
+};
+// Returns true iff the vertex's internal angle is 180 > x > 360
+Polygon.Vertex.prototype.isReflex = function() {
+  return !this.isConvex();
+};
+Polygon.Vertex.prototype.type = function() {
+  return this.isConvex() ? 'convex' : 'reflex';
+};
+
+
+
 // Linked list data structure - required for polygons
 function LinkedList() {}
 LinkedList.prototype = {
-  nodes: 0,
+  length: 0,
   first: null,
   last: null,
+  
+  each: function(fn) {
+    var vertex = this.first;
+    for (var i = 0; i < this.length; i++) {
+      fn(vertex);
+      vertex = vertex.next;
+    }
+  },
+  
   toArray: function() {
     var arr = [], node = this.first;
     if (node === null) { return arr; }
-    for (var i = 0; i < this.nodes; i++) {
+    for (var i = 0; i < this.length; i++) {
       arr.push(node);
       node = node.next;
     }
     return arr;
+  },
+  
+  randomNode: function() {
+    var n = Math.floor(Math.random() * this.length), node = this.first;
+    for (i = 0; i < n; i++) { node = node.next; }
+    return node;
   }
 };
 
@@ -474,7 +682,7 @@ LinkedList.Circular.prototype.append = function(node) {
     this.last.next = node;
     this.last = node;
   }
-  this.nodes++;
+  this.length++;
 };
 
 LinkedList.Circular.prototype.prepend = function(node) {
@@ -487,7 +695,7 @@ LinkedList.Circular.prototype.prepend = function(node) {
     this.last.next = node;
     this.first = node;
   }
-  this.nodes++;
+  this.length++;
 };
 
 LinkedList.Circular.prototype.insertAfter = function(node, newNode) {
@@ -496,7 +704,7 @@ LinkedList.Circular.prototype.insertAfter = function(node, newNode) {
   node.next.prev = newNode;
   node.next = newNode;
   if (newNode.prev == this.last) { this.last = newNode; }
-  this.nodes++;
+  this.length++;
 };
 
 LinkedList.Circular.prototype.insertBefore = function(node, newNode) {
@@ -505,7 +713,7 @@ LinkedList.Circular.prototype.insertBefore = function(node, newNode) {
   node.prev.next = newNode;
   node.prev = newNode;
   if (newNode.next == this.first) { this.first = newNode; }
-  this.nodes++;
+  this.length++;
 };
 
 LinkedList.Circular.prototype.remove = function(node) {
@@ -515,4 +723,14 @@ LinkedList.Circular.prototype.remove = function(node) {
   if (node == this.last) { this.last = node.prev; }
   node.prev = null;
   node.next = null;
+  this.length--;
+};
+
+LinkedList.Circular.fromArray = function(list) {
+  var linked = new LinkedList.Circular();
+  for (var i = 0; i < list.length; i++) {
+    list[i].id = i;
+    linked.append(list[i]);
+  }
+  return linked;
 };
