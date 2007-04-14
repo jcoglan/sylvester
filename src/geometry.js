@@ -187,6 +187,59 @@ var $L = Line.create;
 
 
 
+Line.Segment = function() {}
+Line.Segment.prototype = {
+
+  // Returns the length of the line segment
+  length: function() {
+    return this.toVector().modulus();
+  },
+  
+  // Returns the line segment as a vector equal to its
+  // end point relative to its endpoint
+  toVector: function() {
+    return this.end.subtract(this.start);
+  },
+  
+  // Returns the segment's midpoint as a vector
+  midpoint: function() {
+    return this.start.add(this.end).x(0.5);
+  },
+  
+  // Returns the plane that bisects the segment
+  bisectingPlane: function() {
+    return Plane.create(this.midpoint(), this.toVector());
+  },
+  
+  // Returns true iff the given point lies on the segment
+  contains: function(point) {
+    point = point.to3D();
+    if (point === null) { return null; }
+    if (point.eql(this.start)) { return true; }
+    var V = point.subtract(this.start);
+    return V.isParallelTo(this.toVector()) && V.modulus() <= this.toVector().modulus();
+  },
+  
+  // Set the start and end-points of the segment
+  setPoints: function(startPoint, endPoint) {
+    startPoint = Vector.create(startPoint).to3D();
+    endPoint = Vector.create(endPoint).to3D();
+    if (startPoint === null || endPoint === null) { return null; }
+    this.line = Line.create(startPoint, endPoint.subtract(startPoint));
+    this.start = startPoint;
+    this.end = endPoint;
+    return this;
+  }
+};
+
+// Constructor function
+Line.Segment.create = function(v1, v2) {
+  var S = new Line.Segment;
+  return S.setPoints(v1, v2);
+};
+
+
+
 function Plane() {}
 Plane.prototype = {
 
