@@ -454,76 +454,65 @@ LinkedList.prototype = {
       arr.push(node);
       node = node.next;
     }
+    return arr;
   }
 };
 
-var LinkedList = {
-  Circular: function() {
-    this.nodes = 0;
-    this.first = null;
-    this.last = null;
-  }
-};
-LinkedList.Circular.prototype = {
+LinkedList.Circular = function() {};
+LinkedList.Circular.prototype = new LinkedList;
 
-  // Inserts a node at the last position in the list
-  append: function(node) {
-    if (this.first === null) {
-      node.prev = null;
-      node.next = null;
-      this.first = node;
-      this.last = node;
-    } else {
-      node.prev = this.last;
-      node.next = this.first;
-      this.first.prev = node;
-      this.last.next = node;
-      this.last = node;
-    }
-    this.nodes++;
-  },
-  
-  // Inserts a node at the first position in the list
-  prepend: function(node) {
-    if (this.first === null) {
-      this.append(node);
-    } else {
-      node.prev = this.last;
-      node.next = this.first;
-      this.first.prev = node;
-      this.last.next = node;
-      this.first = node;
-    }
-    this.nodes++;
-  },
-  
-  // Inserts a node after a specific node
-  insertAfter: function(node, newNode) {
-    newNode.prev = node;
-    newNode.next = node.next;
-    node.next.prev = newNode;
-    node.next = newNode;
-    if (newNode.prev == this.last) { this.last = newNode; }
-    this.nodes++;
-  },
-  
-  // Inserts a node before a specific node
-  insertBefore: function(node, newNode) {
-    newNode.prev = node.prev;
-    newNode.next = node;
-    node.prev.next = newNode;
-    node.prev = newNode;
-    if (newNode.next == this.first) { this.first = newNode; }
-    this.nodes++;
-  },
-  
-  // Removes a node
-  remove: function(node) {
-    node.prev.next = node.next;
-    node.next.prev = node.prev;
-    if (node == this.first) { this.first = node.next; }
-    if (node == this.last) { this.last = node.prev; }
+LinkedList.Circular.prototype.append = function(node) {
+  if (this.first === null) {
     node.prev = null;
     node.next = null;
+    this.first = node;
+    this.last = node;
+  } else {
+    node.prev = this.last;
+    node.next = this.first;
+    this.first.prev = node;
+    this.last.next = node;
+    this.last = node;
   }
+  this.nodes++;
+};
+
+LinkedList.Circular.prototype.prepend = function(node) {
+  if (this.first === null) {
+    this.append(node);
+  } else {
+    node.prev = this.last;
+    node.next = this.first;
+    this.first.prev = node;
+    this.last.next = node;
+    this.first = node;
+  }
+  this.nodes++;
+};
+
+LinkedList.Circular.prototype.insertAfter = function(node, newNode) {
+  newNode.prev = node;
+  newNode.next = node.next;
+  node.next.prev = newNode;
+  node.next = newNode;
+  if (newNode.prev == this.last) { this.last = newNode; }
+  this.nodes++;
+};
+
+LinkedList.Circular.prototype.insertBefore = function(node, newNode) {
+  newNode.prev = node.prev;
+  newNode.next = node;
+  node.prev.next = newNode;
+  node.prev = newNode;
+  if (newNode.next == this.first) { this.first = newNode; }
+  this.nodes++;
+};
+
+LinkedList.Circular.prototype.remove = function(node) {
+  node.prev.next = node.next;
+  node.next.prev = node.prev;
+  if (node == this.first) { this.first = node.next; }
+  if (node == this.last) { this.last = node.prev; }
+  node.prev = null;
+  node.next = null;
 };
