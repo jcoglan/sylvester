@@ -404,4 +404,126 @@ Plane.YZ = Plane.create(Vector.Zero(3), Vector.i);
 Plane.ZX = Plane.create(Vector.Zero(3), Vector.j);
 Plane.YX = Plane.XY; Plane.ZY = Plane.YZ; Plane.XZ = Plane.ZX;
 
+// Returns the plane containing the given points (can be arrays as
+// well as vectors). If the points are not coplanar, returns null.
+Plane.fromPoints = function(points) {
+  var list = [], i, P, n, N, prevN, totalN = Vector.Zero(3);
+  for (i = 0; i < points.length; i++) {
+    P = Vector.create(points[i]).to3D();
+    if (P === null) { return null; }
+    list.push(P);
+    n = list.length;
+    if (n > 2) {
+      // Compute plane normal for the latest three points
+      N = list[n-1].subtract(list[n-2]).cross(list[n-3].subtract(list[n-2])).toUnitVector();
+      if (n > 3) {
+        // If the latest normal is not (anti)parallel to the previous one, we've strayed off the plane.
+        // This might be a slightly long-winded way of doing things, but we need the sum of all the normals
+        // to find which way the plane normal should point so that the points form an anticlockwise list.
+        if (N.angleFrom(prevN) !== null) {
+          if (!(N.isParallelTo(prevN) || N.isAntiparallelTo(prevN))) { return null; }
+        }
+      }
+      totalN = totalN.add(N);
+      prevN = N;
+    }
+  }
+  // We need to add in the normals at the start and end points, which the above misses out
+  totalN = totalN.add(
+    list[1].subtract(list[0]).cross(list[n-1].subtract(list[0])).toUnitVector()
+  ).add(
+    list[0].subtract(list[n-1]).cross(list[n-2].subtract(list[n-1])).toUnitVector()
+  );
+  return {plane: Plane.create(list[0], totalN), points: list};
+};
+
 var $P = Plane.create;
+
+
+
+// Linked list data structure - required for polygons
+function LinkedList() {}
+LinkedList.prototype = {
+  nodes: 0,
+  first: null,
+  last: null,
+  toArray: function() {
+    var arr = [], node = this.first;
+    if (node === null) { return arr; }
+    for (var i = 0; i < this.nodes; i++) {
+      arr.push(node);
+      node = node.next;
+    }
+  }
+};
+
+var LinkedList = {
+  Circular: function() {
+    this.nodes = 0;
+    this.first = null;
+    this.last = null;
+  }
+};
+LinkedList.Circular.prototype = {
+
+  // Inserts a node at the last position in the list
+  append: function(node) {
+    if (this.first === null) {
+      node.prev = null;
+      node.next = null;
+      this.first = node;
+      this.last = node;
+    } else {
+      node.prev = this.last;
+      node.next = this.first;
+      this.first.prev = node;
+      this.last.next = node;
+      this.last = node;
+    }
+    this.nodes++;
+  },
+  
+  // Inserts a node at the first position in the list
+  prepend: function(node) {
+    if (this.first === null) {
+      this.append(node);
+    } else {
+      node.prev = this.last;
+      node.next = this.first;
+      this.first.prev = node;
+      this.last.next = node;
+      this.first = node;
+    }
+    this.nodes++;
+  },
+  
+  // Inserts a node after a specific node
+  insertAfter: function(node, newNode) {
+    newNode.prev = node;
+    newNode.next = node.next;
+    node.next.prev = newNode;
+    node.next = newNode;
+    if (newNode.prev == this.last) { this.last = newNode; }
+    this.nodes++;
+  },
+  
+  // Inserts a node before a specific node
+  insertBefore: function(node, newNode) {
+    newNode.prev = node.prev;
+    newNode.next = node;
+    node.prev.next = newNode;
+    node.prev = newNode;
+    if (newNode.next == this.first) { this.first = newNode; }
+    this.nodes++;
+  },
+  
+  // Removes a node
+  remove: function(node) {
+    node.prev.next = node.next;
+    node.next.prev = node.prev;
+    if (node == this.first) { this.first = node.next; }
+    if (node == this.last) { this.last = node.prev; }
+    node.prev = null;
+    node.next = null;
+  }
+};
