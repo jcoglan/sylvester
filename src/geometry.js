@@ -72,6 +72,16 @@ Line.prototype = {
     var dist = this.distanceFrom(point);
     return (dist !== null && dist <= Sylvester.precision);
   },
+  
+  // Returns the distance from the anchor of the given point. Negative values are
+  // returned for points that are in the opposite direction to the line's direction from
+  // the line's anchor point.
+  positionOf: function(point) {
+    point = point.to3D();
+    if (point === null) { return null; }
+    if (!this.contains(point)) { return null; }
+    return point.subtract(this.anchor).dot(this.direction);
+  },
 
   // Returns true iff the line lies in the given plane
   liesIn: function(plane) {
@@ -124,6 +134,12 @@ Line.prototype = {
     var R = Matrix.Rotation(t, line.direction);
     var C = line.pointClosestTo(this.anchor);
     return Line.create(C.add(R.x(this.anchor.subtract(C))), R.x(this.direction));
+  },
+  
+  // Returns a copy of the line with its direction vector reversed.
+  // Useful when using lines for rotations.
+  reverse: function() {
+    return Line.create(this.anchor, this.direction.x(-1));
   },
 
   // Returns the line's reflection in the given point or line
