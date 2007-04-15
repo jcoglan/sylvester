@@ -546,6 +546,22 @@ Polygon.prototype = {
     }
   },
   
+  // Returns the centroid of the polygon. Requires division into
+  // triangles - use with caution
+  centroid: function() {
+    if (this.isTriangle()) {
+      return this.v(1).add(this.v(2)).add(this.v(3)).x(1/3);
+    } else {
+      var A, M = 0, V = Vector.Zero(3), trigs = this.toTriangles();
+      for (i = 0; i < trigs.length; i++) {
+        A = trigs[i].area();
+        M += A;
+        V = V.add(trigs[i].centroid().x(A));
+      }
+      return V.x(1/M);
+    }
+  },
+  
   // Returns the polygon's projection on the given plane as another polygon
   projectionOn: function(plane) {
     var points = [];
