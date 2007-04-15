@@ -68,6 +68,7 @@ Vector.prototype = {
   // Returns a new vector created by normalizing the receiver
   toUnitVector: function() {
     var r = this.modulus();
+    if (r === 0) { return this.dup(); }
     return this.map(function(x) { return x/r; });
   },
 
@@ -228,7 +229,7 @@ Vector.prototype = {
     }
   },
 
-  // Unitily to make sure vectors are 3D. If they are 2D, a zero z-component is added
+  // Utility to make sure vectors are 3D. If they are 2D, a zero z-component is added
   to3D: function() {
     var V = this.dup();
     switch (V.dimensions()) {
