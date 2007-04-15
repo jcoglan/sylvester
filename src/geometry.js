@@ -472,17 +472,43 @@ Polygon.prototype = {
     return Polygon.create(this.vertices);
   },
   
+  // Returns a copy of the polygon after it's been translated
+  // by the given vector. Any cached properties are transfered
+  // to the new copy and changed as necessary.
+  translate: function(vector) {
+    vector = vector.to3D();
+    if (vector === null) { return null; }
+    var points = [];
+    this.vertices.each(function(vertex) { points.push(vertex.add(vector)); } );
+    var poly = Polygon.create(points);
+    if (this.cached.triangles !== null) {
+      poly.cached.triangles = [];
+      for (var i = 0; i < this.cached.triangles.length; i++) {
+        poly.cached.triangles.push(this.cached.triangles[i].translate(vector));
+      }
+    }
+    return poly;
+  },
+  
   // Returns a copy of the polygon rotated about the given line
+  // Any cached properties are transfered to the new copy and
+  // changed as necessary.
   rotate: function(t, line) {
-    var poly = this.dup();
-    poly.vertices.each(function(vertex) {
-      vertex.setElements(vertex.rotate(t, line).elements);
-    } );
-    // TODO: rotate triangles if they are cached
+    var points = [];
+    this.vertices.each(function(vertex) { points.push(vertex.rotate(t, line)); } );
+    var poly = Polygon.create(points);
+    if (this.cached.triangles !== null) {
+      poly.cached.triangles = [];
+      for (var i = 0; i < this.cached.triangles.length; i++) {
+        poly.cached.triangles.push(this.cached.triangles[i].rotate(t, line));
+      }
+    }
     return poly;
   },
   
   // Scales a copy of the polygon relative to the given point
+  // Any cached properties are transfered to the new copy and
+  // changed as necessary.
   scale: function(k, point) {
     point = point.to3D();
     if (point === null) { return null; }
@@ -490,7 +516,14 @@ Polygon.prototype = {
     this.vertices.each(function(vertex) {
       points.push(point.add(vertex.subtract(point).x(k)));
     } );
-    return Polygon.create(points);
+    var poly = Polygon.create(points);
+    if (this.cached.triangles !== null) {
+      poly.cached.triangles = [];
+      for (var i = 0; i < this.cached.triangles.length; i++) {
+        poly.cached.triangles.push(this.cached.triangles[i].scale(k, point));
+      }
+    }
+    return poly;
   },
   
   // Returns true iff the polygon is a triangle
@@ -498,7 +531,8 @@ Polygon.prototype = {
     return this.vertices.length == 3;
   },
   
-  // Returns the area of the polygon
+  // Returns the area of the polygon. Requires that the polygon
+  // be converted to triangles, so use with caution.
   area: function() {
     if (this.isTriangle()) {
       var base = this.v(2).subtract(this.v(1));
