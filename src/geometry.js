@@ -482,6 +482,17 @@ Polygon.prototype = {
     return poly;
   },
   
+  // Scales a copy of the polygon relative to the given point
+  scale: function(k, point) {
+    point = point.to3D();
+    if (point === null) { return null; }
+    var points = [];
+    this.vertices.each(function(vertex) {
+      points.push(point.add(vertex.subtract(point).x(k)));
+    } );
+    return Polygon.create(points);
+  },
+  
   // Returns true iff the polygon is a triangle
   isTriangle: function() {
     return this.vertices.length == 3;
@@ -499,6 +510,13 @@ Polygon.prototype = {
       }
       return area;
     }
+  },
+  
+  // Returns the polygon's projection on the given plane as another polygon
+  projectionOn: function(plane) {
+    var points = [];
+    this.vertices.each(function(vertex) { points.push(plane.pointClosestTo(vertex)); });
+    return Polygon.create(points);
   },
   
   // Removes the given vertex from the polygon as long as it's not triangular.
@@ -539,13 +557,6 @@ Polygon.prototype = {
       }
     }
     return this;
-  },
-  
-  // Returns the polygon's projection on the given plane as another polygon
-  projectionOn: function(plane) {
-    var points = [];
-    this.vertices.each(function(vertex) { points.push(plane.pointClosestTo(vertex)); });
-    return Polygon.create(points);
   },
   
   // Returns true iff the point is strictly inside the polygon
