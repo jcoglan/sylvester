@@ -458,9 +458,12 @@ Polygon.prototype = {
 
   // Returns the vertex with the given ID. Vertices are numbered from 1.
   v: function(i) {
-    if (i < 1 || i > this.vertices.length) { return null; }
-    var node = this.vertices.first, j = 0;
-    while (++j < i) { node = node.next; }
+    if (i < 1 || i > this.vertices.last.id) { return null; }
+    var node = null, vertex = this.vertices.first;
+    for (var j = 0; j < this.vertices.length; j++) {
+      if (vertex.id == i) node = vertex;
+      vertex = vertex.next;
+    }
     return node;
   },
 
@@ -475,6 +478,7 @@ Polygon.prototype = {
     poly.vertices.each(function(vertex) {
       vertex.setElements(vertex.rotate(t, line).elements);
     } );
+    // TODO: rotate triangles if they are cached
     return poly;
   },
   
@@ -483,19 +487,56 @@ Polygon.prototype = {
     return this.vertices.length == 3;
   },
   
+  // Returns the area of the polygon
+  area: function() {
+    if (this.isTriangle()) {
+      var base = this.v(2).subtract(this.v(1));
+      return 0.5 * base.modulus() * this.v(3).distanceFrom(Line.create(this.v(1), base));
+    } else {
+      var trigs = this.toTriangles(), area = 0;
+      for (var i = 0; i < trigs.length; i++) {
+        area += trigs[i].area();
+      }
+      return area;
+    }
+  },
+  
   // Removes the given vertex from the polygon as long as it's not triangular.
-  // Warning: vertices are renumbered when removal happens.
+  // Warning: vertices are NOT renumbered when removal happens.
   removeVertex: function(i) {
     var vertex = this.v(i);
     if (vertex === null) { return null; }
     if (!this.isTriangle()) {
       this.clearCache();
+      var prev = vertex.prev, next = vertex.next;
+      var prevWasConvex = prev.isConvex();
+      var nextWasConvex = next.isConvex();
       if (vertex.isConvex()) {
         this.convexVertices.remove(vertex.copy);
       } else {
         this.reflexVertices.remove(vertex.copy);
       }
       this.vertices.remove(vertex);
+      // Deal with previous vertex's change of class
+      if (prevWasConvex != prev.isConvex()) {
+        if (prevWasConvex) {
+          this.convexVertices.remove(prev.copy);
+          this.reflexVertices.append(prev.copy);
+        } else {
+          this.reflexVertices.remove(prev.copy);
+          this.convexVertices.append(prev.copy);
+        }
+      }
+      // Deal with next vertex's change of class
+      if (nextWasConvex != next.isConvex()) {
+        if (nextWasConvex) {
+          this.convexVertices.remove(next.copy);
+          this.reflexVertices.append(next.copy);
+        } else {
+          this.reflexVertices.remove(next.copy);
+          this.convexVertices.append(next.copy);
+        }
+      }
     }
     return this;
   },
@@ -507,29 +548,34 @@ Polygon.prototype = {
     return Polygon.create(points);
   },
   
-  // Returns true iff the point in inside the polygon
+  // Returns true iff the point is strictly inside the polygon
   contains: function(point) {
     point = point.to3D();
     if (point === null) { return null; }
     if (!this.plane.contains(point)) { return false; }
+    if (this.hasEdgeContaining(point)) { return false; }
+    // Pick projection direction
     var axis = this.plane.normal.indexOf(this.plane.normal.max());
     var normal = Vector.create([(axis == 1) ? 1 : 0, (axis == 2) ? 1 : 0, (axis == 3) ? 1 : 0]);
     var rayDir = Vector.create([(axis == 3) ? 1 : 0, (axis == 1) ? 1 : 0, (axis == 2) ? 1 : 0]);
+    // Project polygon and point onto a 2D plane
     var plane = Plane.create([0,0,0], normal);
     var projectedPoly = this.projectionOn(plane);
     var projectedPoint = plane.pointClosestTo(point);
+    // Create ray from the point
     var ray = Line.create(projectedPoint, rayDir);
     var line, intersection, cuts = 0, vertex = this.vertices.first;
     for (var i = 0; i < this.vertices.length; i++) {
-      if (point.eql(vertex)) { return true; }
       line = Line.Segment.create(vertex, vertex.next);
       intersection = line.intersectionWith(ray);
       if (intersection !== null) {
         if (intersection.eql(line.start) || intersection.eql(line.end)) {
+          // If the intersection is a vertex then rotate the polygon about the point slightly
           return this.rotate(Math.PI/180, Line.create(projectedPoint, normal)).contains(point);
         }
         if (ray.positionOf(intersection) >= 0) { cuts++; }
       } else if (ray.contains(line.start) && ray.contains(line.end)) {
+        // If the edge lies on the ray then rotate the polygon
         return this.rotate(Math.PI/180, Line.create(projectedPoint, normal)).contains(point);
       }
       vertex = vertex.next;
@@ -537,21 +583,54 @@ Polygon.prototype = {
     return (cuts%2 != 0);
   },
   
+  // Returns true if the given point lies on an edge of the polygon
+  // May cause problems with 'hole-joining' edges
+  hasEdgeContaining: function(point) {
+    point = point.to3D();
+    if (point === null) { return null; }
+    var success = false;
+    this.vertices.each(function(vertex) {
+      if (Line.Segment.create(vertex, vertex.next).contains(point)) { success = true; }
+    } );
+    return success;
+  },
+  
   // Returns an array of 3-vertex polygons that the original has been split into
+  // Stores the first calculation for faster retrieval later on
   toTriangles: function() {
-    return this.triangulateByEarClipping();
+    if (this.cached.triangles !== null) { return this.cached.triangles; }
+    return this.setCache('triangles', this.triangulateByEarClipping());
   },
   
   // Implementation of ear clipping algorithm
   // Found in 'Triangulation by ear clipping', by David Eberly
   // at http://www.geometrictools.com
+  // This will not deal with overlapping sections - contruct your polygons sensibly
   triangulateByEarClipping: function() {
-    if (this.cached.triangles !== null) { return this.cached.triangles; }
-    var poly = this.dup(), triangles = [];
+    var poly = this.dup(), triangles = [], success, vertex, trig;
     while (!poly.isTriangle()) {
-      // Collect ears
+      success = false;
+      while (!success) {
+        success = true;
+        // Ear tips must be convex vertices - let's pick one at random
+        vertex = poly.convexVertices.randomNode();
+        // Need to use .parent otherwise we're picking adjacent points in the convex list!
+        // For convex vertices, this order will always be anticlockwise
+        trig = Polygon.create([vertex, vertex.parent.next, vertex.parent.prev]);
+        // Now test whether any reflex vertices lie within the ear
+        poly.reflexVertices.each(function(V) {
+          // Don't test points belonging to this triangle. V won't be
+          // equal to vertex as V is reflex and vertex is convex.
+          if (V != vertex.parent.prev.copy && V != vertex.parent.next.copy) {
+            if (trig.contains(V) || trig.hasEdgeContaining(V)) { success = false; }
+          }
+        } );
+      }
+      triangles.push(trig);
+      poly.removeVertex(vertex.parent.id);
     }
-    triangles.push(poly);
+    // Need to do this to renumber the remaining vertices
+    triangles.push(Polygon.create(poly.vertices.toArray()));
     return triangles;
   },
   
@@ -566,12 +645,14 @@ Polygon.prototype = {
     var i, n = P.points.length, newVertex;
     // Construct linked list of vertices
     for (i = 0; i < n; i++) {
-      this.vertices.append(new Polygon.Vertex(this, P.points[i]));
+      newVertex = new Polygon.Vertex(this, P.points[i]);
+      newVertex.id = i + 1;
+      this.vertices.append(newVertex);
     }
     this.convexVertices = new LinkedList.Circular();
     this.reflexVertices = new LinkedList.Circular();
     var vertex = this.vertices.first;
-    for (i = 0; i < n; i++ ){
+    for (i = 0; i < n; i++){
       // Split vertices into convex / reflex groups
       // Each vertex has a copy property, which is a vector copied from the vertex.
       // The copy has a parent property which is the original vertex. This allows linking
@@ -618,13 +699,16 @@ Polygon.Vertex = function(polygon, point) {
 };
 Polygon.Vertex.prototype = new Vector;
 
-// Returns true iff the vertex's internal angle is 0 >= x >= 180
+// Returns true iff the vertex's internal angle is 0 >= x > 180
 Polygon.Vertex.prototype.isConvex = function() {
-  var N = this.next.subtract(this).cross(this.prev.subtract(this));
-  if (N.angleFrom(this.polygon.plane.normal) === null) { return true; }
+  var A = this.next.subtract(this);
+  var B = this.prev.subtract(this);
+  if (A.isParallelTo(B)) { return true; }
+  if (A.isAntiparallelTo(B)) { return false; }
+  var N = A.cross(B);
   return N.isParallelTo(this.polygon.plane.normal);
 };
-// Returns true iff the vertex's internal angle is 180 > x > 360
+// Returns true iff the vertex's internal angle is 180 >= x > 360
 Polygon.Vertex.prototype.isReflex = function() {
   return !this.isConvex();
 };
