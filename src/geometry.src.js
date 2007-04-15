@@ -187,7 +187,7 @@ var $L = Line.create;
 
 
 
-Line.Segment = function() {}
+Line.Segment = function() {};
 Line.Segment.prototype = {
 
   // Returns the length of the line segment
