@@ -21,6 +21,7 @@
 // DEALINGS IN THE SOFTWARE.
 
 var Sylvester = {
+  version: '0.1.0',
   precision: 1e-6
 };
 
