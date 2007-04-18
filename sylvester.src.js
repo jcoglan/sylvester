@@ -190,6 +190,7 @@ Vector.prototype = {
   distanceFrom: function(obj) {
     if (obj.anchor) { return obj.distanceFrom(this); }
     if (obj.elements.length != this.elements.length) { return null; }
+    // this.subtract(obj).modulus()
     var sum = 0, part;
     this.each(function(x, i) {
       part = x - obj.elements[i-1];
@@ -215,6 +216,7 @@ Vector.prototype = {
     switch (this.elements.length) {
       case 2:
         if (obj.elements.length != 2) { return null; }
+        // obj.add(Matrix.Rotation(t).x(this.subtract(obj)))
         R = Matrix.Rotation(t);
         x = this.elements[0] - obj.elements[0];
         y = this.elements[1] - obj.elements[1];
@@ -226,6 +228,7 @@ Vector.prototype = {
         if (!obj.direction) { return null; }
         var C = obj.pointClosestTo(this);
         R = Matrix.Rotation(t, obj.direction);
+        // C.add(R.x(this.subtract(C)))
         x = this.elements[0] - C.elements[0];
         y = this.elements[1] - C.elements[1];
         z = this.elements[2] - C.elements[2];
@@ -826,8 +829,18 @@ Line.prototype = {
       var P = obj.to3D();
       if (P === null) { return null; }
       if (this.contains(P)) { return P; }
-      var A = P.subtract(this.anchor);
-      return P.add(this.direction.cross(this.direction.cross(A)).toUnitVector().x(this.distanceFrom(P)));
+      // return P.add(this.direction.cross(this.direction.cross(P.subtract(this.anchor))).toUnitVector().x(this.distanceFrom(P)));
+      var A = this.anchor, D = this.direction, mod = 0;
+      var V = P.map(function(x, i) {
+        var i1 = i-1, i2 = i%3, i3 = (i+1)%3;
+        var D1 = D.elements[i1], D2 = D.elements[i2], D3 = D.elements[i3];
+        var P1 = P.elements[i1], P2 = P.elements[i2], P3 = P.elements[i3];
+        var A1 = A.elements[i1], A2 = A.elements[i2], A3 = A.elements[i3];
+        var element = D2 * (D1 * (P2-A2) - D2 * (P1-A1)) - D3 * (D3 * (P1-A1) - D1 * (P3-A3));
+        mod += element * element;
+        return element;
+      });
+      return P.add(V.x(this.distanceFrom(P) / Math.sqrt(mod)));
     }
   },
 
