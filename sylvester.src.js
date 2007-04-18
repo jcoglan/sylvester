@@ -830,7 +830,7 @@ Line.prototype = {
       if (P === null) { return null; }
       if (this.contains(P)) { return P; }
       // P.add(this.direction.cross(this.direction.cross(P.subtract(this.anchor))).toUnitVector().x(this.distanceFrom(P)))
-      var A = this.anchor, D = this.direction, mod = 0;
+      var A = this.anchor, D = this.direction;
       var D1 = D.elements[0], D2 = D.elements[1], D3 = D.elements[2];
       var A1 = A.elements[0], A2 = A.elements[1], A3 = A.elements[2];
       var P1 = P.elements[0], P2 = P.elements[1], P3 = P.elements[2];
