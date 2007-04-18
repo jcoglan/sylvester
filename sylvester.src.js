@@ -29,7 +29,7 @@ Vector.prototype = {
 
   // Returns element i of the vector
   e: function(i) {
-    return (i < 1 || i > this.dimensions()) ? null : this.elements[i - 1];
+    return (i < 1 || i > this.elements.length) ? null : this.elements[i - 1];
   },
 
   // Returns the number of elements the vector has
@@ -44,10 +44,11 @@ Vector.prototype = {
 
   // Returns true iff the vector is equal to the argument
   eql: function(vector) {
-    if (this.dimensions() != vector.dimensions()) { return false; }
-    for (var i = 1; i <= this.dimensions(); i++) {
-      if (Math.abs(this.e(i) - vector.e(i)) > Sylvester.precision) { return false; }
-    }
+    var n = this.elements.length;
+    if (n != vector.elements.length) { return false; }
+    do {
+      if (Math.abs(this.elements[n-1] - vector.elements[n-1]) > Sylvester.precision) { return false; }
+    } while (--n);
     return true;
   },
 
@@ -59,10 +60,18 @@ Vector.prototype = {
   // Maps the vector to another vector according to the given function
   map: function(fn) {
     var elements = [];
-    for (var i = 1; i <= this.dimensions(); i++) {
-      elements.push(fn(this.e(i), i));
-    }
+    this.each(function(x, i) {
+      elements.push(fn(x, i));
+    });
     return Vector.create(elements);
+  },
+  
+  // Calls the iterator for each element of the vector in turn
+  each: function(fn) {
+    var n = this.elements.length, k = n, i;
+    do { i = k - n;
+      fn(this.elements[i], i+1);
+    } while (--n);
   },
 
   // Returns a new vector created by normalizing the receiver
@@ -74,9 +83,9 @@ Vector.prototype = {
 
   // Returns the angle between the vector and the argument (also a vector)
   angleFrom: function(vector) {
-    var dot = this.dot(vector);
-    if (dot === null || this.modulus() === 0 || vector.modulus() === 0) { return null; }
-    var theta = this.dot(vector) / (this.modulus() * vector.modulus());
+    var dot = this.dot(vector), mod1 = this.modulus(), mod2 = vector.modulus();
+    if (dot === null || mod1*mod2 === 0) { return null; }
+    var theta = dot / (mod1*mod2);
     if (theta < -1) { theta = -1; }
     if (theta > 1) { theta = 1; }
     return Math.acos(theta);
@@ -102,13 +111,14 @@ Vector.prototype = {
 
   // Returns the result of adding the argument to the vector
   add: function(vector) {
-    if (this.dimensions() != vector.dimensions()) { return null; }
-    return this.map(function(x, i) { return x + vector.e(i); });
+    if (this.elements.length != vector.elements.length) { return null; }
+    return this.map(function(x, i) { return x + vector.elements[i-1]; });
   },
 
   // Returns the result of subtracting the argument from the vector
   subtract: function(vector) {
-    return this.add(vector.x(-1));
+    if (this.elements.length != vector.elements.length) { return null; }
+    return this.map(function(x, i) { return x - vector.elements[i-1]; });
   },
 
   // Returns the result of multiplying the elements of the vector by the argument
@@ -121,42 +131,40 @@ Vector.prototype = {
   // Returns the scalar product of the vector with the argument
   // Both vectors must have equal dimensionality
   dot: function(vector) {
-    var i, product = 0;
-    if (this.dimensions() != vector.dimensions()) { return null; }
-    for (i = 1; i <= this.dimensions(); i++) {
-      product += this.e(i) * vector.e(i);
-    }
+    var i, product = 0, n = this.elements.length;
+    if (n != vector.elements.length) { return null; }
+    do { product += this.elements[n-1] * vector.elements[n-1]; } while (--n);
     return product;
   },
 
   // Returns the vector product of the vector with the argument
   // Both vectors must have dimensionality 3
   cross: function(vector) {
-    if (this.dimensions() != 3 || vector.dimensions() != 3) { return null; }
+    if (this.elements.length != 3 || vector.elements.length != 3) { return null; }
     return Vector.create([
-      (this.e(2) * vector.e(3)) - (this.e(3) * vector.e(2)),
-      (this.e(3) * vector.e(1)) - (this.e(1) * vector.e(3)),
-      (this.e(1) * vector.e(2)) - (this.e(2) * vector.e(1))
+      (this.elements[1] * vector.elements[2]) - (this.elements[2] * vector.elements[1]),
+      (this.elements[2] * vector.elements[0]) - (this.elements[0] * vector.elements[2]),
+      (this.elements[0] * vector.elements[1]) - (this.elements[1] * vector.elements[0])
     ]);
   },
 
   // Returns the (absolute) largest element of the vector
   max: function() {
-    var m = 0;
-    for (var i = 1; i <= this.dimensions(); i++) {
-      if (Math.abs(this.e(i)) > Math.abs(m)) { m = this.e(i); }
-    }
+    var m = 0, n = this.elements.length, k = n, i;
+    do { i = k - n;
+      if (Math.abs(this.elements[i]) > Math.abs(m)) { m = this.elements[i]; }
+    } while (--n);
     return m;
   },
 
   // Returns the index of the first match found
   indexOf: function(x) {
-    var index = null, i;
-    for (i = 1; i <= this.dimensions(); i++) {
-      if (index === null && this.e(i) == x) {
-        index = i;
+    var index = null, n = this.elements.length, k = n, i;
+    do { i = k - n;
+      if (index === null && this.elements[i] == x) {
+        index = i + 1;
       }
-    }
+    } while (--n);
     return index;
   },
 
@@ -181,8 +189,13 @@ Vector.prototype = {
   // Returns the vector's distance from the argument, when considered as a point in space
   distanceFrom: function(obj) {
     if (obj.anchor) { return obj.distanceFrom(this); }
-    if (obj.dimensions() != this.dimensions()) { return null; }
-    return this.subtract(obj).modulus();
+    if (obj.elements.length != this.elements.length) { return null; }
+    var sum = 0, part;
+    this.each(function(x, i) {
+      part = x - obj.elements[i-1];
+      sum += part * part;
+    });
+    return Math.sqrt(sum);
   },
 
   // Returns true if the vector is point on the given line
@@ -198,16 +211,27 @@ Vector.prototype = {
   // Rotates the vector about the given object. The object should be a 
   // point if the vector is 2D, and a line if it is 3D. Be careful with line directions!
   rotate: function(t, obj) {
-    switch (this.dimensions()) {
+    var R, x, y, z;
+    switch (this.elements.length) {
       case 2:
-        if (obj.dimensions() != 2) { return null; }
-        return obj.add(Matrix.Rotation(t).x(this.subtract(obj)));
+        if (obj.elements.length != 2) { return null; }
+        R = Matrix.Rotation(t);
+        x = this.elements[0] - obj.elements[0];
+        y = this.elements[1] - obj.elements[1];
+        return obj.map(function(a, i) {
+          return a + R.elements[i-1][0] * x + R.elements[i-1][1] * y;
+        });
         break;
       case 3:
         if (!obj.direction) { return null; }
         var C = obj.pointClosestTo(this);
-        var R = Matrix.Rotation(t, obj.direction);
-        return C.add(R.x(this.subtract(C)));
+        R = Matrix.Rotation(t, obj.direction);
+        x = this.elements[0] - C.elements[0];
+        y = this.elements[1] - C.elements[1];
+        z = this.elements[2] - C.elements[2];
+        return C.map(function(a, i) {
+          return a + R.elements[i-1][0] * x + R.elements[i-1][1] * y + R.elements[i-1][2] * z;
+        });
         break;
       default:
         return null;
@@ -232,7 +256,7 @@ Vector.prototype = {
   // Utility to make sure vectors are 3D. If they are 2D, a zero z-component is added
   to3D: function() {
     var V = this.dup();
-    switch (V.dimensions()) {
+    switch (V.elements.length) {
       case 3: return V; break;
       case 2: return Vector.create([V.e(1), V.e(2), 0]); break;
       default: return null;
@@ -246,13 +270,7 @@ Vector.prototype = {
 
   // Set vector's elements from an array
   setElements: function(els) {
-    if (typeof(els) == 'undefined') { return null; }
-    this.elements = [];
-    if (els.elements) { els = els.elements; }
-    for (var i = 0; i < els.length; i++) {
-      if (!isNaN(els[i])) { this.elements.push(els[i]); }
-    }
-    if (this.elements.length === 0) { return null; }
+    this.elements = els.elements ? els.elements : els;
     return this;
   }
 };

@@ -110,10 +110,6 @@ window.onload = function() {
     V.modulus()
   );
   
-  assert('Zero elements',
-    $V() === null
-  );
-  
   assert('Duplication',
     V.dup().eql(V)
   );
@@ -360,10 +356,6 @@ window.onload = function() {
   assert('Number of columns',
     M.cols() == 4,
     M.cols()
-  );
-  
-  assert('Creation with no elements',
-    $M() === null
   );
   
   M = $M([
@@ -844,6 +836,14 @@ var assert = function(testName, condition, message) {
   resultList.appendChild(item);
   item.className = klass;
   item.innerHTML = testName + ': ' + display;
+};
+
+var benchmark = function(fn, n) {
+  n = n || 100; k = n;
+  var A = new Date().getTime();
+  do { fn() } while (--n);
+  var B = new Date().getTime();
+  alert('Completed ' + k + ' executions in ' + ((B-A)/1000) + ' seconds');
 };
 
 var title = function(str) {
