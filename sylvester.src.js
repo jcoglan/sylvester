@@ -829,18 +829,22 @@ Line.prototype = {
       var P = obj.to3D();
       if (P === null) { return null; }
       if (this.contains(P)) { return P; }
-      // return P.add(this.direction.cross(this.direction.cross(P.subtract(this.anchor))).toUnitVector().x(this.distanceFrom(P)));
+      // P.add(this.direction.cross(this.direction.cross(P.subtract(this.anchor))).toUnitVector().x(this.distanceFrom(P)))
       var A = this.anchor, D = this.direction, mod = 0;
-      var V = P.map(function(x, i) {
-        var i1 = i-1, i2 = i%3, i3 = (i+1)%3;
-        var D1 = D.elements[i1], D2 = D.elements[i2], D3 = D.elements[i3];
-        var P1 = P.elements[i1], P2 = P.elements[i2], P3 = P.elements[i3];
-        var A1 = A.elements[i1], A2 = A.elements[i2], A3 = A.elements[i3];
-        var element = D2 * (D1 * (P2-A2) - D2 * (P1-A1)) - D3 * (D3 * (P1-A1) - D1 * (P3-A3));
-        mod += element * element;
-        return element;
-      });
-      return P.add(V.x(this.distanceFrom(P) / Math.sqrt(mod)));
+      var D1 = D.elements[0], D2 = D.elements[1], D3 = D.elements[2];
+      var A1 = A.elements[0], A2 = A.elements[1], A3 = A.elements[2];
+      var P1 = P.elements[0], P2 = P.elements[1], P3 = P.elements[2];
+      var V = Vector.create([
+        D2 * (D1 * (P2-A2) - D2 * (P1-A1)) - D3 * (D3 * (P1-A1) - D1 * (P3-A3)),
+        D3 * (D2 * (P3-A3) - D3 * (P2-A2)) - D1 * (D1 * (P2-A2) - D2 * (P1-A1)),
+        D1 * (D3 * (P1-A1) - D1 * (P3-A3)) - D2 * (D2 * (P3-A3) - D3 * (P2-A2))
+      ]);
+      var k = this.distanceFrom(P) / V.modulus();
+      return Vector.create([
+        P.elements[0] + V.elements[0] * k,
+        P.elements[1] + V.elements[1] * k,
+        P.elements[2] + V.elements[2] * k
+      ]);
     }
   },
 
