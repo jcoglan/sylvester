@@ -769,7 +769,8 @@ Line.prototype = {
   // have a unique intersection.
   isParallelTo: function(obj) {
     if (obj.normal) { return obj.isParallelTo(this); }
-    return (this.direction.isParallelTo(obj.direction) || this.direction.isAntiparallelTo(obj.direction));
+    var theta = this.direction.angleFrom(obj.direction);
+    return (Math.abs(theta) <= Sylvester.precision || Math.abs(theta - Math.PI) <= Sylvester.precision);
   },
 
   // Returns the line's perpendicular distance from the argument,
@@ -780,13 +781,29 @@ Line.prototype = {
       // obj is a line
       if (this.isParallelTo(obj)) { return this.distanceFrom(obj.anchor); }
       var N = this.direction.cross(obj.direction).toUnitVector();
-      return Math.abs(this.anchor.subtract(obj.anchor).dot(N));
+      // this.anchor.subtract(obj.anchor).dot(N)
+      var A = this.anchor, B = obj.anchor;
+      var N1 = N.elements[0], N2 = N.elements[1], N3 = N.elements[2];
+      var A1 = A.elements[0], A2 = A.elements[1], A3 = A.elements[2];
+      var B1 = B.elements[0], B2 = B.elements[1], B3 = B.elements[2];
+      return Math.abs((A1 - B1) * N1 + (A2 - B2) * N2 + (A3 - B3) * N3);
     } else {
       // obj is a point
       var P = obj.to3D();
       if (P === null) { return null; }
-      var A = P.subtract(this.anchor);
-      return Math.abs(A.modulus() * Math.sin(A.angleFrom(this.direction)));
+      // var A = P.subtract(this.anchor);
+      // return Math.abs(A.modulus() * Math.sin(A.angleFrom(this.direction)));
+      var A = this.anchor, D = this.direction;
+      var P1 = P.elements[0], P2 = P.elements[1], P3 = P.elements[2];
+      var A1 = A.elements[0], A2 = A.elements[1], A3 = A.elements[2];
+      var D1 = D.elements[0], D2 = D.elements[1], D3 = D.elements[2];
+      var PA1 = P1 - A1, PA2 = P2 - A2, PA3 = P3 - A3;
+      var modPA = Math.sqrt(PA1*PA1 + PA2*PA2 + PA3*PA3);
+      if (modPA === 0) return 0;
+      // Assumes direction vector is normalised
+      var cosTheta = (PA1 * D1 + PA2 * D2 + PA3 * D3) / modPA;
+      var sin2 = 1 - cosTheta*cosTheta;
+      return Math.abs(modPA * Math.sqrt(sin2 < 0 ? 0 : sin2));
     }
   },
 
