@@ -220,9 +220,10 @@ Vector.prototype = {
         R = Matrix.Rotation(t);
         x = this.elements[0] - obj.elements[0];
         y = this.elements[1] - obj.elements[1];
-        return obj.map(function(a, i) {
-          return a + R.elements[i-1][0] * x + R.elements[i-1][1] * y;
-        });
+        return Vector.create([
+          obj.elements[0] + R.elements[0][0] * x + R.elements[0][1] * y,
+          obj.elements[1] + R.elements[1][0] * x + R.elements[1][1] * y
+        ]);
         break;
       case 3:
         if (!obj.direction) { return null; }
@@ -232,9 +233,11 @@ Vector.prototype = {
         x = this.elements[0] - C.elements[0];
         y = this.elements[1] - C.elements[1];
         z = this.elements[2] - C.elements[2];
-        return C.map(function(a, i) {
-          return a + R.elements[i-1][0] * x + R.elements[i-1][1] * y + R.elements[i-1][2] * z;
-        });
+        return Vector.create([
+          C.elements[0] + R.elements[0][0] * x + R.elements[0][1] * y + R.elements[0][2] * z,
+          C.elements[1] + R.elements[1][0] * x + R.elements[1][1] * y + R.elements[1][2] * z,
+          C.elements[2] + R.elements[2][0] * x + R.elements[2][1] * y + R.elements[2][2] * z
+        ]);
         break;
       default:
         return null;
