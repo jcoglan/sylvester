@@ -251,11 +251,15 @@ Vector.prototype = {
       var P = this.to3D();
       if (P === null) { return null; }
       var C = obj.pointClosestTo(P);
-      return C.add(C.subtract(P));
+      var C1 = C.elements[0], C2 = C.elements[1], C3 = C.elements[2];
+      var P1 = P.elements[0], P2 = P.elements[1], P3 = P.elements[2];
+      return Vector.create([C1 + (C1 - P1), C2 + (C2 - P2), C3 + (C3 - P3)]);
     } else {
       // obj is a point
-      if (this.dimensions() != obj.dimensions()) { return null; }
-      return obj.add(obj.subtract(this));
+      if (this.elements.length != obj.elements.length) { return null; }
+      var P1 = this.elements[0], P2 = this.elements[1], P3 = this.elements[2];
+      var Q1 = obj.elements[0], Q2 = obj.elements[1], Q3 = obj.elements[2];
+      return Vector.create([Q1 + (Q1 - P1), Q2 + (Q2 - P2), Q3 + (Q3 - P3)]);
     }
   },
 
