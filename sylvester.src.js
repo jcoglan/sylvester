@@ -701,24 +701,27 @@ Matrix.Rotation = function(t, a) {
 
 // Special case rotations
 Matrix.RotationX = function(t) {
+  var c = Math.cos(t), s = Math.sin(t);
   return Matrix.create([
-    [            1,             0,             0 ],
-    [            0,   Math.cos(t),  -Math.sin(t) ],
-    [            0,   Math.sin(t),   Math.cos(t) ]
+    [  1,  0,  0 ],
+    [  0,  c, -s ],
+    [  0,  s,  c ]
   ]);
 };
 Matrix.RotationY = function(t) {
+  var c = Math.cos(t), s = Math.sin(t);
   return Matrix.create([
-    [  Math.cos(t),             0,   Math.sin(t) ],
-    [            0,             1,             0 ],
-    [ -Math.sin(t),             0,   Math.cos(t) ]
+    [  c,  0,  s ],
+    [  0,  1,  0 ],
+    [ -s,  0,  c ]
   ]);
 };
 Matrix.RotationZ = function(t) {
+  var c = Math.cos(t), s = Math.sin(t);
   return Matrix.create([
-    [  Math.cos(t),  -Math.sin(t),             0 ],
-    [  Math.sin(t),   Math.cos(t),             0 ],
-    [            0,             0,             1 ]
+    [  c, -s,  0 ],
+    [  s,  c,  0 ],
+    [  0,  0,  1 ]
   ]);
 };
 
