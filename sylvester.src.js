@@ -756,11 +756,15 @@ Line.prototype = {
     return Line.create(this.anchor, this.direction);
   },
 
-  // Returns the result of translating the line by the given vector
+  // Returns the result of translating the line by the given vector/array
   translate: function(vector) {
-    vector = Vector.create(vector).to3D();
-    if (vector === null) { return null; }
-    return Line.create(this.anchor.add(vector), this.direction);
+    if (vector.elements) { vector = vector.elements; }
+    if (vector.length == 2) { vector.push(0); }
+    return Line.create([
+      this.anchor.elements[0] + vector[0],
+      this.anchor.elements[1] + vector[1],
+      this.anchor.elements[2] + vector[2]
+    ], this.direction);
   },
 
   // Returns true if the line is parallel to the argument. Here, 'parallel to'
@@ -849,10 +853,18 @@ Line.prototype = {
       // obj is a line
       if (this.intersects(obj)) { return this.intersectionWith(obj); }
       if (this.isParallelTo(obj)) { return null; }
-      var S = this.direction.cross(obj.direction).toUnitVector().x(this.distanceFrom(obj));
-      var L = obj.dup().translate(S);
-      if (L.distanceFrom(this) > obj.distanceFrom(this)) { L = obj.dup().translate(S.x(-1)); }
-      return this.intersectionWith(L);
+      var D = this.direction, E = obj.direction;
+      var D1 = D.elements[0], D2 = D.elements[1], D3 = D.elements[2];
+      var E1 = E.elements[0], E2 = E.elements[1], E3 = E.elements[2];
+      // Create plane containing obj and the shared normal and intersect this with it
+      // Thank you: http://www.cgafaq.info/wiki/Line-line_distance
+      var N = Vector.create([
+        (D3 * E1 - D1 * E3) * E3 - (D1 * E2 - D2 * E1) * E2,
+        (D1 * E2 - D2 * E1) * E1 - (D2 * E3 - D3 * E2) * E3,
+        (D2 * E3 - D3 * E2) * E2 - (D3 * E1 - D1 * E3) * E1
+      ]);
+      var P = Plane.create(obj.anchor, N);
+      return P.intersectionWith(this);
     } else {
       // obj is a point
       var P = obj.to3D();
