@@ -829,9 +829,18 @@ Line.prototype = {
     if (!this.intersects(obj)) { return null; }
     if (obj.normal) { return obj.intersectionWith(this); }
     var P = this.anchor, X = this.direction, Q = obj.anchor, Y = obj.direction;
-    var a = (X.dot(Q.subtract(P)) * Y.dot(Y) / X.dot(X)) + (X.dot(Y) * Y.dot(P.subtract(Q)));
-    var s = a / (Y.dot(Y) - (X.dot(Y) * X.dot(Y)));
-    return P.add(X.x(s));
+    var P1 = P.elements[0], P2 = P.elements[1], P3 = P.elements[2];
+    var Q1 = Q.elements[0], Q2 = Q.elements[1], Q3 = Q.elements[2];
+    var X1 = X.elements[0], X2 = X.elements[1], X3 = X.elements[2];
+    var Y1 = Y.elements[0], Y2 = Y.elements[1], Y3 = Y.elements[2];
+    var PsubQ1 = P1 - Q1, PsubQ2 = P2 - Q2, PsubQ3 = P3 - Q3;
+    var XdotQsubP = - X1*PsubQ1 - X2*PsubQ2 - X3*PsubQ3;
+    var YdotPsubQ = Y1*PsubQ1 + Y2*PsubQ2 + Y3*PsubQ3;
+    var XdotX = X1*X1 + X2*X2 + X3*X3;
+    var YdotY = Y1*Y1 + Y2*Y2 + Y3*Y3;
+    var XdotY = X1*Y1 + X2*Y2 + X3*Y3;
+    var k = (XdotQsubP * YdotY / XdotX + XdotY * YdotPsubQ) / (YdotY - XdotY * XdotY);
+    return Vector.create([P1 + k*X1, P2 + k*X2, P3 + k*X3]);
   },
 
   // Returns the point on the line that is closest to the given point or line
