@@ -372,13 +372,14 @@ Matrix.prototype = {
 
   // Maps the matrix to another matrix (of the same dimensions) according to the given function
   map: function(fn) {
-    var els = [], i, j;
-    for (i = 1; i <= this.rows(); i++) {
-      els[i - 1] = [];
-      for (j = 1; j <= this.cols(); j++) {
-        els[i - 1][j - 1] = fn(this.e(i,j), i, j);
-      }
-    }
+    var els = [], ni = this.elements.length, ki = ni, i, nj, kj = this.elements[0].length, j;
+    do { i = ki - ni;
+      nj = kj;
+      els[i] = [];
+      do { j = kj - nj;
+        els[i][j] = fn(this.elements[i][j], i + 1, j + 1);
+      } while (--nj);
+    } while (--ni);
     return Matrix.create(els);
   },
 
@@ -905,7 +906,14 @@ Line.prototype = {
     if (typeof(line.direction) == 'undefined') { line = Line.create(line.to3D(), Vector.k); }
     var R = Matrix.Rotation(t, line.direction);
     var C = line.pointClosestTo(this.anchor);
-    return Line.create(C.add(R.x(this.anchor.subtract(C))), R.x(this.direction));
+    var A = this.anchor;
+    var C1 = C.elements[0], C2 = C.elements[1], C3 = C.elements[2];
+    var A1 = A.elements[0], A2 = A.elements[1], A3 = A.elements[2];
+    return Line.create([
+      C1 + R.elements[0][0] * (A1 - C1) + R.elements[0][1] * (A2 - C2) + R.elements[0][2] * (A3 - C3),
+      C2 + R.elements[1][0] * (A1 - C1) + R.elements[1][1] * (A2 - C2) + R.elements[1][2] * (A3 - C3),
+      C3 + R.elements[2][0] * (A1 - C1) + R.elements[2][1] * (A2 - C2) + R.elements[2][2] * (A3 - C3)
+    ], R.x(this.direction));
   },
 
   // Returns the line's reflection in the given point or line
