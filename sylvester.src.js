@@ -267,10 +267,11 @@ Vector.prototype = {
   to3D: function() {
     var V = this.dup();
     switch (V.elements.length) {
-      case 3: return V; break;
-      case 2: return Vector.create([V.e(1), V.e(2), 0]); break;
+      case 3: break;
+      case 2: V.elements.push(0); break;
       default: return null;
     }
+    return V;
   },
 
   // Returns a string representation of the vector
