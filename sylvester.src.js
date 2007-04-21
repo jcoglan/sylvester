@@ -687,7 +687,7 @@ Matrix.Rotation = function(theta, a) {
   var x = axis.elements[0], y = axis.elements[1], z = axis.elements[2];
   var s = Math.sin(theta), c = Math.cos(theta), t = 1 - c;
   // Formula derived here: http://www.gamedev.net/reference/articles/article1199.asp
-  // That proof rotates the co-ordinate symbol so theta
+  // That proof rotates the co-ordinate system so theta
   // becomes -theta and sin becomes -sin here.
   return Matrix.create([
     [ t*x*x + c, t*x*y - s*z, t*x*z + s*y ],
