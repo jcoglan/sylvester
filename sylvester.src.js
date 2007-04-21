@@ -674,35 +674,26 @@ Matrix.Diagonal = function(elements) {
 
 // Rotation matrix about some axis. If no axis is
 // supplied, assume we're after a 2D transform
-Matrix.Rotation = function(t, a) {
+Matrix.Rotation = function(theta, a) {
   if (!a) {
     return Matrix.create([
-      [Math.cos(t),  -Math.sin(t)],
-      [Math.sin(t),   Math.cos(t)]
+      [Math.cos(theta),  -Math.sin(theta)],
+      [Math.sin(theta),   Math.cos(theta)]
     ]);
   }
   var axis = a.dup();
   if (axis.dimensions() != 3) { return null; }
   axis = axis.toUnitVector();
-  var rot = Matrix.RotationZ(t);
-  // Axis is parallel to z-axis - just return that rotation
-  if (axis.isParallelTo(Vector.k)) { return rot; }
-  var projectionOnXY = Vector.create([axis.e(1), axis.e(2), 0]);
-  var z_rot = Matrix.I(3), inv_z_rot = Matrix.I(3);
-  if (!projectionOnXY.isParallelTo(Vector.i)) {
-    // Axis does not lie in X-Z plane - change co-ordinates through R(Z)
-    var Za = projectionOnXY.cross(Vector.i).toUnitVector();
-    var Zt = Za.e(3) * projectionOnXY.angleFrom(Vector.i);
-    axis = Matrix.RotationZ(Zt).x(axis);
-    z_rot = Matrix.RotationZ(Zt);
-    inv_z_rot = Matrix.RotationZ(-Zt);
-  }
-  // Axis lies in X-Z plame - change co-ordinates so that axis = z-axis, through R(Y)
-  var Ya = axis.cross(Vector.k).toUnitVector();
-  var Yt = Ya.e(2) * axis.angleFrom(Vector.k);
-  var y_rot = Matrix.RotationY(Yt);
-  var inv_y_rot = Matrix.RotationY(-Yt);
-  return inv_z_rot.x(inv_y_rot).x(rot).x(y_rot).x(z_rot);
+  var x = axis.elements[0], y = axis.elements[1], z = axis.elements[2];
+  var s = Math.sin(theta), c = Math.cos(theta), t = 1 - c;
+  // Formula derived here: http://www.gamedev.net/reference/articles/article1199.asp
+  // That proof rotates the co-ordinate symbol so theta
+  // becomes -theta and sin becomes -sin here.
+  return Matrix.create([
+    [ t*x*x + c, t*x*y - s*z, t*x*z + s*y ],
+    [ t*x*y + s*z, t*y*y + c, t*y*z - s*x ],
+    [ t*x*z - s*y, t*y*z + s*x, t*z*z + c ]
+  ]);
 };
 
 // Special case rotations
