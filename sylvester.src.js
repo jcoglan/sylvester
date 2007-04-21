@@ -683,8 +683,8 @@ Matrix.Rotation = function(theta, a) {
   }
   var axis = a.dup();
   if (axis.dimensions() != 3) { return null; }
-  axis = axis.toUnitVector();
-  var x = axis.elements[0], y = axis.elements[1], z = axis.elements[2];
+  var mod = axis.modulus();
+  var x = axis.elements[0]/mod, y = axis.elements[1]/mod, z = axis.elements[2]/mod;
   var s = Math.sin(theta), c = Math.cos(theta), t = 1 - c;
   // Formula derived here: http://www.gamedev.net/reference/articles/article1199.asp
   // That proof rotates the co-ordinate system so theta
