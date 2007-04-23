@@ -318,29 +318,29 @@ Matrix.prototype = {
 
   // Returns element (i,j) of the matrix
   e: function(i,j) {
-    if (i < 1 || i > this.rows() || j < 1 || j > this.cols()) { return null; }
-    return this.elements[i - 1][j - 1];
+    if (i < 1 || i > this.elements.length || j < 1 || j > this.elements[0].length) { return null; }
+    return this.elements[i-1][j-1];
   },
 
   // Returns row k of the matrix as a vector
-  row: function(k) {
-    if (k > this.rows()) { return null; }
-    return Vector.create(this.elements[k - 1]);
+  row: function(i) {
+    if (i > this.elements.length) { return null; }
+    return Vector.create(this.elements[i - 1]);
   },
 
   // Returns column k of the matrix as a vector
-  col: function(k) {
-    if (k > this.cols()) { return null; }
-    var col = [];
-    for (var i = 1; i <= this.rows(); i++) {
-      col.push(this.e(i,k));
-    }
+  col: function(j) {
+    if (j > this.elements[0].length) { return null; }
+    var col = [], n = this.elements.length, k = n, i;
+    do { i = k - n;
+      col.push(this.elements[i][j-1]);
+    } while (--n);
     return Vector.create(col);
   },
 
   // Returns the number of rows/columns the matrix has
   dimensions: function() {
-    return {rows: this.rows(), cols: this.cols()};
+    return {rows: this.elements.length, cols: this.elements[0].length};
   },
 
   // Returns the number of rows in the matrix
@@ -357,10 +357,11 @@ Matrix.prototype = {
   // a vector as the argument, in which case the receiver must be a
   // one-column matrix equal to the vector.
   eql: function(matrix) {
-    matrix = Matrix.create(matrix);
-    if (this.rows() != matrix.rows() || this.cols() != matrix.cols()) { return false; }
-    var i, j;
-    for (i = 1; i <= this.rows(); i++) {
+    if (!matrix.determinant) { matrix = Matrix.create(matrix); }
+    if (this.elements.length != matrix.elements.length ||
+        this.elements[0].length != matrix.elements[0].length) { return false; }
+    var i;
+    for (i = 1; i <= this.elements.length; i++) {
       if (!this.row(i).eql(matrix.row(i))) { return false; }
     }
     return true;
@@ -386,9 +387,9 @@ Matrix.prototype = {
 
   // Returns true iff the argument has the same dimensions as the matrix
   isSameSizeAs: function(matrix) {
-    matrix = Matrix.create(matrix);
-    return (this.rows() == matrix.rows() &&
-        this.cols() == matrix.cols());
+    if (!matrix.determinant) { matrix = Matrix.create(matrix); }
+    return (this.elements.length == matrix.elements.length &&
+        this.elements[0].length == matrix.elements[0].length);
   },
 
   // Returns the result of adding the argument to the matrix
@@ -603,41 +604,35 @@ Matrix.prototype = {
 
   // Returns a string representation of the matrix
   inspect: function() {
-    var matrix = this.dup();
-    for (var i = 0; i < matrix.rows(); i++) {
-      matrix.elements[i] = Vector.create(matrix.elements[i]).inspect();
+    var matrix_rows = [];
+    for (var i = 0; i < this.rows(); i++) {
+      matrix_rows.push(Vector.create(this.elements[i]).inspect());
     }
-    return matrix.elements.join('\n');
+    return matrix_rows.join('\n');
   },
 
   // Set the matrix's elements from an array. If the argument passed
   // is a vector, the resulting matrix will be a single column.
   setElements: function(els) {
-    var row, i, j, success = true;
-    if (typeof(els) == 'undefined') { return null; }
-    this.elements = [];
     if (els.elements) { els = els.elements; }
-    for (i = 0; i < els.length; i++) {
-      if (typeof(els[i][0]) != 'undefined') {
-        row = [];
-        for (j = 0; j < els[i].length; j++) {
-          if (!isNaN(els[i][j])) { row.push(els[i][j]); }
-        }
-        if (i > 0 && this.elements[i-1].length != row.length) {
-          success = false;
-        } else {
-          this.elements.push(row);
-        }
-      } else {
-        if (!isNaN(els[i])) { this.elements.push([els[i]]); }
-      }
-    }
-    if (!success) {
+    if (typeof(els[0][0]) != 'undefined') {
+      var ni = els.length, ki = ni, i, nj, kj, j;
       this.elements = [];
-      return null;
-    } else {
+      do { i = ki - ni;
+        nj = els[i].length; kj = nj;
+        this.elements[i] = [];
+        do { j = kj - nj;
+          this.elements[i][j] = els[i][j];
+        } while (--nj);
+      } while(--ni);
       return this;
     }
+    var n = els.length, k = n, i;
+    this.elements = [];
+    do { i = k - n;
+      this.elements.push([els[i]]);
+    } while (--n);
+    return this;
   }
 };
 

@@ -374,14 +374,6 @@ window.onload = function() {
     M.inspect()
   );
   
-  M = $M([
-    [0,3,4,8,7],
-    [3,9,7,3]
-  ]);
-  assert('Create with bad dimensions',
-    M === null
-  );
-  
   assert('Create with one element',
     $M([0]).inspect() == '[0]'
   );
