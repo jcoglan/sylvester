@@ -449,21 +449,35 @@ Matrix.prototype = {
   // Element selection wraps if the required index is outside the matrix's bounds, so you could
   // use this to perform row/column cycling or copy-augmenting.
   minor: function(a, b, c, d) {
-    var self = this;
-    return Matrix.Zero(c, d).map(
-      function(x, i, j) { return self.e((i + a - 2)%self.rows() + 1, (j + b - 2)%self.cols() + 1); }
-    );
+    var elements = [], ni = c, i, nj, j;
+    var rows = this.elements.length, cols = this.elements[0].length;
+    do { i = c - ni;
+      elements[i] = [];
+      nj = d;
+      do { j = d - nj;
+        elements[i][j] = this.elements[(a+i-1)%rows][(b+j-1)%cols];
+      } while (--nj);
+    } while (--ni);
+    return Matrix.create(elements);
   },
 
   // Returns the transpose of the matrix
   transpose: function() {
-    var self = this;
-    return Matrix.Zero(this.cols(), this.rows()).map(function(x, i, j) { return self.e(j,i); });
+    var rows = this.elements.length, cols = this.elements[0].length;
+    var elements = [], ni = cols, i, nj, j;
+    do { i = cols - ni;
+      elements[i] = [];
+      nj = rows;
+      do { j = rows - nj;
+        elements[i][j] = this.elements[j][i];
+      } while (--nj);
+    } while (--ni);
+    return Matrix.create(elements);
   },
 
   // Returns true iff the matrix is square
   isSquare: function() {
-    return (this.rows() == this.cols());
+    return (this.elements.length == this.elements[0].length);
   },
 
   // Returns the (absolute) largest element of the matrix
