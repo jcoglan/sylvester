@@ -394,20 +394,23 @@ Matrix.prototype = {
 
   // Returns the result of adding the argument to the matrix
   add: function(matrix) {
-    matrix = Matrix.create(matrix);
+    if (!matrix.determinant) { matrix = Matrix.create(matrix); }
     if (!this.isSameSizeAs(matrix)) { return null; }
-    return this.map(function(x, i, j) { return x + matrix.e(i,j); });
+    return this.map(function(x, i, j) { return x + matrix.elements[i-1][j-1]; });
   },
 
   // Returns the result of subtracting the argument from the matrix
   subtract: function(matrix) {
-    return this.add(matrix.x(-1));
+    if (!matrix.determinant) { matrix = Matrix.create(matrix); }
+    if (!this.isSameSizeAs(matrix)) { return null; }
+    return this.map(function(x, i, j) { return x - matrix.elements[i-1][j-1]; });
   },
 
   // Returns true iff the matrix can multiply the argument from the left
   canMultiplyFromLeft: function(matrix) {
-    var mat = Matrix.create(matrix);
-    return (this.cols() == mat.rows());
+    if (!matrix.determinant) { matrix = Matrix.create(matrix); }
+    // this.columns should equal matrix.rows
+    return (this.elements[0].length == matrix.elements.length);
   },
 
   // Returns the result of multiplying the matrix from the right by the argument.
