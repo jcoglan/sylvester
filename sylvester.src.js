@@ -418,19 +418,28 @@ Matrix.prototype = {
   // a vector, a vector is returned, which saves you having to remember calling
   // col(1) on the result.
   multiply: function(matrix) {
-    var i, j;
-    if (matrix.elements) {
-      var returnVector = matrix.modulus ? true : false;
-      matrix = Matrix.create(matrix);
-      if (!this.canMultiplyFromLeft(matrix)) { return null; }
-      var self = this;
-      var M = Matrix.Zero(this.rows(), matrix.cols()).map(
-        function(x, i, j) { return self.row(i).dot(matrix.col(j)); }
-      );
-      return returnVector ? M.col(1) : M;
-    } else {
+    if (!matrix.elements) {
       return this.map(function(x) { return x * matrix; });
     }
+    var returnVector = matrix.modulus ? true : false;
+    if (!matrix.determinant) { matrix = Matrix.create(matrix); }
+    if (!this.canMultiplyFromLeft(matrix)) { return null; }
+    var ni = this.elements.length, ki = ni, i, nj, kj = matrix.elements[0].length, j;
+    var cols = this.elements[0].length, elements = [], sum, nc, c;
+    do { i = ki - ni;
+      elements[i] = [];
+      nj = kj;
+      do { j = kj - nj;
+        sum = 0;
+        nc = cols;
+        do { c = cols - nc;
+          sum += this.elements[i][c] * matrix.elements[c][j];
+        } while (--nc);
+        elements[i][j] = sum;
+      } while (--nj);
+    } while (--ni);
+    var M = Matrix.create(elements);
+    return returnVector ? M.col(1) : M;
   },
 
   x: function(matrix) { return this.multiply(matrix); },
