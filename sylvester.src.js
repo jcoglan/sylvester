@@ -481,34 +481,36 @@ Matrix.prototype = {
 
   // Returns the (absolute) largest element of the matrix
   max: function() {
-    var m = 0;
-    for (var i = 1; i <= this.rows(); i++) {
-      if (Math.abs(this.row(i).max()) > Math.abs(m)) { m = this.row(i).max(); }
-    }
+    var m = 0, ni = this.elements.length, ki = ni, i, nj, kj = this.elements[0].length, j;
+    do { i = ki - ni;
+      nj = kj;
+      do { j = kj - nj;
+        if (Math.abs(this.elements[i][j]) > Math.abs(m)) { m = this.elements[i][j]; }
+      } while (--nj);
+    } while (--ni);
     return m;
   },
 
   // Returns the indeces of the first match found by reading row-by-row from left to right
   indexOf: function(x) {
-    var index = null, i, j;
-    for (i = 1; i <= this.rows(); i++) {
-      for (j = 1; j <= this.cols(); j++) {
-        if (index === null && this.e(i,j) == x) {
-          index = {i: i, j: j};
-        }
-      }
-    }
-    return index;
+    var index = null, ni = this.elements.length, ki = ni, i, nj, kj = this.elements[0].length, j;
+    do { i = ki - ni;
+      nj = kj;
+      do { j = kj - nj;
+        if (this.elements[i][j] == x) { return {i: i+1, j: j+1}; }
+      } while (--nj);
+    } while (--ni);
+    return null;
   },
 
   // If the matrix is square, returns the diagonal elements as a vector.
   // Otherwise, returns null.
   diagonal: function() {
     if (!this.isSquare) { return null; }
-    var els = [];
-    for (var i = 1; i <= this.rows(); i++) {
-      els.push(this.e(i,i));
-    }
+    var els = [], n = this.elements.length, k = n, i;
+    do { i = k - n;
+      els.push(this.elements[i][i]);
+    } while (--n);
     return Vector.create(els);
   },
 
