@@ -257,9 +257,8 @@ Vector.prototype = {
     } else {
       // obj is a point
       if (this.elements.length != obj.elements.length) { return null; }
-      var P1 = this.elements[0], P2 = this.elements[1], P3 = this.elements[2];
-      var Q1 = obj.elements[0], Q2 = obj.elements[1], Q3 = obj.elements[2];
-      return Vector.create([Q1 + (Q1 - P1), Q2 + (Q2 - P2), Q3 + (Q3 - P3)]);
+      var self = this;
+      return obj.map(function(x, i) { return x + (x - self.elements[i-1]); });
     }
   },
 
