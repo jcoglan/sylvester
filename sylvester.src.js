@@ -519,24 +519,37 @@ Matrix.prototype = {
   // scaled up or switched, and the determinant is preserved. Elements that
   // are within rounding error precision of zero are snapped to zero.
   toRightTriangular: function() {
-    var i, j, M = this.dup(), nonzero;
-    for (i = 1; i < M.rows(); i++) {
-      if (M.e(i,i) == 0) {
-        nonzero = false;
-        for (j = i + 1; j <= M.rows(); j++) {
-          if (M.e(j,i) != 0 && !nonzero) {
-            nonzero = true;
-            M.elements[i - 1] = M.row(i).add(M.row(j)).elements;
+    var M = this.dup(), els;
+    var n = this.elements.length, k = n, i, np, kp = this.elements[0].length, p;
+    do { i = k - n;
+      if (M.elements[i][i] == 0) {
+        for (j = i + 1; j < k; j++) {
+          if (M.elements[j][i] != 0) {
+            els = []; np = kp;
+            do { p = kp - np;
+              els.push(M.elements[i][p] + M.elements[j][p]);
+            } while (--np);
+            M.elements[i] = els;
+            break;
           }
         }
       }
-      if (M.e(i,i) != 0) {
-        for (j = i + 1; j <= M.rows(); j++) {
-          M.elements[j - 1] = M.row(j).subtract(M.row(i).x(M.e(j,i) / M.e(i,i))).elements;
+      if (M.elements[i][i] != 0) {
+        for (j = i + 1; j < k; j++) {
+          var multiplier = M.elements[j][i] / M.elements[i][i];
+          els = []; np = kp;
+          do { p = kp - np;
+            // Elements with column numbers up to an including the number
+            // of the row that we're subtracting can safely be set straight to
+            // zero, since that's the point of this routine and it avoids having
+            // to loop over and correct rounding errors later
+            els.push(p <= i ? 0 : M.elements[j][p] - M.elements[i][p] * multiplier);
+          } while (--np);
+          M.elements[j] = els;
         }
       }
-    }
-    return M.snapTo(0);
+    } while (--n);
+    return M;
   },
 
   toUpperTriangular: function() { return this.toRightTriangular(); },
