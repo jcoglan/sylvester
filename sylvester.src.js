@@ -557,9 +557,11 @@ Matrix.prototype = {
   // Returns the determinant for square matrices
   determinant: function() {
     if (!this.isSquare()) { return null; }
-    var els = this.toRightTriangular().diagonal().elements;
-    var det = els[0];
-    for (var i = 1; i < els.length; i++) { det = det * els[i]; }
+    var M = this.toRightTriangular();
+    var det = M.elements[0][0], n = M.elements.length - 1, k = n, i;
+    do { i = k - n + 1;
+      det = det * M.elements[i][i];
+    } while (--n);
     return det;
   },
 
@@ -573,9 +575,10 @@ Matrix.prototype = {
   // Returns the trace for square matrices
   trace: function() {
     if (!this.isSquare()) { return null; }
-    var els = this.toRightTriangular().diagonal().elements;
-    var tr = els[0];
-    for (var i = 1; i < els.length; i++) { tr = tr + els[i]; }
+    var tr = this.elements[0][0], n = this.elements.length - 1, k = n, i;
+    do { i = k - n + 1;
+      tr += this.elements[i][i];
+    } while (--n);
     return tr;
   },
 
@@ -584,10 +587,13 @@ Matrix.prototype = {
   // Returns the rank of the matrix
   rank: function() {
     var M = this.toRightTriangular(), rank = 0;
-    for (var i = 1; i <= this.rows(); i++) {
-      // toRightTriangular snaps values to zero
-      if (M.row(i).modulus() > 0) { rank++; }
-    }
+    var ni = this.elements.length, ki = ni, i, nj, kj = this.elements[0].length, j;
+    do { i = ki - ni;
+      nj = kj;
+      do { j = kj - nj;
+        if (M.elements[i][j] !== 0) { rank++; break; }
+      } while (--nj);
+    } while (--ni);
     return rank;
   },
   
@@ -595,16 +601,17 @@ Matrix.prototype = {
 
   // Returns the result of attaching the given argument to the right-hand side of the matrix
   augment: function(matrix) {
-    matrix = Matrix.create(matrix); // Allows us to supply vectors
-    var self = this.dup();
-    var i, j;
-    if (self.rows() != matrix.rows()) { return null; }
-    for (i = 0; i < self.rows(); i++) {
-      for (j = 0; j < matrix.cols(); j++) {
-        self.elements[i][self.rows() + j] = matrix.e(i+1,j+1);
-      }
-    }
-    return self;
+    if (!matrix.determinant) { matrix = Matrix.create(matrix); }
+    var els = this.dup().elements, cols = els[0].length;
+    var ni = els.length, ki = ni, i, nj, kj = matrix.elements[0].length, j;
+    if (ni != matrix.elements.length) { return null; }
+    do { i = ki - ni;
+      nj = kj;
+      do { j = kj - nj;
+        els[i][cols + j] = matrix.elements[i][j];
+      } while (--nj);
+    } while (--ni);
+    return Matrix.create(els);
   },
 
   // Returns the inverse (if one exists) using Gauss-Jordan
@@ -645,9 +652,10 @@ Matrix.prototype = {
   // Returns a string representation of the matrix
   inspect: function() {
     var matrix_rows = [];
-    for (var i = 0; i < this.rows(); i++) {
+    var n = this.elements.length, k = n, i;
+    do { i = k - n;
       matrix_rows.push(Vector.create(this.elements[i]).inspect());
-    }
+    } while (--n);
     return matrix_rows.join('\n');
   },
 

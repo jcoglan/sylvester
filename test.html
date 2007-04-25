@@ -594,6 +594,28 @@ window.onload = function() {
     M.tr() == 15
   );
   
+  M1 = $M([
+    [7,2,9,4],
+    [4,8,2,6],
+    [9,2,5,6]
+  ]);
+  
+  M2 = $M([
+    [4,6],
+    [5,2],
+    [8,2]
+  ]);
+  
+  M = $M([
+    [7,2,9,4,4,6],
+    [4,8,2,6,5,2],
+    [9,2,5,6,8,2]
+  ]);
+  
+  assert('Augmentation',
+    M1.augment(M2).eql(M)
+  );
+  
   for (i = 1; i <= 10; i++) {
     M = Matrix.Random(3,3);
     if (!M.isSingular()) {
