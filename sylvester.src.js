@@ -298,15 +298,17 @@ Vector.k = Vector.create([0,0,1]);
 
 // Random vector of size n
 Vector.Random = function(n) {
-  return Vector.Zero(n).map(function() { return Math.random(); });
+  var elements = [];
+  do { elements.push(Math.random());
+  } while (--n);
+  return Vector.create(elements);
 };
 
 // Vector filled with zeros
 Vector.Zero = function(n) {
   var elements = [];
-  for (var i = 0; i < n; i++) {
-    elements.push(0)
-  }
+  do { elements.push(0);
+  } while (--n);
   return Vector.create(elements);
 };
 
