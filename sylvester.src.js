@@ -516,8 +516,7 @@ Matrix.prototype = {
 
   // Make the matrix upper (right) triangular by Gaussian elimination.
   // This method only adds multiples of rows to other rows. No rows are
-  // scaled up or switched, and the determinant is preserved. Elements that
-  // are within rounding error precision of zero are snapped to zero.
+  // scaled up or switched, and the determinant is preserved.
   toRightTriangular: function() {
     var M = this.dup(), els;
     var n = this.elements.length, k = n, i, np, kp = this.elements[0].length, p;
@@ -591,7 +590,7 @@ Matrix.prototype = {
     do { i = ki - ni;
       nj = kj;
       do { j = kj - nj;
-        if (M.elements[i][j] !== 0) { rank++; break; }
+        if (Math.abs(M.elements[i][j]) > Sylvester.precision) { rank++; break; }
       } while (--nj);
     } while (--ni);
     return rank;
@@ -616,20 +615,37 @@ Matrix.prototype = {
 
   // Returns the inverse (if one exists) using Gauss-Jordan
   inverse: function() {
-    var i, j;
     if (!this.isSquare() || this.isSingular()) { return null; }
-    var n = this.rows();
-    var M = this.augment(Matrix.I(n)).toRightTriangular();
+    var ni = this.elements.length, ki = ni, i, j;
+    var M = this.augment(Matrix.I(ni)).toRightTriangular();
+    var np, kp = M.elements[0].length, p, els, divisor;
+    var inverse_elements = [], new_element;
     // Matrix is non-singular so there will be no zeros on the diagonal
-    for (i = 1; i <= n; i++) {
-      M.elements[i - 1] = M.row(i).x(1 / M.e(i,i)).elements;
-    }
-    for (i = n; i > 1; i--) {
-      for (j = 1; j < i; j++) {
-        M.elements[j - 1] = M.row(j).subtract(M.row(i).x(M.e(j,i))).elements;
+    // Cycle through rows from last to first
+    do { i = ni - 1;
+      // First, normalise diagonal elements to 1
+      els = []; np = kp;
+      inverse_elements[i] = [];
+      divisor = M.elements[i][i];
+      do { p = kp - np;
+        new_element = M.elements[i][p] / divisor;
+        els.push(new_element);
+        // Shuffle of the current row of the right hand side into the results
+        // array as it will not be modified by later runs through this loop
+        if (p >= ki) { inverse_elements[i].push(new_element); }
+      } while (--np);
+      M.elements[i] = els;
+      // Then, subtract this row from those above it to
+      // give the identity matrix on the left hand side
+      for (j = 0; j < i; j++) {
+        els = []; np = kp;
+        do { p = kp - np;
+          els.push(M.elements[j][p] - M.elements[i][p] * M.elements[j][i]);
+        } while (--np);
+        M.elements[j] = els;
       }
-    }
-    return M.minor(1, n+1, n, n);
+    } while (--ni);
+    return Matrix.create(inverse_elements);
   },
 
   inv: function() { return this.inverse(); },
