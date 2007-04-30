@@ -29,7 +29,7 @@ Vector.prototype = {
 
   // Returns element i of the vector
   e: function(i) {
-    return (i < 1 || i > this.elements.length) ? null : this.elements[i - 1];
+    return (i < 1 || i > this.elements.length) ? null : this.elements[i-1];
   },
 
   // Returns the number of elements the vector has
@@ -326,7 +326,7 @@ Matrix.prototype = {
   // Returns row k of the matrix as a vector
   row: function(i) {
     if (i > this.elements.length) { return null; }
-    return Vector.create(this.elements[i - 1]);
+    return Vector.create(this.elements[i-1]);
   },
 
   // Returns column k of the matrix as a vector
@@ -661,9 +661,10 @@ Matrix.prototype = {
   // differ from it by less than Sylvester.precision
   snapTo: function(x) {
     var M = this.dup();
-    for (var i = 1; i <= M.rows(); i++) {
-      M.elements[i - 1] = M.row(i).snapTo(x).elements;
-    }
+    var n = this.elements.length, k = n, i;
+    do { i = k - n;
+      M.elements[i]  = M.row(i+1).snapTo(x).elements;
+    } while (--n);
     return M;
   },
 
@@ -710,26 +711,23 @@ Matrix.create = function(elements) {
 
 // Identity matrix of size n
 Matrix.I = function(n) {
-  var els = [], i, j;
-  for (i = 0; i < n; i++) {
-    els[i] = [];
-    for (j = 0; j < n; j++) {
+  var els = [], k = n, i, nj, j;
+  do { i = k - n;
+    els[i] = []; nj = k;
+    do { j = k - nj;
       els[i][j] = (i == j) ? 1 : 0;
-    }
-  }
+    } while (--nj);
+  } while (--n);
   return Matrix.create(els);
 };
 
 // Diagonal matrix - all off-diagonal elements are zero
 Matrix.Diagonal = function(elements) {
-  if (typeof(elements) == 'undefined') { return null; }
-  var V = Vector.create(elements);
-  var n = V.dimensions();
-  if (n <= 0) { return null; }
+  var n = elements.length, k = n, i;
   var M = Matrix.I(n);
-  for (var i = 0; i < n; i++) {
-    M.elements[i][i] = V.elements[i];
-  }
+  do { i = k - n;
+    M.elements[i][i] = elements[i];
+  } while (--n);
   return M;
 };
 
@@ -792,13 +790,14 @@ Matrix.Random = function(n, m) {
 
 // Matrix filled with zeros
 Matrix.Zero = function(n, m) {
-  var els = [], i, j;
-  for (i = 0; i < n; i++) {
+  var els = [], ni = n, i, nj, j;
+  do { i = n - ni;
     els[i] = [];
-    for (j = 0; j < m; j++) {
+    nj = m;
+    do { j = m - nj;
       els[i][j] = 0;
-    }
-  }
+    } while (--nj);
+  } while (--ni);
   return Matrix.create(els);
 };
 
