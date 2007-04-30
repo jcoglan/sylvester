@@ -660,12 +660,9 @@ Matrix.prototype = {
   // Sets the elements of the matrix to the given value if they
   // differ from it by less than Sylvester.precision
   snapTo: function(x) {
-    var M = this.dup();
-    var n = this.elements.length, k = n, i;
-    do { i = k - n;
-      M.elements[i]  = M.row(i+1).snapTo(x).elements;
-    } while (--n);
-    return M;
+    return this.map(function(p) {
+      return (Math.abs(p - x) <= Sylvester.precision) ? x : p;
+    });
   },
 
   // Returns a string representation of the matrix
