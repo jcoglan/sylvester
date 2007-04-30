@@ -985,11 +985,18 @@ Line.prototype = {
 
   // Set the line's anchor point and direction.
   setVectors: function(anchor, direction) {
-    anchor = Vector.create(anchor).to3D();
-    direction = Vector.create(direction).to3D();
-    if (anchor === null || direction === null || direction.modulus() === 0) { return null; }
+    if (!anchor.modulus) { anchor = Vector.create(anchor); }
+    if (!direction.modulus) { direction = Vector.create(direction); }
+    anchor = anchor.to3D(); direction = direction.to3D();
+    if (anchor === null || direction === null) { return null; }
+    var mod = direction.modulus();
+    if (mod === 0) { return null; }
     this.anchor = anchor;
-    this.direction = direction.toUnitVector();
+    this.direction = Vector.create([
+      direction.elements[0] / mod,
+      direction.elements[1] / mod,
+      direction.elements[2] / mod
+    ]);
     return this;
   }
 };
