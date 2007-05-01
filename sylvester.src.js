@@ -915,11 +915,8 @@ Line.prototype = {
       var E1 = E.elements[0], E2 = E.elements[1], E3 = E.elements[2];
       // Create plane containing obj and the shared normal and intersect this with it
       // Thank you: http://www.cgafaq.info/wiki/Line-line_distance
-      var N = Vector.create([
-        (D3 * E1 - D1 * E3) * E3 - (D1 * E2 - D2 * E1) * E2,
-        (D1 * E2 - D2 * E1) * E1 - (D2 * E3 - D3 * E2) * E3,
-        (D2 * E3 - D3 * E2) * E2 - (D3 * E1 - D1 * E3) * E1
-      ]);
+      var x = (D3 * E1 - D1 * E3), y = (D1 * E2 - D2 * E1), z = (D2 * E3 - D3 * E2);
+      var N = Vector.create([x * E3 - y * E2, y * E1 - z * E3, z * E2 - x * E1]);
       var P = Plane.create(obj.anchor, N);
       return P.intersectionWith(this);
     } else {
@@ -932,11 +929,8 @@ Line.prototype = {
       var D1 = D.elements[0], D2 = D.elements[1], D3 = D.elements[2];
       var A1 = A.elements[0], A2 = A.elements[1], A3 = A.elements[2];
       var P1 = P.elements[0], P2 = P.elements[1], P3 = P.elements[2];
-      var V = Vector.create([
-        D2 * (D1 * (P2-A2) - D2 * (P1-A1)) - D3 * (D3 * (P1-A1) - D1 * (P3-A3)),
-        D3 * (D2 * (P3-A3) - D3 * (P2-A2)) - D1 * (D1 * (P2-A2) - D2 * (P1-A1)),
-        D1 * (D3 * (P1-A1) - D1 * (P3-A3)) - D2 * (D2 * (P3-A3) - D3 * (P2-A2))
-      ]);
+      var x = D1 * (P2-A2) - D2 * (P1-A1), y = D2 * (P3-A3) - D3 * (P2-A2), z = D3 * (P1-A1) - D1 * (P3-A3);
+      var V = Vector.create([D2 * x - D3 * z, D3 * y - D1 * x, D1 * z - D2 * y]);
       var k = this.distanceFrom(P) / V.modulus();
       return Vector.create([
         P.elements[0] + V.elements[0] * k,
@@ -958,10 +952,11 @@ Line.prototype = {
     var A = this.anchor;
     var C1 = C.elements[0], C2 = C.elements[1], C3 = C.elements[2];
     var A1 = A.elements[0], A2 = A.elements[1], A3 = A.elements[2];
+    var x = A1 - C1, y = A2 - C2, z = A3 - C3;
     return Line.create([
-      C1 + R.elements[0][0] * (A1 - C1) + R.elements[0][1] * (A2 - C2) + R.elements[0][2] * (A3 - C3),
-      C2 + R.elements[1][0] * (A1 - C1) + R.elements[1][1] * (A2 - C2) + R.elements[1][2] * (A3 - C3),
-      C3 + R.elements[2][0] * (A1 - C1) + R.elements[2][1] * (A2 - C2) + R.elements[2][2] * (A3 - C3)
+      C1 + R.elements[0][0] * x + R.elements[0][1] * y + R.elements[0][2] * z,
+      C2 + R.elements[1][0] * x + R.elements[1][1] * y + R.elements[1][2] * z,
+      C3 + R.elements[2][0] * x + R.elements[2][1] * y + R.elements[2][2] * z
     ], R.x(this.direction));
   },
 
