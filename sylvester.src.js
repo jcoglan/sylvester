@@ -1030,17 +1030,23 @@ Plane.prototype = {
 
   // Returns the result of translating the plane by the given vector
   translate: function(vector) {
-    vector = Vector.create(vector).to3D();
-    if (vector === null) { return null; }
-    return Plane.create(this.anchor.add(vector), this.normal);
+    if (vector.elements) { vector = vector.elements; }
+    if (vector.length == 2) { vector.push(0); }
+    return Plane.create([
+      this.anchor.elements[0] + vector[0],
+      this.anchor.elements[1] + vector[1],
+      this.anchor.elements[2] + vector[2]
+    ], this.normal);
   },
 
   // Returns true iff the plane is parallel to the argument. Will return true
   // if the planes are equal, or if you give a line and it lies in the plane.
   isParallelTo: function(obj) {
+    var theta;
     if (obj.normal) {
       // obj is a plane
-      return (this.normal.isParallelTo(obj.normal) || this.normal.isAntiparallelTo(obj.normal));
+      theta = this.normal.angleFrom(obj.normal);
+      return (Math.abs(theta) <= Sylvester.precision || Math.abs(Math.PI - theta) <= Sylvester.precision);
     } else if (obj.direction) {
       // obj is a line
       return this.normal.isPerpendicularTo(obj.direction);
