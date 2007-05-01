@@ -1081,11 +1081,15 @@ Plane.prototype = {
   contains: function(obj) {
     if (obj.normal) { return null; }
     if (obj.direction) {
-      return (this.contains(obj.anchor) && this.normal.isPerpendicularTo(obj.direction));
+      return (this.contains(obj.anchor) && this.contains(obj.anchor.add(obj.direction)));
     } else {
-      var P = obj.to3D();
-      if (P === null) { return null; }
-      return (Math.abs(this.normal.dot(this.anchor) - this.normal.dot(P)) <= Sylvester.precision);
+      var P = obj.elements || obj;
+      if (P.length == 2) { P.push(0); }
+      var A = this.anchor, N = this.normal;
+      var A1 = A.elements[0], A2 = A.elements[1], A3 = A.elements[2];
+      var N1 = N.elements[0], N2 = N.elements[1], N3 = N.elements[2];
+      var diff = Math.abs(N1*A1 - N1*P[0] + N2*A2 - N2*P[1] + N3*A3 - N3*P[2]);
+      return (diff <= Sylvester.precision);
     }
   },
 
@@ -1112,8 +1116,8 @@ Plane.prototype = {
       while (N.isSingular()) {
         i++;
         N = Matrix.create([
-          [ this.normal.e(i%3 + 1), this.normal.e((i+1)%3 + 1) ],
-          [ obj.normal.e(i%3 + 1),  obj.normal.e((i+1)%3 + 1)  ]
+          [ this.normal.elements[i%3], this.normal.elements[(i+1)%3] ],
+          [ obj.normal.elements[i%3],  obj.normal.elements[(i+1)%3]  ]
         ]);
       }
       // Then we solve the simultaneous equations in the remaining dimensions
@@ -1122,7 +1126,7 @@ Plane.prototype = {
       for (var j = 1; j <= 3; j++) {
         // This formula picks the right element from intersection by
         // cycling depending on which element we set to zero above
-        anchor.push((i == j) ? 0 : intersection.e((j + (5 - i)%3)%3 + 1));
+        anchor.push((i == j) ? 0 : intersection.elements[(j + (5 - i)%3)%3]);
       }
       return Line.create(anchor, direction);
     }
