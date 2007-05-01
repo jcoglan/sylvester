@@ -1059,12 +1059,21 @@ Plane.prototype = {
     if (this.intersects(obj) || this.contains(obj)) { return 0; }
     if (obj.anchor) {
       // obj is a plane or line
-      return Math.abs(this.anchor.subtract(obj.anchor).dot(this.normal));
+      var A = this.anchor, B = obj.anchor, N = this.normal;
+      var A1 = A.elements[0], A2 = A.elements[1], A3 = A.elements[2];
+      var B1 = B.elements[0], B2 = B.elements[1], B3 = B.elements[2];
+      var N1 = N.elements[0], N2 = N.elements[1], N3 = N.elements[2];
+      // Math.abs(this.anchor.subtract(obj.anchor).dot(this.normal))
+      return Math.abs((A1 - B1) * N1 + (A2 - B2) * N2 + (A3 - B3) * N3);
     } else {
       // obj is a point
-      var P = obj.to3D();
-      if (P === null) { return null; }
-      return Math.abs(this.anchor.subtract(P).dot(this.normal))
+      var P = obj.elements || obj;
+      if (P.length == 2) { P.push(0); }
+      var A = this.anchor, N = this.normal;
+      var A1 = A.elements[0], A2 = A.elements[1], A3 = A.elements[2];
+      var N1 = N.elements[0], N2 = N.elements[1], N3 = N.elements[2];
+      // Math.abs(this.anchor.subtract(P).dot(this.normal))
+      return Math.abs((A1 - P[0]) * N1 + (A2 - P[1]) * N2 + (A3 - P[2]) * N3);
     }
   },
 
@@ -1172,6 +1181,7 @@ Plane.prototype = {
     var normal, mod;
     if (v2 !== null) {
       var v21 = v2.elements[0], v22 = v2.elements[1], v23 = v2.elements[2];
+      // normal = ((v1 - A) ^ (v2 - A)).toUnitVector()
       normal = Vector.create([
         (v12 - A2) * (v23 - A3) - (v13 - A3) * (v22 - A2),
         (v13 - A3) * (v21 - A1) - (v11 - A1) * (v23 - A3),
