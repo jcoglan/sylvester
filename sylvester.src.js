@@ -1101,7 +1101,13 @@ Plane.prototype = {
     if (obj.direction) {
       // obj is a line
       var A = obj.anchor, D = obj.direction, P = this.anchor, N = this.normal;
-      return A.add(D.x(N.dot(P.subtract(A)) / N.dot(D)));
+      var A1 = A.elements[0], A2 = A.elements[1], A3 = A.elements[2];
+      var D1 = D.elements[0], D2 = D.elements[1], D3 = D.elements[2];
+      var P1 = P.elements[0], P2 = P.elements[1], P3 = P.elements[2];
+      var N1 = N.elements[0], N2 = N.elements[1], N3 = N.elements[2];
+      // A.add(D.x(N.dot(P.subtract(A)) / N.dot(D)))
+      var multiplier = (N1*(P1-A1) + N2*(P2-A2) + N3*(P3-A3)) / (N1*D1 + N2*D2 + N3*D3);
+      return Vector.create([A1 + D1*multiplier, A2 + D2*multiplier, A3 + D3*multiplier]);
     } else if (obj.normal) {
       // obj is a plane
       var direction = this.normal.cross(obj.normal).toUnitVector();
@@ -1116,12 +1122,20 @@ Plane.prototype = {
         ]);
       }
       // Then we solve the simultaneous equations in the remaining dimensions
-      var intersection = N.inv().x(Vector.create([this.normal.dot(this.anchor), obj.normal.dot(obj.anchor)]));
+      // var intersection = N.inv().x(Vector.create([this.normal.dot(this.anchor), obj.normal.dot(obj.anchor)]));
+      var inverse = N.inverse();
+      var N = this.normal, A = this.anchor, O = obj.normal, B = obj.anchor;
+      var x = N.elements[0]*A.elements[0] + N.elements[1]*A.elements[1] + N.elements[2]*A.elements[2];
+      var y = O.elements[0]*B.elements[0] + O.elements[1]*B.elements[1] + O.elements[2]*B.elements[2];
+      var intersection = [
+        inverse.elements[0][0] * x + inverse.elements[0][1] * y,
+        inverse.elements[1][0] * x + inverse.elements[1][1] * y
+      ];
       var anchor = [];
       for (var j = 1; j <= 3; j++) {
         // This formula picks the right element from intersection by
         // cycling depending on which element we set to zero above
-        anchor.push((i == j) ? 0 : intersection.elements[(j + (5 - i)%3)%3]);
+        anchor.push((i == j) ? 0 : intersection[(j + (5 - i)%3)%3]);
       }
       return Line.create(anchor, direction);
     }
