@@ -1151,15 +1151,33 @@ Plane.prototype = {
   // If only two are sepcified, the second is taken to be the normal. Normal vector is
   // normalised before storage.
   setVectors: function(anchor, v1, v2) {
-    anchor = Vector.create(anchor).to3D();
-    v1 = Vector.create(v1).to3D();
-    v2 = (typeof(v2) == 'undefined') ? null : Vector.create(v2).to3D();
-    if (anchor === null || v1 === null || v1.modulus() === 0) { return null; }
-    if (v2 !== null) {
-      if (v2.modulus() === 0) { return null; }
-      normal = (v1.subtract(anchor)).cross(v2.subtract(anchor)).toUnitVector();
+    if (!anchor.modulus) { anchor = Vector.create(anchor); }
+    anchor = anchor.to3D(); if (anchor === null) { return null; }
+    if (!v1.modulus) { v1 = Vector.create(v1); }
+    v1 = v1.to3D(); if (v1 === null) { return null; }
+    if (typeof(v2) == 'undefined') {
+      v2 = null;
     } else {
-      normal = v1.toUnitVector();
+      if (!v2.modulus) { v2 = Vector.create(v2); }
+      v2 = v2.to3D(); if (v2 === null) { return null; }
+    }
+    var A1 = anchor.elements[0], A2 = anchor.elements[1], A3 = anchor.elements[2];
+    var v11 = v1.elements[0], v12 = v1.elements[1], v13 = v1.elements[2];
+    var normal, mod;
+    if (v2 !== null) {
+      var v21 = v2.elements[0], v22 = v2.elements[1], v23 = v2.elements[2];
+      normal = Vector.create([
+        (v12 - A2) * (v23 - A3) - (v13 - A3) * (v22 - A2),
+        (v13 - A3) * (v21 - A1) - (v11 - A1) * (v23 - A3),
+        (v11 - A1) * (v22 - A2) - (v12 - A2) * (v21 - A1)
+      ]);
+      mod = normal.modulus();
+      if (mod === 0) { return null; }
+      normal = Vector.create([normal.elements[0] / mod, normal.elements[1] / mod, normal.elements[2] / mod]);
+    } else {
+      mod = Math.sqrt(v11*v11 + v12*v12 + v13*v13);
+      if (mod === 0) { return null; }
+      normal = Vector.create([v1.elements[0] / mod, v1.elements[1] / mod, v1.elements[2] / mod]);
     }
     this.anchor = anchor;
     this.normal = normal;
