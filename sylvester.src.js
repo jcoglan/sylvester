@@ -850,15 +850,14 @@ Line.prototype = {
       return Math.abs((A1 - B1) * N1 + (A2 - B2) * N2 + (A3 - B3) * N3);
     } else {
       // obj is a point
-      var P = obj.to3D();
-      if (P === null) { return null; }
+      var P = obj.elements || obj;
+      if (P.length == 2) { P.push(0); }
       // var A = P.subtract(this.anchor);
       // return Math.abs(A.modulus() * Math.sin(A.angleFrom(this.direction)));
       var A = this.anchor, D = this.direction;
-      var P1 = P.elements[0], P2 = P.elements[1], P3 = P.elements[2];
       var A1 = A.elements[0], A2 = A.elements[1], A3 = A.elements[2];
       var D1 = D.elements[0], D2 = D.elements[1], D3 = D.elements[2];
-      var PA1 = P1 - A1, PA2 = P2 - A2, PA3 = P3 - A3;
+      var PA1 = P[0] - A1, PA2 = P[1] - A2, PA3 = P[2] - A3;
       var modPA = Math.sqrt(PA1*PA1 + PA2*PA2 + PA3*PA3);
       if (modPA === 0) return 0;
       // Assumes direction vector is normalised
@@ -921,21 +920,20 @@ Line.prototype = {
       return P.intersectionWith(this);
     } else {
       // obj is a point
-      var P = obj.to3D();
-      if (P === null) { return null; }
-      if (this.contains(P)) { return P; }
+      var P = obj.elements || obj;
+      if (P.length == 2) { P.push(0); }
+      if (this.contains(P)) { return Vector.create(P); }
       // P.add(this.direction.cross(this.direction.cross(P.subtract(this.anchor))).toUnitVector().x(this.distanceFrom(P)))
       var A = this.anchor, D = this.direction;
       var D1 = D.elements[0], D2 = D.elements[1], D3 = D.elements[2];
       var A1 = A.elements[0], A2 = A.elements[1], A3 = A.elements[2];
-      var P1 = P.elements[0], P2 = P.elements[1], P3 = P.elements[2];
-      var x = D1 * (P2-A2) - D2 * (P1-A1), y = D2 * (P3-A3) - D3 * (P2-A2), z = D3 * (P1-A1) - D1 * (P3-A3);
+      var x = D1 * (P[1]-A2) - D2 * (P[0]-A1), y = D2 * (P[2]-A3) - D3 * (P[1]-A2), z = D3 * (P[0]-A1) - D1 * (P[2]-A3);
       var V = Vector.create([D2 * x - D3 * z, D3 * y - D1 * x, D1 * z - D2 * y]);
       var k = this.distanceFrom(P) / V.modulus();
       return Vector.create([
-        P.elements[0] + V.elements[0] * k,
-        P.elements[1] + V.elements[1] * k,
-        P.elements[2] + V.elements[2] * k
+        P[0] + V.elements[0] * k,
+        P[1] + V.elements[1] * k,
+        P[2] + V.elements[2] * k
       ]);
     }
   },
@@ -982,8 +980,9 @@ Line.prototype = {
   setVectors: function(anchor, direction) {
     if (!anchor.modulus) { anchor = Vector.create(anchor); }
     if (!direction.modulus) { direction = Vector.create(direction); }
-    anchor = anchor.to3D(); direction = direction.to3D();
-    if (anchor === null || direction === null) { return null; }
+    if (anchor.elements.length == 2) { anchor.elements.push(0); }
+    if (direction.elements.length == 2) { direction.elements.push(0); }
+    if (anchor.elements.length > 3 || direction.elements.length > 3) { return null; }
     var mod = direction.modulus();
     if (mod === 0) { return null; }
     this.anchor = anchor;
