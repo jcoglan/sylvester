@@ -248,12 +248,11 @@ Vector.prototype = {
   reflectionIn: function(obj) {
     if (obj.anchor) {
       // obj is a plane or line
-      var P = this.to3D();
-      if (P === null) { return null; }
+      var P = this.elements;
+      if (P.length == 2) { P.push(0); }
       var C = obj.pointClosestTo(P);
       var C1 = C.elements[0], C2 = C.elements[1], C3 = C.elements[2];
-      var P1 = P.elements[0], P2 = P.elements[1], P3 = P.elements[2];
-      return Vector.create([C1 + (C1 - P1), C2 + (C2 - P2), C3 + (C3 - P3)]);
+      return Vector.create([C1 + (C1 - P[0]), C2 + (C2 - P[1]), C3 + (C3 - P[2])]);
     } else {
       // obj is a point
       if (this.elements.length != obj.elements.length) { return null; }
@@ -962,17 +961,28 @@ Line.prototype = {
   reflectionIn: function(obj) {
     if (obj.normal) {
       // obj is a plane
-      var A = this.anchor.reflectionIn(obj);
-      var D = obj.anchor.add(this.direction).reflectionIn(obj).subtract(obj.anchor);
-      return Line.create(A, D);
+      var theta = this.direction.angleFrom(obj.normal);
+      if (Math.abs(theta) <= Sylvester.precision || Math.abs(Math.PI - theta) <= Sylvester.precision) { return this.dup(); }
+      var C = obj.pointClosestTo(this.anchor);
+      var A = this.anchor, D = this.direction;
+      var C1 = C.elements[0], C2 = C.elements[1], C3 = C.elements[2];
+      var A1 = A.elements[0], A2 = A.elements[1], A3 = A.elements[2];
+      var D1 = D.elements[0], D2 = D.elements[1], D3 = D.elements[2];
+      var newA = [C1 + (C1 - A1), C2 + (C2 - A2), C3 + (C3 - A3)];
+      // Add the line's direction vector to its anchor, then mirror that in the plane
+      var AD1 = A1 + D1, AD2 = A2 + D2, AD3 = A3 + D3;
+      var Q = obj.pointClosestTo([AD1, AD2, AD3]);
+      var Q1 = Q.elements[0], Q2 = Q.elements[1], Q3 = Q.elements[2];
+      var newD = [Q1 + (Q1 - AD1) - newA[0], Q2 + (Q2 - AD2) - newA[1], Q3 + (Q3 - AD3) - newA[2]];
+      return Line.create(newA, newD);
     } else if (obj.direction) {
       // obj is a line - reflection obtained by rotating PI radians about obj
       return this.rotate(Math.PI, obj);
     } else {
       // obj is a point - just reflect the line's anchor in it
-      var P = obj.to3D();
-      if (P === null) { return null; }
-      return Line.create(this.anchor.reflectionIn(P), this.direction);
+      var P = obj.elements || obj;
+      if (P.length == 2) { P.push(0); }
+      return Line.create(this.anchor.reflectionIn($V(P)), this.direction);
     }
   },
 
@@ -1142,8 +1152,9 @@ Plane.prototype = {
 
   // Returns the point in the plane closest to the given point
   pointClosestTo: function(point) {
-    point = point.to3D();
-    if (point === null) { return null; }
+    point = point.elements || point;
+    if (point.length == 2) { point.push(0); }
+    point = $V(point);
     return point.add(this.normal.x(this.anchor.subtract(point).dot(this.normal)));
   },
 
