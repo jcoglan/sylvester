@@ -1152,10 +1152,14 @@ Plane.prototype = {
 
   // Returns the point in the plane closest to the given point
   pointClosestTo: function(point) {
-    point = point.elements || point;
-    if (point.length == 2) { point.push(0); }
-    point = $V(point);
-    return point.add(this.normal.x(this.anchor.subtract(point).dot(this.normal)));
+    var P = point.elements || point;
+    if (P.length == 2) { P.push(0); }
+    // point.add(this.normal.x(this.anchor.subtract(point).dot(this.normal)))
+    var A = this.anchor, N = this.normal;
+    var A1 = A.elements[0], A2 = A.elements[1], A3 = A.elements[2];
+    var N1 = N.elements[0], N2 = N.elements[1], N3 = N.elements[2];
+    var dot = (A1 - P[0]) * N1 + (A2 - P[1]) * N2 + (A3 - P[2]) * N3;
+    return Vector.create([P[0] + N1 * dot, P[1] + N2 * dot, P[2] + N3 * dot]);
   },
 
   // Returns a copy of the plane, rotated by t radians about the given line
