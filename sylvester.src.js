@@ -140,11 +140,13 @@ Vector.prototype = {
   // Returns the vector product of the vector with the argument
   // Both vectors must have dimensionality 3
   cross: function(vector) {
-    if (this.elements.length != 3 || vector.elements.length != 3) { return null; }
+    vector = vector.elements || vector;
+    if (this.elements.length != 3 || vector.length != 3) { return null; }
+    var A = this.elements, B = vector;
     return Vector.create([
-      (this.elements[1] * vector.elements[2]) - (this.elements[2] * vector.elements[1]),
-      (this.elements[2] * vector.elements[0]) - (this.elements[0] * vector.elements[2]),
-      (this.elements[0] * vector.elements[1]) - (this.elements[1] * vector.elements[0])
+      (A[1] * B[2]) - (A[2] * B[1]),
+      (A[2] * B[0]) - (A[0] * B[2]),
+      (A[0] * B[1]) - (A[1] * B[0])
     ]);
   },
 
@@ -217,26 +219,26 @@ Vector.prototype = {
       case 2:
         if (obj.elements.length != 2) { return null; }
         // obj.add(Matrix.Rotation(t).x(this.subtract(obj)))
-        R = Matrix.Rotation(t);
+        R = Matrix.Rotation(t).elements;
         x = this.elements[0] - obj.elements[0];
         y = this.elements[1] - obj.elements[1];
         return Vector.create([
-          obj.elements[0] + R.elements[0][0] * x + R.elements[0][1] * y,
-          obj.elements[1] + R.elements[1][0] * x + R.elements[1][1] * y
+          obj.elements[0] + R[0][0] * x + R[0][1] * y,
+          obj.elements[1] + R[1][0] * x + R[1][1] * y
         ]);
         break;
       case 3:
         if (!obj.direction) { return null; }
-        var C = obj.pointClosestTo(this);
-        R = Matrix.Rotation(t, obj.direction);
+        var C = obj.pointClosestTo(this).elements;
+        R = Matrix.Rotation(t, obj.direction).elements;
         // C.add(R.x(this.subtract(C)))
-        x = this.elements[0] - C.elements[0];
-        y = this.elements[1] - C.elements[1];
-        z = this.elements[2] - C.elements[2];
+        x = this.elements[0] - C[0];
+        y = this.elements[1] - C[1];
+        z = this.elements[2] - C[2];
         return Vector.create([
-          C.elements[0] + R.elements[0][0] * x + R.elements[0][1] * y + R.elements[0][2] * z,
-          C.elements[1] + R.elements[1][0] * x + R.elements[1][1] * y + R.elements[1][2] * z,
-          C.elements[2] + R.elements[2][0] * x + R.elements[2][1] * y + R.elements[2][2] * z
+          C[0] + R[0][0] * x + R[0][1] * y + R[0][2] * z,
+          C[1] + R[1][0] * x + R[1][1] * y + R[1][2] * z,
+          C[2] + R[2][0] * x + R[2][1] * y + R[2][2] * z
         ]);
         break;
       default:
@@ -250,9 +252,8 @@ Vector.prototype = {
       // obj is a plane or line
       var P = this.elements;
       if (P.length == 2) { P.push(0); }
-      var C = obj.pointClosestTo(P);
-      var C1 = C.elements[0], C2 = C.elements[1], C3 = C.elements[2];
-      return Vector.create([C1 + (C1 - P[0]), C2 + (C2 - P[1]), C3 + (C3 - P[2])]);
+      var C = obj.pointClosestTo(P).elements;
+      return Vector.create([C[0] + (C[0] - P[0]), C[1] + (C[1] - P[1]), C[2] + (C[2] - P[2])]);
     } else {
       // obj is a point
       if (this.elements.length != obj.elements.length) { return null; }
@@ -840,27 +841,22 @@ Line.prototype = {
     if (obj.direction) {
       // obj is a line
       if (this.isParallelTo(obj)) { return this.distanceFrom(obj.anchor); }
-      var N = this.direction.cross(obj.direction).toUnitVector();
+      var N = this.direction.cross(obj.direction).toUnitVector().elements;
+      var A = this.anchor.elements, B = obj.anchor.elements;
       // this.anchor.subtract(obj.anchor).dot(N)
-      var A = this.anchor, B = obj.anchor;
-      var N1 = N.elements[0], N2 = N.elements[1], N3 = N.elements[2];
-      var A1 = A.elements[0], A2 = A.elements[1], A3 = A.elements[2];
-      var B1 = B.elements[0], B2 = B.elements[1], B3 = B.elements[2];
-      return Math.abs((A1 - B1) * N1 + (A2 - B2) * N2 + (A3 - B3) * N3);
+      return Math.abs((A[0] - B[0]) * N[0] + (A[1] - B[1]) * N[1] + (A[2] - B[2]) * N[2]);
     } else {
       // obj is a point
       var P = obj.elements || obj;
       if (P.length == 2) { P.push(0); }
       // var A = P.subtract(this.anchor);
       // return Math.abs(A.modulus() * Math.sin(A.angleFrom(this.direction)));
-      var A = this.anchor, D = this.direction;
-      var A1 = A.elements[0], A2 = A.elements[1], A3 = A.elements[2];
-      var D1 = D.elements[0], D2 = D.elements[1], D3 = D.elements[2];
-      var PA1 = P[0] - A1, PA2 = P[1] - A2, PA3 = P[2] - A3;
+      var A = this.anchor.elements, D = this.direction.elements;
+      var PA1 = P[0] - A[0], PA2 = P[1] - A[1], PA3 = P[2] - A[2];
       var modPA = Math.sqrt(PA1*PA1 + PA2*PA2 + PA3*PA3);
       if (modPA === 0) return 0;
       // Assumes direction vector is normalised
-      var cosTheta = (PA1 * D1 + PA2 * D2 + PA3 * D3) / modPA;
+      var cosTheta = (PA1 * D[0] + PA2 * D[1] + PA3 * D[2]) / modPA;
       var sin2 = 1 - cosTheta*cosTheta;
       return Math.abs(modPA * Math.sqrt(sin2 < 0 ? 0 : sin2));
     }
@@ -887,19 +883,17 @@ Line.prototype = {
   intersectionWith: function(obj) {
     if (!this.intersects(obj)) { return null; }
     if (obj.normal) { return obj.intersectionWith(this); }
-    var P = this.anchor, X = this.direction, Q = obj.anchor, Y = obj.direction;
-    var P1 = P.elements[0], P2 = P.elements[1], P3 = P.elements[2];
-    var Q1 = Q.elements[0], Q2 = Q.elements[1], Q3 = Q.elements[2];
-    var X1 = X.elements[0], X2 = X.elements[1], X3 = X.elements[2];
-    var Y1 = Y.elements[0], Y2 = Y.elements[1], Y3 = Y.elements[2];
-    var PsubQ1 = P1 - Q1, PsubQ2 = P2 - Q2, PsubQ3 = P3 - Q3;
+    var P = this.anchor.elements, X = this.direction.elements,
+        Q = obj.anchor.elements, Y = obj.direction.elements;
+    var X1 = X[0], X2 = X[1], X3 = X[2], Y1 = Y[0], Y2 = Y[1], Y3 = Y[2];
+    var PsubQ1 = P[0] - Q[0], PsubQ2 = P[1] - Q[1], PsubQ3 = P[2] - Q[2];
     var XdotQsubP = - X1*PsubQ1 - X2*PsubQ2 - X3*PsubQ3;
     var YdotPsubQ = Y1*PsubQ1 + Y2*PsubQ2 + Y3*PsubQ3;
     var XdotX = X1*X1 + X2*X2 + X3*X3;
     var YdotY = Y1*Y1 + Y2*Y2 + Y3*Y3;
     var XdotY = X1*Y1 + X2*Y2 + X3*Y3;
     var k = (XdotQsubP * YdotY / XdotX + XdotY * YdotPsubQ) / (YdotY - XdotY * XdotY);
-    return Vector.create([P1 + k*X1, P2 + k*X2, P3 + k*X3]);
+    return Vector.create([P[0] + k*X1, P[1] + k*X2, P[2] + k*X3]);
   },
 
   // Returns the point on the line that is closest to the given point or line
@@ -908,9 +902,8 @@ Line.prototype = {
       // obj is a line
       if (this.intersects(obj)) { return this.intersectionWith(obj); }
       if (this.isParallelTo(obj)) { return null; }
-      var D = this.direction, E = obj.direction;
-      var D1 = D.elements[0], D2 = D.elements[1], D3 = D.elements[2];
-      var E1 = E.elements[0], E2 = E.elements[1], E3 = E.elements[2];
+      var D = this.direction.elements, E = obj.direction.elements;
+      var D1 = D[0], D2 = D[1], D3 = D[2], E1 = E[0], E2 = E[1], E3 = E[2];
       // Create plane containing obj and the shared normal and intersect this with it
       // Thank you: http://www.cgafaq.info/wiki/Line-line_distance
       var x = (D3 * E1 - D1 * E3), y = (D1 * E2 - D2 * E1), z = (D2 * E3 - D3 * E2);
@@ -923,9 +916,8 @@ Line.prototype = {
       if (P.length == 2) { P.push(0); }
       if (this.contains(P)) { return Vector.create(P); }
       // P.add(this.direction.cross(this.direction.cross(P.subtract(this.anchor))).toUnitVector().x(this.distanceFrom(P)))
-      var A = this.anchor, D = this.direction;
-      var D1 = D.elements[0], D2 = D.elements[1], D3 = D.elements[2];
-      var A1 = A.elements[0], A2 = A.elements[1], A3 = A.elements[2];
+      var A = this.anchor.elements, D = this.direction.elements;
+      var D1 = D[0], D2 = D[1], D3 = D[2], A1 = A[0], A2 = A[1], A3 = A[2];
       var x = D1 * (P[1]-A2) - D2 * (P[0]-A1), y = D2 * (P[2]-A3) - D3 * (P[1]-A2), z = D3 * (P[0]-A1) - D1 * (P[2]-A3);
       var V = Vector.create([D2 * x - D3 * z, D3 * y - D1 * x, D1 * z - D2 * y]);
       var k = this.distanceFrom(P) / V.modulus();
@@ -944,17 +936,17 @@ Line.prototype = {
   rotate: function(t, line) {
     // If we're working in 2D
     if (typeof(line.direction) == 'undefined') { line = Line.create(line.to3D(), Vector.k); }
-    var R = Matrix.Rotation(t, line.direction);
-    var C = line.pointClosestTo(this.anchor);
-    var A = this.anchor;
-    var C1 = C.elements[0], C2 = C.elements[1], C3 = C.elements[2];
-    var A1 = A.elements[0], A2 = A.elements[1], A3 = A.elements[2];
+    var rotation = Matrix.Rotation(t, line.direction);
+    var R = rotation.elements;
+    var C = line.pointClosestTo(this.anchor).elements;
+    var A = this.anchor.elements;
+    var C1 = C[0], C2 = C[1], C3 = C[2], A1 = A[0], A2 = A[1], A3 = A[2];
     var x = A1 - C1, y = A2 - C2, z = A3 - C3;
     return Line.create([
-      C1 + R.elements[0][0] * x + R.elements[0][1] * y + R.elements[0][2] * z,
-      C2 + R.elements[1][0] * x + R.elements[1][1] * y + R.elements[1][2] * z,
-      C3 + R.elements[2][0] * x + R.elements[2][1] * y + R.elements[2][2] * z
-    ], R.x(this.direction));
+      C1 + R[0][0] * x + R[0][1] * y + R[0][2] * z,
+      C2 + R[1][0] * x + R[1][1] * y + R[1][2] * z,
+      C3 + R[2][0] * x + R[2][1] * y + R[2][2] * z
+    ], rotation.x(this.direction));
   },
 
   // Returns the line's reflection in the given point or line
@@ -963,17 +955,14 @@ Line.prototype = {
       // obj is a plane
       var theta = this.direction.angleFrom(obj.normal);
       if (Math.abs(theta) <= Sylvester.precision || Math.abs(Math.PI - theta) <= Sylvester.precision) { return this.dup(); }
-      var C = obj.pointClosestTo(this.anchor);
-      var A = this.anchor, D = this.direction;
-      var C1 = C.elements[0], C2 = C.elements[1], C3 = C.elements[2];
-      var A1 = A.elements[0], A2 = A.elements[1], A3 = A.elements[2];
-      var D1 = D.elements[0], D2 = D.elements[1], D3 = D.elements[2];
-      var newA = [C1 + (C1 - A1), C2 + (C2 - A2), C3 + (C3 - A3)];
+      var C = obj.pointClosestTo(this.anchor).elements;
+      var A = this.anchor.elements, D = this.direction.elements;
+      var A1 = A[0], A2 = A[1], A3 = A[2], D1 = D[0], D2 = D[1], D3 = D[2];
+      var newA = [C[0] + (C[0] - A1), C[1] + (C[1] - A2), C[2] + (C[2] - A3)];
       // Add the line's direction vector to its anchor, then mirror that in the plane
       var AD1 = A1 + D1, AD2 = A2 + D2, AD3 = A3 + D3;
-      var Q = obj.pointClosestTo([AD1, AD2, AD3]);
-      var Q1 = Q.elements[0], Q2 = Q.elements[1], Q3 = Q.elements[2];
-      var newD = [Q1 + (Q1 - AD1) - newA[0], Q2 + (Q2 - AD2) - newA[1], Q3 + (Q3 - AD3) - newA[2]];
+      var Q = obj.pointClosestTo([AD1, AD2, AD3]).elements;
+      var newD = [Q[0] + (Q[0] - AD1) - newA[0], Q[1] + (Q[1] - AD2) - newA[1], Q[2] + (Q[2] - AD3) - newA[2]];
       return Line.create(newA, newD);
     } else if (obj.direction) {
       // obj is a line - reflection obtained by rotating PI radians about obj
@@ -1063,21 +1052,16 @@ Plane.prototype = {
     if (this.intersects(obj) || this.contains(obj)) { return 0; }
     if (obj.anchor) {
       // obj is a plane or line
-      var A = this.anchor, B = obj.anchor, N = this.normal;
-      var A1 = A.elements[0], A2 = A.elements[1], A3 = A.elements[2];
-      var B1 = B.elements[0], B2 = B.elements[1], B3 = B.elements[2];
-      var N1 = N.elements[0], N2 = N.elements[1], N3 = N.elements[2];
+      var A = this.anchor.elements, B = obj.anchor.elements, N = this.normal.elements;
       // Math.abs(this.anchor.subtract(obj.anchor).dot(this.normal))
-      return Math.abs((A1 - B1) * N1 + (A2 - B2) * N2 + (A3 - B3) * N3);
+      return Math.abs((A[0] - B[0]) * N[0] + (A[1] - B[1]) * N[1] + (A[2] - B[2]) * N[2]);
     } else {
       // obj is a point
       var P = obj.elements || obj;
       if (P.length == 2) { P.push(0); }
-      var A = this.anchor, N = this.normal;
-      var A1 = A.elements[0], A2 = A.elements[1], A3 = A.elements[2];
-      var N1 = N.elements[0], N2 = N.elements[1], N3 = N.elements[2];
+      var A = this.anchor.elements, N = this.normal.elements;
       // Math.abs(this.anchor.subtract(P).dot(this.normal))
-      return Math.abs((A1 - P[0]) * N1 + (A2 - P[1]) * N2 + (A3 - P[2]) * N3);
+      return Math.abs((A[0] - P[0]) * N[0] + (A[1] - P[1]) * N[1] + (A[2] - P[2]) * N[2]);
     }
   },
 
@@ -1089,10 +1073,8 @@ Plane.prototype = {
     } else {
       var P = obj.elements || obj;
       if (P.length == 2) { P.push(0); }
-      var A = this.anchor, N = this.normal;
-      var A1 = A.elements[0], A2 = A.elements[1], A3 = A.elements[2];
-      var N1 = N.elements[0], N2 = N.elements[1], N3 = N.elements[2];
-      var diff = Math.abs(N1*A1 - N1*P[0] + N2*A2 - N2*P[1] + N3*A3 - N3*P[2]);
+      var A = this.anchor.elements, N = this.normal.elements;
+      var diff = Math.abs(N[0]*(A[0] - P[0]) + N[1]*(A[1] - P[1]) + N[2]*(A[2] - P[2]));
       return (diff <= Sylvester.precision);
     }
   },
@@ -1109,36 +1091,34 @@ Plane.prototype = {
     if (!this.intersects(obj)) { return null; }
     if (obj.direction) {
       // obj is a line
-      var A = obj.anchor, D = obj.direction, P = this.anchor, N = this.normal;
-      var A1 = A.elements[0], A2 = A.elements[1], A3 = A.elements[2];
-      var D1 = D.elements[0], D2 = D.elements[1], D3 = D.elements[2];
-      var P1 = P.elements[0], P2 = P.elements[1], P3 = P.elements[2];
-      var N1 = N.elements[0], N2 = N.elements[1], N3 = N.elements[2];
+      var A = obj.anchor.elements, D = obj.direction.elements,
+          P = this.anchor.elements, N = this.normal.elements;
       // A.add(D.x(N.dot(P.subtract(A)) / N.dot(D)))
-      var multiplier = (N1*(P1-A1) + N2*(P2-A2) + N3*(P3-A3)) / (N1*D1 + N2*D2 + N3*D3);
-      return Vector.create([A1 + D1*multiplier, A2 + D2*multiplier, A3 + D3*multiplier]);
+      var multiplier = (N[0]*(P[0]-A[0]) + N[1]*(P[1]-A[1]) + N[2]*(P[2]-A[2])) / (N[0]*D[0] + N[1]*D[1] + N[2]*D[2]);
+      return Vector.create([A[0] + D[0]*multiplier, A[1] + D[1]*multiplier, A[2] + D[2]*multiplier]);
     } else if (obj.normal) {
       // obj is a plane
       var direction = this.normal.cross(obj.normal).toUnitVector();
       // To find an anchor point, we find one co-ordinate that has a value
       // of zero somewhere on the intersection, and remember which one we picked
-      var N = Matrix.Zero(2,2), i = 0;
-      while (N.isSingular()) {
+      var N = this.normal.elements, A = this.anchor.elements,
+          O = obj.normal.elements, B = obj.anchor.elements;
+      var solver = Matrix.Zero(2,2), i = 0;
+      while (solver.isSingular()) {
         i++;
-        N = Matrix.create([
-          [ this.normal.elements[i%3], this.normal.elements[(i+1)%3] ],
-          [ obj.normal.elements[i%3],  obj.normal.elements[(i+1)%3]  ]
+        solver = Matrix.create([
+          [ N[i%3], N[(i+1)%3] ],
+          [ O[i%3], O[(i+1)%3]  ]
         ]);
       }
       // Then we solve the simultaneous equations in the remaining dimensions
-      // var intersection = N.inv().x(Vector.create([this.normal.dot(this.anchor), obj.normal.dot(obj.anchor)]));
-      var inverse = N.inverse();
-      var N = this.normal, A = this.anchor, O = obj.normal, B = obj.anchor;
-      var x = N.elements[0]*A.elements[0] + N.elements[1]*A.elements[1] + N.elements[2]*A.elements[2];
-      var y = O.elements[0]*B.elements[0] + O.elements[1]*B.elements[1] + O.elements[2]*B.elements[2];
+      // var intersection = solver.inv().x(Vector.create([this.normal.dot(this.anchor), obj.normal.dot(obj.anchor)]));
+      var inverse = solver.inverse().elements;
+      var x = N[0]*A[0] + N[1]*A[1] + N[2]*A[2];
+      var y = O[0]*B[0] + O[1]*B[1] + O[2]*B[2];
       var intersection = [
-        inverse.elements[0][0] * x + inverse.elements[0][1] * y,
-        inverse.elements[1][0] * x + inverse.elements[1][1] * y
+        inverse[0][0] * x + inverse[0][1] * y,
+        inverse[1][0] * x + inverse[1][1] * y
       ];
       var anchor = [];
       for (var j = 1; j <= 3; j++) {
@@ -1155,11 +1135,9 @@ Plane.prototype = {
     var P = point.elements || point;
     if (P.length == 2) { P.push(0); }
     // point.add(this.normal.x(this.anchor.subtract(point).dot(this.normal)))
-    var A = this.anchor, N = this.normal;
-    var A1 = A.elements[0], A2 = A.elements[1], A3 = A.elements[2];
-    var N1 = N.elements[0], N2 = N.elements[1], N3 = N.elements[2];
-    var dot = (A1 - P[0]) * N1 + (A2 - P[1]) * N2 + (A3 - P[2]) * N3;
-    return Vector.create([P[0] + N1 * dot, P[1] + N2 * dot, P[2] + N3 * dot]);
+    var A = this.anchor.elements, N = this.normal.elements;
+    var dot = (A[0] - P[0]) * N[0] + (A[1] - P[1]) * N[1] + (A[2] - P[2]) * N[2];
+    return Vector.create([P[0] + N[0] * dot, P[1] + N[1] * dot, P[2] + N[2] * dot]);
   },
 
   // Returns a copy of the plane, rotated by t radians about the given line
