@@ -936,12 +936,12 @@ Line.prototype = {
   rotate: function(t, line) {
     // If we're working in 2D
     if (typeof(line.direction) == 'undefined') { line = Line.create(line.to3D(), Vector.k); }
-    var rotation = Matrix.Rotation(t, line.direction);
-    var R = rotation.elements;
+    var R = Matrix.Rotation(t, line.direction).elements;
     var C = line.pointClosestTo(this.anchor).elements;
     var A = this.anchor.elements, D = this.direction.elements;
     var C1 = C[0], C2 = C[1], C3 = C[2], A1 = A[0], A2 = A[1], A3 = A[2];
     var x = A1 - C1, y = A2 - C2, z = A3 - C3;
+    // Line.create(C.add(R.x(this.anchor.subtract(C))), R.x(this.direction))
     return Line.create([
       C1 + R[0][0] * x + R[0][1] * y + R[0][2] * z,
       C2 + R[1][0] * x + R[1][1] * y + R[1][2] * z,
@@ -1147,9 +1147,21 @@ Plane.prototype = {
   // Returns a copy of the plane, rotated by t radians about the given line
   // See notes on Line#rotate.
   rotate: function(t, line) {
-    var R = Matrix.Rotation(t, line.direction);
-    var C = line.pointClosestTo(this.anchor);
-    return Plane.create(C.add(R.x(this.anchor.subtract(C))), R.x(this.normal));
+    var R = Matrix.Rotation(t, line.direction).elements;
+    var C = line.pointClosestTo(this.anchor).elements;
+    var A = this.anchor.elements, N = this.normal.elements;
+    var C1 = C[0], C2 = C[1], C3 = C[2], A1 = A[0], A2 = A[1], A3 = A[2];
+    var x = A1 - C1, y = A2 - C2, z = A3 - C3;
+    // Plane.create(C.add(R.x(this.anchor.subtract(C))), R.x(this.normal))
+    return Plane.create([
+      C1 + R[0][0] * x + R[0][1] * y + R[0][2] * z,
+      C2 + R[1][0] * x + R[1][1] * y + R[1][2] * z,
+      C3 + R[2][0] * x + R[2][1] * y + R[2][2] * z
+    ], [
+      R[0][0] * N[0] + R[0][1] * N[1] + R[0][2] * N[2],
+      R[1][0] * N[0] + R[1][1] * N[1] + R[1][2] * N[2],
+      R[2][0] * N[0] + R[2][1] * N[1] + R[2][2] * N[2]
+    ]);
   },
 
   // Returns the reflection of the plane in the given point, line or plane.
