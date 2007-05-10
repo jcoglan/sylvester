@@ -256,9 +256,9 @@ Vector.prototype = {
       return Vector.create([C[0] + (C[0] - P[0]), C[1] + (C[1] - P[1]), C[2] + (C[2] - P[2])]);
     } else {
       // obj is a point
-      if (this.elements.length != obj.elements.length) { return null; }
-      var self = this;
-      return obj.map(function(x, i) { return x + (x - self.elements[i-1]); });
+      var Q = obj.elements || obj;
+      if (this.elements.length != Q.length) { return null; }
+      return this.map(function(x, i) { return Q[i-1] + (Q[i-1] - x); });
     }
   },
 
@@ -957,12 +957,9 @@ Line.prototype = {
   reflectionIn: function(obj) {
     if (obj.normal) {
       // obj is a plane
-      var theta = this.direction.angleFrom(obj.normal);
-      if (Math.abs(theta) <= Sylvester.precision || Math.abs(Math.PI - theta) <= Sylvester.precision) { return this.dup(); }
-      var C = obj.pointClosestTo(this.anchor).elements;
       var A = this.anchor.elements, D = this.direction.elements;
       var A1 = A[0], A2 = A[1], A3 = A[2], D1 = D[0], D2 = D[1], D3 = D[2];
-      var newA = [C[0] + (C[0] - A1), C[1] + (C[1] - A2), C[2] + (C[2] - A3)];
+      var newA = this.anchor.reflectionIn(obj).elements;
       // Add the line's direction vector to its anchor, then mirror that in the plane
       var AD1 = A1 + D1, AD2 = A2 + D2, AD3 = A3 + D3;
       var Q = obj.pointClosestTo([AD1, AD2, AD3]).elements;
@@ -975,7 +972,7 @@ Line.prototype = {
       // obj is a point - just reflect the line's anchor in it
       var P = obj.elements || obj;
       if (P.length == 2) { P.push(0); }
-      return Line.create(this.anchor.reflectionIn($V(P)), this.direction);
+      return Line.create(this.anchor.reflectionIn(P), this.direction);
     }
   },
 
@@ -1168,16 +1165,21 @@ Plane.prototype = {
   reflectionIn: function(obj) {
     if (obj.normal) {
       // obj is a plane
-      var A = this.anchor.reflectionIn(obj);
-      var N = obj.anchor.add(this.normal).reflectionIn(obj).subtract(obj.anchor);
-      return Plane.create(A, N);
+      var A = this.anchor.elements, N = this.normal.elements;
+      var A1 = A[0], A2 = A[1], A3 = A[2], N1 = N[0], N2 = N[1], N3 = N[2];
+      var newA = this.anchor.reflectionIn(obj).elements;
+      // Add the plane's normal to its anchor, then mirror that in the other plane
+      var AN1 = A1 + N1, AN2 = A2 + N2, AN3 = A3 + N3;
+      var Q = obj.pointClosestTo([AN1, AN2, AN3]).elements;
+      var newN = [Q[0] + (Q[0] - AN1) - newA[0], Q[1] + (Q[1] - AN2) - newA[1], Q[2] + (Q[2] - AN3) - newA[2]];
+      return Plane.create(newA, newN);
     } else if (obj.direction) {
       // obj is a line
       return this.rotate(Math.PI, obj);
     } else {
       // obj is a point
-      var P = obj.to3D();
-      if (P === null) { return null; }
+      var P = obj.elements || obj;
+      if (P.length == 2) { P.push(0); }
       return Plane.create(this.anchor.reflectionIn(P), this.normal);
     }
   },
