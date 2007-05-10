@@ -939,14 +939,18 @@ Line.prototype = {
     var rotation = Matrix.Rotation(t, line.direction);
     var R = rotation.elements;
     var C = line.pointClosestTo(this.anchor).elements;
-    var A = this.anchor.elements;
+    var A = this.anchor.elements, D = this.direction.elements;
     var C1 = C[0], C2 = C[1], C3 = C[2], A1 = A[0], A2 = A[1], A3 = A[2];
     var x = A1 - C1, y = A2 - C2, z = A3 - C3;
     return Line.create([
       C1 + R[0][0] * x + R[0][1] * y + R[0][2] * z,
       C2 + R[1][0] * x + R[1][1] * y + R[1][2] * z,
       C3 + R[2][0] * x + R[2][1] * y + R[2][2] * z
-    ], rotation.x(this.direction));
+    ], [
+      R[0][0] * D[0] + R[0][1] * D[1] + R[0][2] * D[2],
+      R[1][0] * D[0] + R[1][1] * D[1] + R[1][2] * D[2],
+      R[2][0] * D[0] + R[2][1] * D[1] + R[2][2] * D[2]
+    ]);
   },
 
   // Returns the line's reflection in the given point or line
