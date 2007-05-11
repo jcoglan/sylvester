@@ -45,9 +45,10 @@ Vector.prototype = {
   // Returns true iff the vector is equal to the argument
   eql: function(vector) {
     var n = this.elements.length;
-    if (n != vector.elements.length) { return false; }
+    vector = vector.elements || vector;
+    if (n != vector.length) { return false; }
     do {
-      if (Math.abs(this.elements[n-1] - vector.elements[n-1]) > Sylvester.precision) { return false; }
+      if (Math.abs(this.elements[n-1] - vector[n-1]) > Sylvester.precision) { return false; }
     } while (--n);
     return true;
   },
@@ -83,6 +84,7 @@ Vector.prototype = {
 
   // Returns the angle between the vector and the argument (also a vector)
   angleFrom: function(vector) {
+    if (!vector.modulus) { vector = Vector.create(vector); }
     var dot = this.dot(vector), mod1 = this.modulus(), mod2 = vector.modulus();
     if (dot === null || mod1*mod2 === 0) { return null; }
     var theta = dot / (mod1*mod2);
@@ -111,14 +113,16 @@ Vector.prototype = {
 
   // Returns the result of adding the argument to the vector
   add: function(vector) {
-    if (this.elements.length != vector.elements.length) { return null; }
-    return this.map(function(x, i) { return x + vector.elements[i-1]; });
+    vector = vector.elements || vector;
+    if (this.elements.length != vector.length) { return null; }
+    return this.map(function(x, i) { return x + vector[i-1]; });
   },
 
   // Returns the result of subtracting the argument from the vector
   subtract: function(vector) {
-    if (this.elements.length != vector.elements.length) { return null; }
-    return this.map(function(x, i) { return x - vector.elements[i-1]; });
+    vector = vector.elements || vector;
+    if (this.elements.length != vector.length) { return null; }
+    return this.map(function(x, i) { return x - vector[i-1]; });
   },
 
   // Returns the result of multiplying the elements of the vector by the argument
@@ -131,9 +135,10 @@ Vector.prototype = {
   // Returns the scalar product of the vector with the argument
   // Both vectors must have equal dimensionality
   dot: function(vector) {
+    vector = vector.elements || vector;
     var i, product = 0, n = this.elements.length;
-    if (n != vector.elements.length) { return null; }
-    do { product += this.elements[n-1] * vector.elements[n-1]; } while (--n);
+    if (n != vector.length) { return null; }
+    do { product += this.elements[n-1] * vector[n-1]; } while (--n);
     return product;
   },
 
@@ -191,11 +196,12 @@ Vector.prototype = {
   // Returns the vector's distance from the argument, when considered as a point in space
   distanceFrom: function(obj) {
     if (obj.anchor) { return obj.distanceFrom(this); }
-    if (obj.elements.length != this.elements.length) { return null; }
+    obj = obj.elements || obj;
+    if (obj.length != this.elements.length) { return null; }
     // this.subtract(obj).modulus()
     var sum = 0, part;
     this.each(function(x, i) {
-      part = x - obj.elements[i-1];
+      part = x - obj[i-1];
       sum += part * part;
     });
     return Math.sqrt(sum);
@@ -217,14 +223,15 @@ Vector.prototype = {
     var R, x, y, z;
     switch (this.elements.length) {
       case 2:
-        if (obj.elements.length != 2) { return null; }
+        obj = obj.elements || obj;
+        if (obj.length != 2) { return null; }
         // obj.add(Matrix.Rotation(t).x(this.subtract(obj)))
         R = Matrix.Rotation(t).elements;
-        x = this.elements[0] - obj.elements[0];
-        y = this.elements[1] - obj.elements[1];
+        x = this.elements[0] - obj[0];
+        y = this.elements[1] - obj[1];
         return Vector.create([
-          obj.elements[0] + R[0][0] * x + R[0][1] * y,
-          obj.elements[1] + R[1][0] * x + R[1][1] * y
+          obj[0] + R[0][0] * x + R[0][1] * y,
+          obj[1] + R[1][0] * x + R[1][1] * y
         ]);
         break;
       case 3:
@@ -280,7 +287,7 @@ Vector.prototype = {
 
   // Set vector's elements from an array
   setElements: function(els) {
-    this.elements = els.elements ? els.elements : els;
+    this.elements = els.elements || els;
     return this;
   }
 };
