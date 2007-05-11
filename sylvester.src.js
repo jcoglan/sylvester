@@ -198,7 +198,6 @@ Vector.prototype = {
     if (obj.anchor) { return obj.distanceFrom(this); }
     obj = obj.elements || obj;
     if (obj.length != this.elements.length) { return null; }
-    // this.subtract(obj).modulus()
     var sum = 0, part;
     this.each(function(x, i) {
       part = x - obj[i-1];
@@ -225,7 +224,6 @@ Vector.prototype = {
       case 2:
         obj = obj.elements || obj;
         if (obj.length != 2) { return null; }
-        // obj.add(Matrix.Rotation(t).x(this.subtract(obj)))
         R = Matrix.Rotation(t).elements;
         x = this.elements[0] - obj[0];
         y = this.elements[1] - obj[1];
@@ -238,7 +236,6 @@ Vector.prototype = {
         if (!obj.direction) { return null; }
         var C = obj.pointClosestTo(this).elements;
         R = Matrix.Rotation(t, obj.direction).elements;
-        // C.add(R.x(this.subtract(C)))
         x = this.elements[0] - C[0];
         y = this.elements[1] - C[1];
         z = this.elements[2] - C[2];
@@ -822,7 +819,7 @@ Line.prototype = {
 
   // Returns the result of translating the line by the given vector/array
   translate: function(vector) {
-    if (vector.elements) { vector = vector.elements; }
+    vector = vector.elements || vector;
     if (vector.length == 2) { vector.push(0); }
     return Line.create([
       this.anchor.elements[0] + vector[0],
@@ -850,14 +847,11 @@ Line.prototype = {
       if (this.isParallelTo(obj)) { return this.distanceFrom(obj.anchor); }
       var N = this.direction.cross(obj.direction).toUnitVector().elements;
       var A = this.anchor.elements, B = obj.anchor.elements;
-      // this.anchor.subtract(obj.anchor).dot(N)
       return Math.abs((A[0] - B[0]) * N[0] + (A[1] - B[1]) * N[1] + (A[2] - B[2]) * N[2]);
     } else {
       // obj is a point
       var P = obj.elements || obj;
       if (P.length == 2) { P.push(0); }
-      // var A = P.subtract(this.anchor);
-      // return Math.abs(A.modulus() * Math.sin(A.angleFrom(this.direction)));
       var A = this.anchor.elements, D = this.direction.elements;
       var PA1 = P[0] - A[0], PA2 = P[1] - A[1], PA3 = P[2] - A[2];
       var modPA = Math.sqrt(PA1*PA1 + PA2*PA2 + PA3*PA3);
@@ -922,7 +916,6 @@ Line.prototype = {
       var P = obj.elements || obj;
       if (P.length == 2) { P.push(0); }
       if (this.contains(P)) { return Vector.create(P); }
-      // P.add(this.direction.cross(this.direction.cross(P.subtract(this.anchor))).toUnitVector().x(this.distanceFrom(P)))
       var A = this.anchor.elements, D = this.direction.elements;
       var D1 = D[0], D2 = D[1], D3 = D[2], A1 = A[0], A2 = A[1], A3 = A[2];
       var x = D1 * (P[1]-A2) - D2 * (P[0]-A1), y = D2 * (P[2]-A3) - D3 * (P[1]-A2), z = D3 * (P[0]-A1) - D1 * (P[2]-A3);
@@ -948,7 +941,6 @@ Line.prototype = {
     var A = this.anchor.elements, D = this.direction.elements;
     var C1 = C[0], C2 = C[1], C3 = C[2], A1 = A[0], A2 = A[1], A3 = A[2];
     var x = A1 - C1, y = A2 - C2, z = A3 - C3;
-    // Line.create(C.add(R.x(this.anchor.subtract(C))), R.x(this.direction))
     return Line.create([
       C1 + R[0][0] * x + R[0][1] * y + R[0][2] * z,
       C2 + R[1][0] * x + R[1][1] * y + R[1][2] * z,
@@ -1031,7 +1023,7 @@ Plane.prototype = {
 
   // Returns the result of translating the plane by the given vector
   translate: function(vector) {
-    if (vector.elements) { vector = vector.elements; }
+    vector = vector.elements || vector;
     if (vector.length == 2) { vector.push(0); }
     return Plane.create([
       this.anchor.elements[0] + vector[0],
@@ -1061,14 +1053,12 @@ Plane.prototype = {
     if (obj.anchor) {
       // obj is a plane or line
       var A = this.anchor.elements, B = obj.anchor.elements, N = this.normal.elements;
-      // Math.abs(this.anchor.subtract(obj.anchor).dot(this.normal))
       return Math.abs((A[0] - B[0]) * N[0] + (A[1] - B[1]) * N[1] + (A[2] - B[2]) * N[2]);
     } else {
       // obj is a point
       var P = obj.elements || obj;
       if (P.length == 2) { P.push(0); }
       var A = this.anchor.elements, N = this.normal.elements;
-      // Math.abs(this.anchor.subtract(P).dot(this.normal))
       return Math.abs((A[0] - P[0]) * N[0] + (A[1] - P[1]) * N[1] + (A[2] - P[2]) * N[2]);
     }
   },
@@ -1101,7 +1091,6 @@ Plane.prototype = {
       // obj is a line
       var A = obj.anchor.elements, D = obj.direction.elements,
           P = this.anchor.elements, N = this.normal.elements;
-      // A.add(D.x(N.dot(P.subtract(A)) / N.dot(D)))
       var multiplier = (N[0]*(P[0]-A[0]) + N[1]*(P[1]-A[1]) + N[2]*(P[2]-A[2])) / (N[0]*D[0] + N[1]*D[1] + N[2]*D[2]);
       return Vector.create([A[0] + D[0]*multiplier, A[1] + D[1]*multiplier, A[2] + D[2]*multiplier]);
     } else if (obj.normal) {
@@ -1120,7 +1109,6 @@ Plane.prototype = {
         ]);
       }
       // Then we solve the simultaneous equations in the remaining dimensions
-      // var intersection = solver.inv().x(Vector.create([this.normal.dot(this.anchor), obj.normal.dot(obj.anchor)]));
       var inverse = solver.inverse().elements;
       var x = N[0]*A[0] + N[1]*A[1] + N[2]*A[2];
       var y = O[0]*B[0] + O[1]*B[1] + O[2]*B[2];
@@ -1142,7 +1130,6 @@ Plane.prototype = {
   pointClosestTo: function(point) {
     var P = point.elements || point;
     if (P.length == 2) { P.push(0); }
-    // point.add(this.normal.x(this.anchor.subtract(point).dot(this.normal)))
     var A = this.anchor.elements, N = this.normal.elements;
     var dot = (A[0] - P[0]) * N[0] + (A[1] - P[1]) * N[1] + (A[2] - P[2]) * N[2];
     return Vector.create([P[0] + N[0] * dot, P[1] + N[1] * dot, P[2] + N[2] * dot]);
@@ -1156,7 +1143,6 @@ Plane.prototype = {
     var A = this.anchor.elements, N = this.normal.elements;
     var C1 = C[0], C2 = C[1], C3 = C[2], A1 = A[0], A2 = A[1], A3 = A[2];
     var x = A1 - C1, y = A2 - C2, z = A3 - C3;
-    // Plane.create(C.add(R.x(this.anchor.subtract(C))), R.x(this.normal))
     return Plane.create([
       C1 + R[0][0] * x + R[0][1] * y + R[0][2] * z,
       C2 + R[1][0] * x + R[1][1] * y + R[1][2] * z,
@@ -1211,7 +1197,6 @@ Plane.prototype = {
     var normal, mod;
     if (v2 !== null) {
       var v21 = v2.elements[0], v22 = v2.elements[1], v23 = v2.elements[2];
-      // normal = ((v1 - A) ^ (v2 - A)).toUnitVector()
       normal = Vector.create([
         (v12 - A2) * (v23 - A3) - (v13 - A3) * (v22 - A2),
         (v13 - A3) * (v21 - A1) - (v11 - A1) * (v23 - A3),
