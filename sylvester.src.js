@@ -185,7 +185,7 @@ Vector.prototype = {
     return this.map(function(x) { return Math.round(x); });
   },
 
-  // Sets the elements of the vector to the given value if they
+  // Returns a copy of the vector with elements set to the given value if they
   // differ from it by less than Sylvester.precision
   snapTo: function(x) {
     return this.map(function(y) {
@@ -250,7 +250,7 @@ Vector.prototype = {
     }
   },
 
-  // Returns the result of reflecting the point in the given point, line or plane.
+  // Returns the result of reflecting the point in the given point, line or plane
   reflectionIn: function(obj) {
     if (obj.anchor) {
       // obj is a plane or line
@@ -365,10 +365,13 @@ Matrix.prototype = {
     if (!matrix.determinant) { matrix = Matrix.create(matrix); }
     if (this.elements.length != matrix.elements.length ||
         this.elements[0].length != matrix.elements[0].length) { return false; }
-    var i;
-    for (i = 1; i <= this.elements.length; i++) {
-      if (!this.row(i).eql(matrix.row(i))) { return false; }
-    }
+    var ni = this.elements.length, ki = ni, i, nj, kj = this.elements[0].length, j;
+    do { i = ki - ni;
+      nj = kj;
+      do { j = kj - nj;
+        if (Math.abs(this.elements[i][j] - matrix.elements[i][j]) > Sylvester.precision) { return false; }
+      } while (--nj);
+    } while (--ni);
     return true;
   },
 
@@ -661,7 +664,7 @@ Matrix.prototype = {
     return this.map(function(x) { return Math.round(x); });
   },
 
-  // Sets the elements of the matrix to the given value if they
+  // Returns a copy of the matrix with elements set to the given value if they
   // differ from it by less than Sylvester.precision
   snapTo: function(x) {
     return this.map(function(p) {
@@ -682,7 +685,7 @@ Matrix.prototype = {
   // Set the matrix's elements from an array. If the argument passed
   // is a vector, the resulting matrix will be a single column.
   setElements: function(els) {
-    if (els.elements) { els = els.elements; }
+    els = els.elements || els;
     if (typeof(els[0][0]) != 'undefined') {
       var ni = els.length, ki = ni, i, nj, kj, j;
       this.elements = [];
@@ -742,7 +745,7 @@ Matrix.Rotation = function(theta, a) {
     ]);
   }
   var axis = a.dup();
-  if (axis.dimensions() != 3) { return null; }
+  if (axis.elements.length != 3) { return null; }
   var mod = axis.modulus();
   var x = axis.elements[0]/mod, y = axis.elements[1]/mod, z = axis.elements[2]/mod;
   var s = Math.sin(theta), c = Math.cos(theta), t = 1 - c;
@@ -839,7 +842,7 @@ Line.prototype = {
   },
 
   // Returns the line's perpendicular distance from the argument,
-  //which can be a point, a line or a plane
+  // which can be a point, a line or a plane
   distanceFrom: function(obj) {
     if (obj.normal) { return obj.distanceFrom(this); }
     if (obj.direction) {
@@ -856,7 +859,7 @@ Line.prototype = {
       var PA1 = P[0] - A[0], PA2 = P[1] - A[1], PA3 = P[2] - A[2];
       var modPA = Math.sqrt(PA1*PA1 + PA2*PA2 + PA3*PA3);
       if (modPA === 0) return 0;
-      // Assumes direction vector is normalised
+      // Assumes direction vector is normalized
       var cosTheta = (PA1 * D[0] + PA2 * D[1] + PA3 * D[2]) / modPA;
       var sin2 = 1 - cosTheta*cosTheta;
       return Math.abs(modPA * Math.sqrt(sin2 < 0 ? 0 : sin2));
@@ -882,8 +885,8 @@ Line.prototype = {
 
   // Returns the unique intersection point with the argument, if one exists
   intersectionWith: function(obj) {
-    if (!this.intersects(obj)) { return null; }
     if (obj.normal) { return obj.intersectionWith(this); }
+    if (!this.intersects(obj)) { return null; }
     var P = this.anchor.elements, X = this.direction.elements,
         Q = obj.anchor.elements, Y = obj.direction.elements;
     var X1 = X[0], X2 = X[1], X3 = X[2], Y1 = Y[0], Y2 = Y[1], Y3 = Y[2];
@@ -1045,6 +1048,12 @@ Plane.prototype = {
       return this.normal.isPerpendicularTo(obj.direction);
     }
     return null;
+  },
+  
+  // Returns true iff the receiver is perpendicular to the argument
+  isPerpendicularTo: function(plane) {
+    var theta = this.normal.angleFrom(plane.normal);
+    return (Math.abs(Math.PI/2 - theta) <= Sylvester.precision);
   },
 
   // Returns the plane's distance from the given object (point, line or plane)
