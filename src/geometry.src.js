@@ -246,18 +246,22 @@ Line.Segment.prototype = {
 
   // Returns the length of the line segment
   length: function() {
-    return this.toVector().modulus();
+    var A = this.start.elements, B = this.end.elements;
+    var C1 = B[0] - A[0], C2 = B[1] - A[1], C3 = B[2] - A[2];
+    return Math.sqrt(C1*C1 + C2*C2 + C3*C3);
   },
   
   // Returns the line segment as a vector equal to its
   // end point relative to its endpoint
   toVector: function() {
-    return this.end.subtract(this.start);
+    var A = this.start.elements, B = this.end.elements;
+    return Vector.create([B[0] - A[0], B[1] - A[1], B[2] - A[2]]);
   },
   
   // Returns the segment's midpoint as a vector
   midpoint: function() {
-    return this.start.add(this.end).x(0.5);
+    var A = this.start.elements, B = this.end.elements;
+    return Vector.create([(B[0] + A[0])/2, (B[1] + A[1])/2, (B[2] + A[2])/2]);
   },
   
   // Returns the plane that bisects the segment
@@ -267,23 +271,24 @@ Line.Segment.prototype = {
   
   // Returns true iff the given point lies on the segment
   contains: function(point) {
-    point = point.to3D();
-    if (point === null) { return null; }
-    if (point.eql(this.start)) { return true; }
-    var V = point.subtract(this.start);
-    return V.isParallelTo(this.toVector()) && V.modulus() <= this.toVector().modulus();
+    point = point.elements || point;
+    if (point.length == 2) { point.push(0); }
+    if (this.start.eql(point)) { return true; }
+    var V = this.start.subtract(point);
+    var vect = this.toVector();
+    return V.isAntiparallelTo(vect) && V.modulus() <= vect.modulus();
   },
   
   // Returns true iff the line segment intersects the argument
   intersects: function(obj) {
-    if (!this.line.intersects(obj)) { return false; }
-    var P = this.line.intersectionWith(obj);
-    return this.contains(P);
+    return (this.intersectionWith(obj) !== null);
   },
   
   // Returns the unique point of intersection with the argument
   intersectionWith: function(obj) {
-    return this.intersects(obj) ? this.line.intersectionWith(obj) : null;
+    if (!this.line.intersects(obj)) { return null; }
+    var P = this.line.intersectionWith(obj);
+    return (this.contains(P) ? P : null);
   },
   
   // Set the start and end-points of the segment
@@ -300,7 +305,7 @@ Line.Segment.prototype = {
 
 // Constructor function
 Line.Segment.create = function(v1, v2) {
-  var S = new Line.Segment;
+  var S = new Line.Segment();
   return S.setPoints(v1, v2);
 };
 
