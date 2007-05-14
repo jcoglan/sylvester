@@ -111,10 +111,6 @@ window.onload = function() {
     V.modulus()
   );
   
-  assert('Zero elements',
-    $V() === null
-  );
-  
   assert('Duplication',
     V.dup().eql(V)
   );
@@ -363,10 +359,6 @@ window.onload = function() {
     M.cols()
   );
   
-  assert('Creation with no elements',
-    $M() === null
-  );
-  
   M = $M([
     [0,2,7,5]
   ]);
@@ -381,14 +373,6 @@ window.onload = function() {
   assert('Create with single column',
     M.inspect() == '[0]\n[2]\n[7]\n[5]',
     M.inspect()
-  );
-  
-  M = $M([
-    [0,3,4,8,7],
-    [3,9,7,3]
-  ]);
-  assert('Create with bad dimensions',
-    M === null
   );
   
   assert('Create with one element',
@@ -568,7 +552,7 @@ window.onload = function() {
     M = Matrix.Random(3,3).x(100).round();
     assert('Triangulation',
       M.toRightTriangular().inspect().match(/\[[0-9\-\.]+, [0-9\-\.]+, [0-9\-\.]+\]\n\[0, [0-9\-\.]+, [0-9\-\.]+\]\n\[0, 0, [0-9\-\.]+\]/),
-      M.toRightTriangular().snapTo(0).inspect()
+      M.toRightTriangular().inspect()
     );
   }
   
@@ -609,6 +593,28 @@ window.onload = function() {
   
   assert('Trace',
     M.tr() == 15
+  );
+  
+  M1 = $M([
+    [7,2,9,4],
+    [4,8,2,6],
+    [9,2,5,6]
+  ]);
+  
+  M2 = $M([
+    [4,6],
+    [5,2],
+    [8,2]
+  ]);
+  
+  M = $M([
+    [7,2,9,4,4,6],
+    [4,8,2,6,5,2],
+    [9,2,5,6,8,2]
+  ]);
+  
+  assert('Augmentation',
+    M1.augment(M2).eql(M)
   );
   
   for (i = 1; i <= 10; i++) {
@@ -808,7 +814,15 @@ window.onload = function() {
   );
   
   assert('Reflection in a plane',
-    Plane.XY.reflectionIn($P([0,0,0], [-1,0,1])).eql(Plane.YZ)
+     $P([5,0,0], [1,1,0]).reflectionIn($P([5,0,0], [0,1,0])).eql($P([5,0,0], [-1,1,0]))
+  );
+  
+  assert('Reflection in a plane, cycled',
+     $P([0,5,0], [0,1,1]).reflectionIn($P([0,5,0], [0,0,1])).eql($P([0,5,0], [0,-1,1]))
+  );
+  
+  assert('Reflection in a plane, cycled again',
+     $P([0,0,5], [1,0,1]).reflectionIn($P([0,0,5], [1,0,0])).eql($P([0,0,5], [1,0,-1]))
   );
   
   for (i = 1; i <= 10; i++) {
@@ -845,6 +859,14 @@ var assert = function(testName, condition, message) {
   resultList.appendChild(item);
   item.className = klass;
   item.innerHTML = testName + ': ' + display;
+};
+
+var benchmark = function(fn, n) {
+  n = n || 100; k = n;
+  var A = new Date().getTime();
+  do { fn() } while (--n);
+  var B = new Date().getTime();
+  alert('Completed ' + k + ' executions in ' + ((B-A)/1000) + ' seconds');
 };
 
 var title = function(str) {

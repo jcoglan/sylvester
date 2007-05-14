@@ -29,7 +29,7 @@ Vector.prototype = {
 
   // Returns element i of the vector
   e: function(i) {
-    return (i < 1 || i > this.dimensions()) ? null : this.elements[i - 1];
+    return (i < 1 || i > this.elements.length) ? null : this.elements[i-1];
   },
 
   // Returns the number of elements the vector has
@@ -44,10 +44,12 @@ Vector.prototype = {
 
   // Returns true iff the vector is equal to the argument
   eql: function(vector) {
-    if (this.dimensions() != vector.dimensions()) { return false; }
-    for (var i = 1; i <= this.dimensions(); i++) {
-      if (Math.abs(this.e(i) - vector.e(i)) > Sylvester.precision) { return false; }
-    }
+    var n = this.elements.length;
+    vector = vector.elements || vector;
+    if (n != vector.length) { return false; }
+    do {
+      if (Math.abs(this.elements[n-1] - vector[n-1]) > Sylvester.precision) { return false; }
+    } while (--n);
     return true;
   },
 
@@ -59,10 +61,18 @@ Vector.prototype = {
   // Maps the vector to another vector according to the given function
   map: function(fn) {
     var elements = [];
-    for (var i = 1; i <= this.dimensions(); i++) {
-      elements.push(fn(this.e(i), i));
-    }
+    this.each(function(x, i) {
+      elements.push(fn(x, i));
+    });
     return Vector.create(elements);
+  },
+  
+  // Calls the iterator for each element of the vector in turn
+  each: function(fn) {
+    var n = this.elements.length, k = n, i;
+    do { i = k - n;
+      fn(this.elements[i], i+1);
+    } while (--n);
   },
 
   // Returns a new vector created by normalizing the receiver
@@ -74,9 +84,10 @@ Vector.prototype = {
 
   // Returns the angle between the vector and the argument (also a vector)
   angleFrom: function(vector) {
-    var dot = this.dot(vector);
-    if (dot === null || this.modulus() === 0 || vector.modulus() === 0) { return null; }
-    var theta = this.dot(vector) / (this.modulus() * vector.modulus());
+    if (!vector.modulus) { vector = Vector.create(vector); }
+    var dot = this.dot(vector), mod1 = this.modulus(), mod2 = vector.modulus();
+    if (dot === null || mod1*mod2 === 0) { return null; }
+    var theta = dot / (mod1*mod2);
     if (theta < -1) { theta = -1; }
     if (theta > 1) { theta = 1; }
     return Math.acos(theta);
@@ -102,13 +113,16 @@ Vector.prototype = {
 
   // Returns the result of adding the argument to the vector
   add: function(vector) {
-    if (this.dimensions() != vector.dimensions()) { return null; }
-    return this.map(function(x, i) { return x + vector.e(i); });
+    vector = vector.elements || vector;
+    if (this.elements.length != vector.length) { return null; }
+    return this.map(function(x, i) { return x + vector[i-1]; });
   },
 
   // Returns the result of subtracting the argument from the vector
   subtract: function(vector) {
-    return this.add(vector.x(-1));
+    vector = vector.elements || vector;
+    if (this.elements.length != vector.length) { return null; }
+    return this.map(function(x, i) { return x - vector[i-1]; });
   },
 
   // Returns the result of multiplying the elements of the vector by the argument
@@ -121,42 +135,43 @@ Vector.prototype = {
   // Returns the scalar product of the vector with the argument
   // Both vectors must have equal dimensionality
   dot: function(vector) {
-    var i, product = 0;
-    if (this.dimensions() != vector.dimensions()) { return null; }
-    for (i = 1; i <= this.dimensions(); i++) {
-      product += this.e(i) * vector.e(i);
-    }
+    vector = vector.elements || vector;
+    var i, product = 0, n = this.elements.length;
+    if (n != vector.length) { return null; }
+    do { product += this.elements[n-1] * vector[n-1]; } while (--n);
     return product;
   },
 
   // Returns the vector product of the vector with the argument
   // Both vectors must have dimensionality 3
   cross: function(vector) {
-    if (this.dimensions() != 3 || vector.dimensions() != 3) { return null; }
+    vector = vector.elements || vector;
+    if (this.elements.length != 3 || vector.length != 3) { return null; }
+    var A = this.elements, B = vector;
     return Vector.create([
-      (this.e(2) * vector.e(3)) - (this.e(3) * vector.e(2)),
-      (this.e(3) * vector.e(1)) - (this.e(1) * vector.e(3)),
-      (this.e(1) * vector.e(2)) - (this.e(2) * vector.e(1))
+      (A[1] * B[2]) - (A[2] * B[1]),
+      (A[2] * B[0]) - (A[0] * B[2]),
+      (A[0] * B[1]) - (A[1] * B[0])
     ]);
   },
 
   // Returns the (absolute) largest element of the vector
   max: function() {
-    var m = 0;
-    for (var i = 1; i <= this.dimensions(); i++) {
-      if (Math.abs(this.e(i)) > Math.abs(m)) { m = this.e(i); }
-    }
+    var m = 0, n = this.elements.length, k = n, i;
+    do { i = k - n;
+      if (Math.abs(this.elements[i]) > Math.abs(m)) { m = this.elements[i]; }
+    } while (--n);
     return m;
   },
 
   // Returns the index of the first match found
   indexOf: function(x) {
-    var index = null, i;
-    for (i = 1; i <= this.dimensions(); i++) {
-      if (index === null && this.e(i) == x) {
-        index = i;
+    var index = null, n = this.elements.length, k = n, i;
+    do { i = k - n;
+      if (index === null && this.elements[i] == x) {
+        index = i + 1;
       }
-    }
+    } while (--n);
     return index;
   },
 
@@ -170,7 +185,7 @@ Vector.prototype = {
     return this.map(function(x) { return Math.round(x); });
   },
 
-  // Sets the elements of the vector to the given value if they
+  // Returns a copy of the vector with elements set to the given value if they
   // differ from it by less than Sylvester.precision
   snapTo: function(x) {
     return this.map(function(y) {
@@ -181,8 +196,14 @@ Vector.prototype = {
   // Returns the vector's distance from the argument, when considered as a point in space
   distanceFrom: function(obj) {
     if (obj.anchor) { return obj.distanceFrom(this); }
-    if (obj.dimensions() != this.dimensions()) { return null; }
-    return this.subtract(obj).modulus();
+    obj = obj.elements || obj;
+    if (obj.length != this.elements.length) { return null; }
+    var sum = 0, part;
+    this.each(function(x, i) {
+      part = x - obj[i-1];
+      sum += part * part;
+    });
+    return Math.sqrt(sum);
   },
 
   // Returns true if the vector is point on the given line
@@ -198,45 +219,62 @@ Vector.prototype = {
   // Rotates the vector about the given object. The object should be a 
   // point if the vector is 2D, and a line if it is 3D. Be careful with line directions!
   rotate: function(t, obj) {
-    switch (this.dimensions()) {
+    var R, x, y, z;
+    switch (this.elements.length) {
       case 2:
-        if (obj.dimensions() != 2) { return null; }
-        return obj.add(Matrix.Rotation(t).x(this.subtract(obj)));
+        obj = obj.elements || obj;
+        if (obj.length != 2) { return null; }
+        R = Matrix.Rotation(t).elements;
+        x = this.elements[0] - obj[0];
+        y = this.elements[1] - obj[1];
+        return Vector.create([
+          obj[0] + R[0][0] * x + R[0][1] * y,
+          obj[1] + R[1][0] * x + R[1][1] * y
+        ]);
         break;
       case 3:
         if (!obj.direction) { return null; }
-        var C = obj.pointClosestTo(this);
-        var R = Matrix.Rotation(t, obj.direction);
-        return C.add(R.x(this.subtract(C)));
+        var C = obj.pointClosestTo(this).elements;
+        R = Matrix.Rotation(t, obj.direction).elements;
+        x = this.elements[0] - C[0];
+        y = this.elements[1] - C[1];
+        z = this.elements[2] - C[2];
+        return Vector.create([
+          C[0] + R[0][0] * x + R[0][1] * y + R[0][2] * z,
+          C[1] + R[1][0] * x + R[1][1] * y + R[1][2] * z,
+          C[2] + R[2][0] * x + R[2][1] * y + R[2][2] * z
+        ]);
         break;
       default:
         return null;
     }
   },
 
-  // Returns the result of reflecting the point in the given point, line or plane.
+  // Returns the result of reflecting the point in the given point, line or plane
   reflectionIn: function(obj) {
     if (obj.anchor) {
       // obj is a plane or line
-      var P = this.to3D();
-      if (P === null) { return null; }
-      var C = obj.pointClosestTo(P);
-      return C.add(C.subtract(P));
+      var P = this.elements;
+      if (P.length == 2) { P.push(0); }
+      var C = obj.pointClosestTo(P).elements;
+      return Vector.create([C[0] + (C[0] - P[0]), C[1] + (C[1] - P[1]), C[2] + (C[2] - P[2])]);
     } else {
       // obj is a point
-      if (this.dimensions() != obj.dimensions()) { return null; }
-      return obj.add(obj.subtract(this));
+      var Q = obj.elements || obj;
+      if (this.elements.length != Q.length) { return null; }
+      return this.map(function(x, i) { return Q[i-1] + (Q[i-1] - x); });
     }
   },
 
   // Utility to make sure vectors are 3D. If they are 2D, a zero z-component is added
   to3D: function() {
     var V = this.dup();
-    switch (V.dimensions()) {
-      case 3: return V; break;
-      case 2: return Vector.create([V.e(1), V.e(2), 0]); break;
+    switch (V.elements.length) {
+      case 3: break;
+      case 2: V.elements.push(0); break;
       default: return null;
     }
+    return V;
   },
 
   // Returns a string representation of the vector
@@ -246,13 +284,7 @@ Vector.prototype = {
 
   // Set vector's elements from an array
   setElements: function(els) {
-    if (typeof(els) == 'undefined') { return null; }
-    this.elements = [];
-    if (els.elements) { els = els.elements; }
-    for (var i = 0; i < els.length; i++) {
-      if (!isNaN(els[i])) { this.elements.push(els[i]); }
-    }
-    if (this.elements.length === 0) { return null; }
+    this.elements = els.elements || els;
     return this;
   }
 };
@@ -270,15 +302,17 @@ Vector.k = Vector.create([0,0,1]);
 
 // Random vector of size n
 Vector.Random = function(n) {
-  return Vector.Zero(n).map(function() { return Math.random(); });
+  var elements = [];
+  do { elements.push(Math.random());
+  } while (--n);
+  return Vector.create(elements);
 };
 
 // Vector filled with zeros
 Vector.Zero = function(n) {
   var elements = [];
-  for (var i = 0; i < n; i++) {
-    elements.push(0)
-  }
+  do { elements.push(0);
+  } while (--n);
   return Vector.create(elements);
 };
 
@@ -289,29 +323,29 @@ Matrix.prototype = {
 
   // Returns element (i,j) of the matrix
   e: function(i,j) {
-    if (i < 1 || i > this.rows() || j < 1 || j > this.cols()) { return null; }
-    return this.elements[i - 1][j - 1];
+    if (i < 1 || i > this.elements.length || j < 1 || j > this.elements[0].length) { return null; }
+    return this.elements[i-1][j-1];
   },
 
   // Returns row k of the matrix as a vector
-  row: function(k) {
-    if (k > this.rows()) { return null; }
-    return Vector.create(this.elements[k - 1]);
+  row: function(i) {
+    if (i > this.elements.length) { return null; }
+    return Vector.create(this.elements[i-1]);
   },
 
   // Returns column k of the matrix as a vector
-  col: function(k) {
-    if (k > this.cols()) { return null; }
-    var col = [];
-    for (var i = 1; i <= this.rows(); i++) {
-      col.push(this.e(i,k));
-    }
+  col: function(j) {
+    if (j > this.elements[0].length) { return null; }
+    var col = [], n = this.elements.length, k = n, i;
+    do { i = k - n;
+      col.push(this.elements[i][j-1]);
+    } while (--n);
     return Vector.create(col);
   },
 
   // Returns the number of rows/columns the matrix has
   dimensions: function() {
-    return {rows: this.rows(), cols: this.cols()};
+    return {rows: this.elements.length, cols: this.elements[0].length};
   },
 
   // Returns the number of rows in the matrix
@@ -328,12 +362,16 @@ Matrix.prototype = {
   // a vector as the argument, in which case the receiver must be a
   // one-column matrix equal to the vector.
   eql: function(matrix) {
-    matrix = Matrix.create(matrix);
-    if (this.rows() != matrix.rows() || this.cols() != matrix.cols()) { return false; }
-    var i, j;
-    for (i = 1; i <= this.rows(); i++) {
-      if (!this.row(i).eql(matrix.row(i))) { return false; }
-    }
+    if (!matrix.determinant) { matrix = Matrix.create(matrix); }
+    if (this.elements.length != matrix.elements.length ||
+        this.elements[0].length != matrix.elements[0].length) { return false; }
+    var ni = this.elements.length, ki = ni, i, nj, kj = this.elements[0].length, j;
+    do { i = ki - ni;
+      nj = kj;
+      do { j = kj - nj;
+        if (Math.abs(this.elements[i][j] - matrix.elements[i][j]) > Sylvester.precision) { return false; }
+      } while (--nj);
+    } while (--ni);
     return true;
   },
 
@@ -344,39 +382,43 @@ Matrix.prototype = {
 
   // Maps the matrix to another matrix (of the same dimensions) according to the given function
   map: function(fn) {
-    var els = [], i, j;
-    for (i = 1; i <= this.rows(); i++) {
-      els[i - 1] = [];
-      for (j = 1; j <= this.cols(); j++) {
-        els[i - 1][j - 1] = fn(this.e(i,j), i, j);
-      }
-    }
+    var els = [], ni = this.elements.length, ki = ni, i, nj, kj = this.elements[0].length, j;
+    do { i = ki - ni;
+      nj = kj;
+      els[i] = [];
+      do { j = kj - nj;
+        els[i][j] = fn(this.elements[i][j], i + 1, j + 1);
+      } while (--nj);
+    } while (--ni);
     return Matrix.create(els);
   },
 
   // Returns true iff the argument has the same dimensions as the matrix
   isSameSizeAs: function(matrix) {
-    matrix = Matrix.create(matrix);
-    return (this.rows() == matrix.rows() &&
-        this.cols() == matrix.cols());
+    if (!matrix.determinant) { matrix = Matrix.create(matrix); }
+    return (this.elements.length == matrix.elements.length &&
+        this.elements[0].length == matrix.elements[0].length);
   },
 
   // Returns the result of adding the argument to the matrix
   add: function(matrix) {
-    matrix = Matrix.create(matrix);
+    if (!matrix.determinant) { matrix = Matrix.create(matrix); }
     if (!this.isSameSizeAs(matrix)) { return null; }
-    return this.map(function(x, i, j) { return x + matrix.e(i,j); });
+    return this.map(function(x, i, j) { return x + matrix.elements[i-1][j-1]; });
   },
 
   // Returns the result of subtracting the argument from the matrix
   subtract: function(matrix) {
-    return this.add(matrix.x(-1));
+    if (!matrix.determinant) { matrix = Matrix.create(matrix); }
+    if (!this.isSameSizeAs(matrix)) { return null; }
+    return this.map(function(x, i, j) { return x - matrix.elements[i-1][j-1]; });
   },
 
   // Returns true iff the matrix can multiply the argument from the left
   canMultiplyFromLeft: function(matrix) {
-    var mat = Matrix.create(matrix);
-    return (this.cols() == mat.rows());
+    if (!matrix.determinant) { matrix = Matrix.create(matrix); }
+    // this.columns should equal matrix.rows
+    return (this.elements[0].length == matrix.elements.length);
   },
 
   // Returns the result of multiplying the matrix from the right by the argument.
@@ -384,19 +426,28 @@ Matrix.prototype = {
   // a vector, a vector is returned, which saves you having to remember calling
   // col(1) on the result.
   multiply: function(matrix) {
-    var i, j;
-    if (matrix.elements) {
-      var returnVector = matrix.modulus ? true : false;
-      matrix = Matrix.create(matrix);
-      if (!this.canMultiplyFromLeft(matrix)) { return null; }
-      var self = this;
-      var M = Matrix.Zero(this.rows(), matrix.cols()).map(
-        function(x, i, j) { return self.row(i).dot(matrix.col(j)); }
-      );
-      return returnVector ? M.col(1) : M;
-    } else {
+    if (!matrix.elements) {
       return this.map(function(x) { return x * matrix; });
     }
+    var returnVector = matrix.modulus ? true : false;
+    if (!matrix.determinant) { matrix = Matrix.create(matrix); }
+    if (!this.canMultiplyFromLeft(matrix)) { return null; }
+    var ni = this.elements.length, ki = ni, i, nj, kj = matrix.elements[0].length, j;
+    var cols = this.elements[0].length, elements = [], sum, nc, c;
+    do { i = ki - ni;
+      elements[i] = [];
+      nj = kj;
+      do { j = kj - nj;
+        sum = 0;
+        nc = cols;
+        do { c = cols - nc;
+          sum += this.elements[i][c] * matrix.elements[c][j];
+        } while (--nc);
+        elements[i][j] = sum;
+      } while (--nj);
+    } while (--ni);
+    var M = Matrix.create(elements);
+    return returnVector ? M.col(1) : M;
   },
 
   x: function(matrix) { return this.multiply(matrix); },
@@ -406,79 +457,107 @@ Matrix.prototype = {
   // Element selection wraps if the required index is outside the matrix's bounds, so you could
   // use this to perform row/column cycling or copy-augmenting.
   minor: function(a, b, c, d) {
-    var self = this;
-    return Matrix.Zero(c, d).map(
-      function(x, i, j) { return self.e((i + a - 2)%self.rows() + 1, (j + b - 2)%self.cols() + 1); }
-    );
+    var elements = [], ni = c, i, nj, j;
+    var rows = this.elements.length, cols = this.elements[0].length;
+    do { i = c - ni;
+      elements[i] = [];
+      nj = d;
+      do { j = d - nj;
+        elements[i][j] = this.elements[(a+i-1)%rows][(b+j-1)%cols];
+      } while (--nj);
+    } while (--ni);
+    return Matrix.create(elements);
   },
 
   // Returns the transpose of the matrix
   transpose: function() {
-    var self = this;
-    return Matrix.Zero(this.cols(), this.rows()).map(function(x, i, j) { return self.e(j,i); });
+    var rows = this.elements.length, cols = this.elements[0].length;
+    var elements = [], ni = cols, i, nj, j;
+    do { i = cols - ni;
+      elements[i] = [];
+      nj = rows;
+      do { j = rows - nj;
+        elements[i][j] = this.elements[j][i];
+      } while (--nj);
+    } while (--ni);
+    return Matrix.create(elements);
   },
 
   // Returns true iff the matrix is square
   isSquare: function() {
-    return (this.rows() == this.cols());
+    return (this.elements.length == this.elements[0].length);
   },
 
   // Returns the (absolute) largest element of the matrix
   max: function() {
-    var m = 0;
-    for (var i = 1; i <= this.rows(); i++) {
-      if (Math.abs(this.row(i).max()) > Math.abs(m)) { m = this.row(i).max(); }
-    }
+    var m = 0, ni = this.elements.length, ki = ni, i, nj, kj = this.elements[0].length, j;
+    do { i = ki - ni;
+      nj = kj;
+      do { j = kj - nj;
+        if (Math.abs(this.elements[i][j]) > Math.abs(m)) { m = this.elements[i][j]; }
+      } while (--nj);
+    } while (--ni);
     return m;
   },
 
   // Returns the indeces of the first match found by reading row-by-row from left to right
   indexOf: function(x) {
-    var index = null, i, j;
-    for (i = 1; i <= this.rows(); i++) {
-      for (j = 1; j <= this.cols(); j++) {
-        if (index === null && this.e(i,j) == x) {
-          index = {i: i, j: j};
-        }
-      }
-    }
-    return index;
+    var index = null, ni = this.elements.length, ki = ni, i, nj, kj = this.elements[0].length, j;
+    do { i = ki - ni;
+      nj = kj;
+      do { j = kj - nj;
+        if (this.elements[i][j] == x) { return {i: i+1, j: j+1}; }
+      } while (--nj);
+    } while (--ni);
+    return null;
   },
 
   // If the matrix is square, returns the diagonal elements as a vector.
   // Otherwise, returns null.
   diagonal: function() {
     if (!this.isSquare) { return null; }
-    var els = [];
-    for (var i = 1; i <= this.rows(); i++) {
-      els.push(this.e(i,i));
-    }
+    var els = [], n = this.elements.length, k = n, i;
+    do { i = k - n;
+      els.push(this.elements[i][i]);
+    } while (--n);
     return Vector.create(els);
   },
 
   // Make the matrix upper (right) triangular by Gaussian elimination.
   // This method only adds multiples of rows to other rows. No rows are
-  // scaled up or switched, and the determinant is preserved. Elements that
-  // are within rounding error precision of zero are snapped to zero.
+  // scaled up or switched, and the determinant is preserved.
   toRightTriangular: function() {
-    var i, j, M = this.dup(), nonzero;
-    for (i = 1; i < M.rows(); i++) {
-      if (M.e(i,i) == 0) {
-        nonzero = false;
-        for (j = i + 1; j <= M.rows(); j++) {
-          if (M.e(j,i) != 0 && !nonzero) {
-            nonzero = true;
-            M.elements[i - 1] = M.row(i).add(M.row(j)).elements;
+    var M = this.dup(), els;
+    var n = this.elements.length, k = n, i, np, kp = this.elements[0].length, p;
+    do { i = k - n;
+      if (M.elements[i][i] == 0) {
+        for (j = i + 1; j < k; j++) {
+          if (M.elements[j][i] != 0) {
+            els = []; np = kp;
+            do { p = kp - np;
+              els.push(M.elements[i][p] + M.elements[j][p]);
+            } while (--np);
+            M.elements[i] = els;
+            break;
           }
         }
       }
-      if (M.e(i,i) != 0) {
-        for (j = i + 1; j <= M.rows(); j++) {
-          M.elements[j - 1] = M.row(j).subtract(M.row(i).x(M.e(j,i) / M.e(i,i))).elements;
+      if (M.elements[i][i] != 0) {
+        for (j = i + 1; j < k; j++) {
+          var multiplier = M.elements[j][i] / M.elements[i][i];
+          els = []; np = kp;
+          do { p = kp - np;
+            // Elements with column numbers up to an including the number
+            // of the row that we're subtracting can safely be set straight to
+            // zero, since that's the point of this routine and it avoids having
+            // to loop over and correct rounding errors later
+            els.push(p <= i ? 0 : M.elements[j][p] - M.elements[i][p] * multiplier);
+          } while (--np);
+          M.elements[j] = els;
         }
       }
-    }
-    return M.snapTo(0);
+    } while (--n);
+    return M;
   },
 
   toUpperTriangular: function() { return this.toRightTriangular(); },
@@ -486,9 +565,11 @@ Matrix.prototype = {
   // Returns the determinant for square matrices
   determinant: function() {
     if (!this.isSquare()) { return null; }
-    var els = this.toRightTriangular().diagonal().elements;
-    var det = els[0];
-    for (var i = 1; i < els.length; i++) { det = det * els[i]; }
+    var M = this.toRightTriangular();
+    var det = M.elements[0][0], n = M.elements.length - 1, k = n, i;
+    do { i = k - n + 1;
+      det = det * M.elements[i][i];
+    } while (--n);
     return det;
   },
 
@@ -502,9 +583,10 @@ Matrix.prototype = {
   // Returns the trace for square matrices
   trace: function() {
     if (!this.isSquare()) { return null; }
-    var els = this.toRightTriangular().diagonal().elements;
-    var tr = els[0];
-    for (var i = 1; i < els.length; i++) { tr = tr + els[i]; }
+    var tr = this.elements[0][0], n = this.elements.length - 1, k = n, i;
+    do { i = k - n + 1;
+      tr += this.elements[i][i];
+    } while (--n);
     return tr;
   },
 
@@ -513,10 +595,13 @@ Matrix.prototype = {
   // Returns the rank of the matrix
   rank: function() {
     var M = this.toRightTriangular(), rank = 0;
-    for (var i = 1; i <= this.rows(); i++) {
-      // toRightTriangular snaps values to zero
-      if (M.row(i).modulus() > 0) { rank++; }
-    }
+    var ni = this.elements.length, ki = ni, i, nj, kj = this.elements[0].length, j;
+    do { i = ki - ni;
+      nj = kj;
+      do { j = kj - nj;
+        if (Math.abs(M.elements[i][j]) > Sylvester.precision) { rank++; break; }
+      } while (--nj);
+    } while (--ni);
     return rank;
   },
   
@@ -524,34 +609,52 @@ Matrix.prototype = {
 
   // Returns the result of attaching the given argument to the right-hand side of the matrix
   augment: function(matrix) {
-    matrix = Matrix.create(matrix); // Allows us to supply vectors
-    var self = this.dup();
-    var i, j;
-    if (self.rows() != matrix.rows()) { return null; }
-    for (i = 0; i < self.rows(); i++) {
-      for (j = 0; j < matrix.cols(); j++) {
-        self.elements[i][self.rows() + j] = matrix.e(i+1,j+1);
-      }
-    }
-    return self;
+    if (!matrix.determinant) { matrix = Matrix.create(matrix); }
+    var els = this.dup().elements, cols = els[0].length;
+    var ni = els.length, ki = ni, i, nj, kj = matrix.elements[0].length, j;
+    if (ni != matrix.elements.length) { return null; }
+    do { i = ki - ni;
+      nj = kj;
+      do { j = kj - nj;
+        els[i][cols + j] = matrix.elements[i][j];
+      } while (--nj);
+    } while (--ni);
+    return Matrix.create(els);
   },
 
   // Returns the inverse (if one exists) using Gauss-Jordan
   inverse: function() {
-    var i, j;
     if (!this.isSquare() || this.isSingular()) { return null; }
-    var n = this.rows();
-    var M = this.augment(Matrix.I(n)).toRightTriangular();
+    var ni = this.elements.length, ki = ni, i, j;
+    var M = this.augment(Matrix.I(ni)).toRightTriangular();
+    var np, kp = M.elements[0].length, p, els, divisor;
+    var inverse_elements = [], new_element;
     // Matrix is non-singular so there will be no zeros on the diagonal
-    for (i = 1; i <= n; i++) {
-      M.elements[i - 1] = M.row(i).x(1 / M.e(i,i)).elements;
-    }
-    for (i = n; i > 1; i--) {
-      for (j = 1; j < i; j++) {
-        M.elements[j - 1] = M.row(j).subtract(M.row(i).x(M.e(j,i))).elements;
+    // Cycle through rows from last to first
+    do { i = ni - 1;
+      // First, normalise diagonal elements to 1
+      els = []; np = kp;
+      inverse_elements[i] = [];
+      divisor = M.elements[i][i];
+      do { p = kp - np;
+        new_element = M.elements[i][p] / divisor;
+        els.push(new_element);
+        // Shuffle of the current row of the right hand side into the results
+        // array as it will not be modified by later runs through this loop
+        if (p >= ki) { inverse_elements[i].push(new_element); }
+      } while (--np);
+      M.elements[i] = els;
+      // Then, subtract this row from those above it to
+      // give the identity matrix on the left hand side
+      for (j = 0; j < i; j++) {
+        els = []; np = kp;
+        do { p = kp - np;
+          els.push(M.elements[j][p] - M.elements[i][p] * M.elements[j][i]);
+        } while (--np);
+        M.elements[j] = els;
       }
-    }
-    return M.minor(1, n+1, n, n);
+    } while (--ni);
+    return Matrix.create(inverse_elements);
   },
 
   inv: function() { return this.inverse(); },
@@ -561,53 +664,46 @@ Matrix.prototype = {
     return this.map(function(x) { return Math.round(x); });
   },
 
-  // Sets the elements of the matrix to the given value if they
+  // Returns a copy of the matrix with elements set to the given value if they
   // differ from it by less than Sylvester.precision
   snapTo: function(x) {
-    var M = this.dup();
-    for (var i = 1; i <= M.rows(); i++) {
-      M.elements[i - 1] = M.row(i).snapTo(x).elements;
-    }
-    return M;
+    return this.map(function(p) {
+      return (Math.abs(p - x) <= Sylvester.precision) ? x : p;
+    });
   },
 
   // Returns a string representation of the matrix
   inspect: function() {
-    var matrix = this.dup();
-    for (var i = 0; i < matrix.rows(); i++) {
-      matrix.elements[i] = Vector.create(matrix.elements[i]).inspect();
-    }
-    return matrix.elements.join('\n');
+    var matrix_rows = [];
+    var n = this.elements.length, k = n, i;
+    do { i = k - n;
+      matrix_rows.push(Vector.create(this.elements[i]).inspect());
+    } while (--n);
+    return matrix_rows.join('\n');
   },
 
   // Set the matrix's elements from an array. If the argument passed
   // is a vector, the resulting matrix will be a single column.
   setElements: function(els) {
-    var row, i, j, success = true;
-    if (typeof(els) == 'undefined') { return null; }
-    this.elements = [];
-    if (els.elements) { els = els.elements; }
-    for (i = 0; i < els.length; i++) {
-      if (typeof(els[i][0]) != 'undefined') {
-        row = [];
-        for (j = 0; j < els[i].length; j++) {
-          if (!isNaN(els[i][j])) { row.push(els[i][j]); }
-        }
-        if (i > 0 && this.elements[i-1].length != row.length) {
-          success = false;
-        } else {
-          this.elements.push(row);
-        }
-      } else {
-        if (!isNaN(els[i])) { this.elements.push([els[i]]); }
-      }
-    }
-    if (!success) {
+    els = els.elements || els;
+    if (typeof(els[0][0]) != 'undefined') {
+      var ni = els.length, ki = ni, i, nj, kj, j;
       this.elements = [];
-      return null;
-    } else {
+      do { i = ki - ni;
+        nj = els[i].length; kj = nj;
+        this.elements[i] = [];
+        do { j = kj - nj;
+          this.elements[i][j] = els[i][j];
+        } while (--nj);
+      } while(--ni);
       return this;
     }
+    var n = els.length, k = n, i;
+    this.elements = [];
+    do { i = k - n;
+      this.elements.push([els[i]]);
+    } while (--n);
+    return this;
   }
 };
 
@@ -619,82 +715,73 @@ Matrix.create = function(elements) {
 
 // Identity matrix of size n
 Matrix.I = function(n) {
-  var els = [], i, j;
-  for (i = 0; i < n; i++) {
-    els[i] = [];
-    for (j = 0; j < n; j++) {
+  var els = [], k = n, i, nj, j;
+  do { i = k - n;
+    els[i] = []; nj = k;
+    do { j = k - nj;
       els[i][j] = (i == j) ? 1 : 0;
-    }
-  }
+    } while (--nj);
+  } while (--n);
   return Matrix.create(els);
 };
 
 // Diagonal matrix - all off-diagonal elements are zero
 Matrix.Diagonal = function(elements) {
-  if (typeof(elements) == 'undefined') { return null; }
-  var V = Vector.create(elements);
-  var n = V.dimensions();
-  if (n <= 0) { return null; }
+  var n = elements.length, k = n, i;
   var M = Matrix.I(n);
-  for (var i = 0; i < n; i++) {
-    M.elements[i][i] = V.elements[i];
-  }
+  do { i = k - n;
+    M.elements[i][i] = elements[i];
+  } while (--n);
   return M;
 };
 
 // Rotation matrix about some axis. If no axis is
 // supplied, assume we're after a 2D transform
-Matrix.Rotation = function(t, a) {
+Matrix.Rotation = function(theta, a) {
   if (!a) {
     return Matrix.create([
-      [Math.cos(t),  -Math.sin(t)],
-      [Math.sin(t),   Math.cos(t)]
+      [Math.cos(theta),  -Math.sin(theta)],
+      [Math.sin(theta),   Math.cos(theta)]
     ]);
   }
   var axis = a.dup();
-  if (axis.dimensions() != 3) { return null; }
-  axis = axis.toUnitVector();
-  var rot = Matrix.RotationZ(t);
-  // Axis is parallel to z-axis - just return that rotation
-  if (axis.isParallelTo(Vector.k)) { return rot; }
-  var projectionOnXY = Vector.create([axis.e(1), axis.e(2), 0]);
-  var z_rot = Matrix.I(3), inv_z_rot = Matrix.I(3);
-  if (!projectionOnXY.isParallelTo(Vector.i)) {
-    // Axis does not lie in X-Z plane - change co-ordinates through R(Z)
-    var Za = projectionOnXY.cross(Vector.i).toUnitVector();
-    var Zt = Za.e(3) * projectionOnXY.angleFrom(Vector.i);
-    axis = Matrix.RotationZ(Zt).x(axis);
-    z_rot = Matrix.RotationZ(Zt);
-    inv_z_rot = Matrix.RotationZ(-Zt);
-  }
-  // Axis lies in X-Z plame - change co-ordinates so that axis = z-axis, through R(Y)
-  var Ya = axis.cross(Vector.k).toUnitVector();
-  var Yt = Ya.e(2) * axis.angleFrom(Vector.k);
-  var y_rot = Matrix.RotationY(Yt);
-  var inv_y_rot = Matrix.RotationY(-Yt);
-  return inv_z_rot.x(inv_y_rot).x(rot).x(y_rot).x(z_rot);
+  if (axis.elements.length != 3) { return null; }
+  var mod = axis.modulus();
+  var x = axis.elements[0]/mod, y = axis.elements[1]/mod, z = axis.elements[2]/mod;
+  var s = Math.sin(theta), c = Math.cos(theta), t = 1 - c;
+  // Formula derived here: http://www.gamedev.net/reference/articles/article1199.asp
+  // That proof rotates the co-ordinate system so theta
+  // becomes -theta and sin becomes -sin here.
+  return Matrix.create([
+    [ t*x*x + c, t*x*y - s*z, t*x*z + s*y ],
+    [ t*x*y + s*z, t*y*y + c, t*y*z - s*x ],
+    [ t*x*z - s*y, t*y*z + s*x, t*z*z + c ]
+  ]);
 };
 
 // Special case rotations
 Matrix.RotationX = function(t) {
+  var c = Math.cos(t), s = Math.sin(t);
   return Matrix.create([
-    [            1,             0,             0 ],
-    [            0,   Math.cos(t),  -Math.sin(t) ],
-    [            0,   Math.sin(t),   Math.cos(t) ]
+    [  1,  0,  0 ],
+    [  0,  c, -s ],
+    [  0,  s,  c ]
   ]);
 };
 Matrix.RotationY = function(t) {
+  var c = Math.cos(t), s = Math.sin(t);
   return Matrix.create([
-    [  Math.cos(t),             0,   Math.sin(t) ],
-    [            0,             1,             0 ],
-    [ -Math.sin(t),             0,   Math.cos(t) ]
+    [  c,  0,  s ],
+    [  0,  1,  0 ],
+    [ -s,  0,  c ]
   ]);
 };
 Matrix.RotationZ = function(t) {
+  var c = Math.cos(t), s = Math.sin(t);
   return Matrix.create([
-    [  Math.cos(t),  -Math.sin(t),             0 ],
-    [  Math.sin(t),   Math.cos(t),             0 ],
-    [            0,             0,             1 ]
+    [  c, -s,  0 ],
+    [  s,  c,  0 ],
+    [  0,  0,  1 ]
   ]);
 };
 
@@ -707,13 +794,14 @@ Matrix.Random = function(n, m) {
 
 // Matrix filled with zeros
 Matrix.Zero = function(n, m) {
-  var els = [], i, j;
-  for (i = 0; i < n; i++) {
+  var els = [], ni = n, i, nj, j;
+  do { i = n - ni;
     els[i] = [];
-    for (j = 0; j < m; j++) {
+    nj = m;
+    do { j = m - nj;
       els[i][j] = 0;
-    }
-  }
+    } while (--nj);
+  } while (--ni);
   return Matrix.create(els);
 };
 
