@@ -926,7 +926,7 @@ LinkedList.prototype = {
   
   randomNode: function() {
     var n = Math.floor(Math.random() * this.length), node = this.first;
-    for (i = 0; i < n; i++) { node = node.next; }
+    for (var i = 0; i < n; i++) { node = node.next; }
     return node;
   }
 };
@@ -982,12 +982,17 @@ LinkedList.Circular.prototype.insertBefore = function(node, newNode) {
 };
 
 LinkedList.Circular.prototype.remove = function(node) {
-  node.prev.next = node.next;
-  node.next.prev = node.prev;
-  if (node == this.first) { this.first = node.next; }
-  if (node == this.last) { this.last = node.prev; }
-  node.prev = null;
-  node.next = null;
+  if (this.length > 1) {
+    node.prev.next = node.next;
+    node.next.prev = node.prev;
+    if (node == this.first) { this.first = node.next; }
+    if (node == this.last) { this.last = node.prev; }
+    node.prev = null;
+    node.next = null;
+  } else {
+    this.first = null;
+    this.last = null;
+  }
   this.length--;
 };
 
