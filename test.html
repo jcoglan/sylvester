@@ -17,7 +17,9 @@ window.onload = function() {
   title('Setup');
   assert('Test assertion', true);
   
+  //================================================================================================
   title('Vector tests');
+  //================================================================================================
   
   V = $V([0, 1, 7, 5]);
   assert('Creation with integers',
@@ -110,8 +112,14 @@ window.onload = function() {
     V.modulus()
   );
   
+  var dup = V.dup();
   assert('Duplication',
-    V.dup().eql(V)
+    dup.eql(V)
+  );
+  
+  dup.elements[0] = 12;
+  assert('Duplicate does not reference the origninal',
+    V.elements[0] == 4
   );
   
   V = $V([1,6,3,9]);
@@ -308,7 +316,16 @@ window.onload = function() {
     Vector.i.rotate(-Math.PI/2, $L([10, 0, 100], Vector.k)).eql($V([10,9,0]))
   );
   
+  V = $V([3,4,5]);
+  V.map(function(x) { return x*x; });
+  assert('Mapping does not overwrite the original',
+    V.inspect() == '[3, 4, 5]'
+  );
+  
+  
+  //================================================================================================
   title('Matrix tests');
+  //================================================================================================
   
   M = $M([
     [0,3,4,8],
@@ -650,7 +667,11 @@ window.onload = function() {
     ]))
   );
   
+  
+  
+  //================================================================================================
   title('Line tests');
+  //================================================================================================
   
   assert('Equality of antiparallel lines',
     Line.X.eql($L([0,0,0], [-12,0,0]))
@@ -750,7 +771,11 @@ window.onload = function() {
     Line.X.isParallelTo($P([0,0,-4], Vector.k))
   );
   
+  
+  
+  //================================================================================================
   title('Plane tests');
+  //================================================================================================
   
   assert('Equality and duplication',
     Plane.XY.dup().eql($P([34,-99,0], [0,0,-4]))
