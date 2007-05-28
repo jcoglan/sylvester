@@ -371,14 +371,15 @@ Matrix.prototype = {
   // a vector as the argument, in which case the receiver must be a
   // one-column matrix equal to the vector.
   eql: function(matrix) {
-    if (!matrix.determinant) { matrix = Matrix.create(matrix); }
-    if (this.elements.length != matrix.elements.length ||
-        this.elements[0].length != matrix.elements[0].length) { return false; }
+    var M = matrix.elements || matrix;
+    if (typeof(M[0][0]) == 'undefined') { M = Matrix.create(M).elements; }
+    if (this.elements.length != M.length ||
+        this.elements[0].length != M[0].length) { return false; }
     var ni = this.elements.length, ki = ni, i, nj, kj = this.elements[0].length, j;
     do { i = ki - ni;
       nj = kj;
       do { j = kj - nj;
-        if (Math.abs(this.elements[i][j] - matrix.elements[i][j]) > Sylvester.precision) { return false; }
+        if (Math.abs(this.elements[i][j] - M[i][j]) > Sylvester.precision) { return false; }
       } while (--nj);
     } while (--ni);
     return true;
@@ -404,30 +405,34 @@ Matrix.prototype = {
 
   // Returns true iff the argument has the same dimensions as the matrix
   isSameSizeAs: function(matrix) {
-    if (!matrix.determinant) { matrix = Matrix.create(matrix); }
-    return (this.elements.length == matrix.elements.length &&
-        this.elements[0].length == matrix.elements[0].length);
+    var M = matrix.elements || matrix;
+    if (typeof(M[0][0]) == 'undefined') { M = Matrix.create(M).elements; }
+    return (this.elements.length == M.length &&
+        this.elements[0].length == M[0].length);
   },
 
   // Returns the result of adding the argument to the matrix
   add: function(matrix) {
-    if (!matrix.determinant) { matrix = Matrix.create(matrix); }
-    if (!this.isSameSizeAs(matrix)) { return null; }
-    return this.map(function(x, i, j) { return x + matrix.elements[i-1][j-1]; });
+    var M = matrix.elements || matrix;
+    if (typeof(M[0][0]) == 'undefined') { M = Matrix.create(M).elements; }
+    if (!this.isSameSizeAs(M)) { return null; }
+    return this.map(function(x, i, j) { return x + M[i-1][j-1]; });
   },
 
   // Returns the result of subtracting the argument from the matrix
   subtract: function(matrix) {
-    if (!matrix.determinant) { matrix = Matrix.create(matrix); }
-    if (!this.isSameSizeAs(matrix)) { return null; }
-    return this.map(function(x, i, j) { return x - matrix.elements[i-1][j-1]; });
+    var M = matrix.elements || matrix;
+    if (typeof(M[0][0]) == 'undefined') { M = Matrix.create(M).elements; }
+    if (!this.isSameSizeAs(M)) { return null; }
+    return this.map(function(x, i, j) { return x - M[i-1][j-1]; });
   },
 
   // Returns true iff the matrix can multiply the argument from the left
   canMultiplyFromLeft: function(matrix) {
-    if (!matrix.determinant) { matrix = Matrix.create(matrix); }
+    var M = matrix.elements || matrix;
+    if (typeof(M[0][0]) == 'undefined') { M = Matrix.create(M).elements; }
     // this.columns should equal matrix.rows
-    return (this.elements[0].length == matrix.elements.length);
+    return (this.elements[0].length == M.length);
   },
 
   // Returns the result of multiplying the matrix from the right by the argument.
@@ -439,9 +444,10 @@ Matrix.prototype = {
       return this.map(function(x) { return x * matrix; });
     }
     var returnVector = matrix.modulus ? true : false;
-    if (!matrix.determinant) { matrix = Matrix.create(matrix); }
-    if (!this.canMultiplyFromLeft(matrix)) { return null; }
-    var ni = this.elements.length, ki = ni, i, nj, kj = matrix.elements[0].length, j;
+    var M = matrix.elements || matrix;
+    if (typeof(M[0][0]) == 'undefined') { M = Matrix.create(M).elements; }
+    if (!this.canMultiplyFromLeft(M)) { return null; }
+    var ni = this.elements.length, ki = ni, i, nj, kj = M[0].length, j;
     var cols = this.elements[0].length, elements = [], sum, nc, c;
     do { i = ki - ni;
       elements[i] = [];
@@ -450,7 +456,7 @@ Matrix.prototype = {
         sum = 0;
         nc = cols;
         do { c = cols - nc;
-          sum += this.elements[i][c] * matrix.elements[c][j];
+          sum += this.elements[i][c] * M[c][j];
         } while (--nc);
         elements[i][j] = sum;
       } while (--nj);
@@ -618,17 +624,18 @@ Matrix.prototype = {
 
   // Returns the result of attaching the given argument to the right-hand side of the matrix
   augment: function(matrix) {
-    if (!matrix.determinant) { matrix = Matrix.create(matrix); }
-    var els = this.dup().elements, cols = els[0].length;
-    var ni = els.length, ki = ni, i, nj, kj = matrix.elements[0].length, j;
-    if (ni != matrix.elements.length) { return null; }
+    var M = matrix.elements || matrix;
+    if (typeof(M[0][0]) == 'undefined') { M = Matrix.create(M).elements; }
+    var T = this.dup(), cols = T.elements[0].length;
+    var ni = T.elements.length, ki = ni, i, nj, kj = M[0].length, j;
+    if (ni != M.length) { return null; }
     do { i = ki - ni;
       nj = kj;
       do { j = kj - nj;
-        els[i][cols + j] = matrix.elements[i][j];
+        T.elements[i][cols + j] = M[i][j];
       } while (--nj);
     } while (--ni);
-    return Matrix.create(els);
+    return T;
   },
 
   // Returns the inverse (if one exists) using Gauss-Jordan
@@ -694,23 +701,23 @@ Matrix.prototype = {
   // Set the matrix's elements from an array. If the argument passed
   // is a vector, the resulting matrix will be a single column.
   setElements: function(els) {
-    els = els.elements || els;
-    if (typeof(els[0][0]) != 'undefined') {
-      var ni = els.length, ki = ni, i, nj, kj, j;
+    var i, elements = els.elements || els;
+    if (typeof(elements[0][0]) != 'undefined') {
+      var ni = elements.length, ki = ni, nj, kj, j;
       this.elements = [];
       do { i = ki - ni;
-        nj = els[i].length; kj = nj;
+        nj = elements[i].length; kj = nj;
         this.elements[i] = [];
         do { j = kj - nj;
-          this.elements[i][j] = els[i][j];
+          this.elements[i][j] = elements[i][j];
         } while (--nj);
       } while(--ni);
       return this;
     }
-    var n = els.length, k = n, i;
+    var n = elements.length, k = n;
     this.elements = [];
     do { i = k - n;
-      this.elements.push([els[i]]);
+      this.elements.push([elements[i]]);
     } while (--n);
     return this;
   }
