@@ -264,9 +264,8 @@ Vector.prototype = {
     if (obj.anchor) {
       // obj is a plane or line
       var P = this.elements.slice();
-      if (P.length == 2) { P.push(0); }
       var C = obj.pointClosestTo(P).elements;
-      return Vector.create([C[0] + (C[0] - P[0]), C[1] + (C[1] - P[1]), C[2] + (C[2] - P[2])]);
+      return Vector.create([C[0] + (C[0] - P[0]), C[1] + (C[1] - P[1]), C[2] + (C[2] - (P[2] || 0))]);
     } else {
       // obj is a point
       var Q = obj.elements || obj;
@@ -839,11 +838,10 @@ Line.prototype = {
   // Returns the result of translating the line by the given vector/array
   translate: function(vector) {
     vector = vector.elements || vector;
-    if (vector.length == 2) { vector.push(0); }
     return Line.create([
       this.anchor.elements[0] + vector[0],
       this.anchor.elements[1] + vector[1],
-      this.anchor.elements[2] + vector[2]
+      this.anchor.elements[2] + (vector[2] || 0)
     ], this.direction);
   },
 
@@ -870,9 +868,8 @@ Line.prototype = {
     } else {
       // obj is a point
       var P = obj.elements || obj;
-      if (P.length == 2) { P.push(0); }
       var A = this.anchor.elements, D = this.direction.elements;
-      var PA1 = P[0] - A[0], PA2 = P[1] - A[1], PA3 = P[2] - A[2];
+      var PA1 = P[0] - A[0], PA2 = P[1] - A[1], PA3 = (P[2] || 0) - A[2];
       var modPA = Math.sqrt(PA1*PA1 + PA2*PA2 + PA3*PA3);
       if (modPA === 0) return 0;
       // Assumes direction vector is normalized
@@ -933,17 +930,17 @@ Line.prototype = {
     } else {
       // obj is a point
       var P = obj.elements || obj;
-      if (P.length == 2) { P.push(0); }
       if (this.contains(P)) { return Vector.create(P); }
       var A = this.anchor.elements, D = this.direction.elements;
       var D1 = D[0], D2 = D[1], D3 = D[2], A1 = A[0], A2 = A[1], A3 = A[2];
-      var x = D1 * (P[1]-A2) - D2 * (P[0]-A1), y = D2 * (P[2]-A3) - D3 * (P[1]-A2), z = D3 * (P[0]-A1) - D1 * (P[2]-A3);
+      var x = D1 * (P[1]-A2) - D2 * (P[0]-A1), y = D2 * ((P[2] || 0) - A3) - D3 * (P[1]-A2),
+          z = D3 * (P[0]-A1) - D1 * ((P[2] || 0) - A3);
       var V = Vector.create([D2 * x - D3 * z, D3 * y - D1 * x, D1 * z - D2 * y]);
       var k = this.distanceFrom(P) / V.modulus();
       return Vector.create([
         P[0] + V.elements[0] * k,
         P[1] + V.elements[1] * k,
-        P[2] + V.elements[2] * k
+        (P[2] || 0) + V.elements[2] * k
       ]);
     }
   },
@@ -989,16 +986,17 @@ Line.prototype = {
     } else {
       // obj is a point - just reflect the line's anchor in it
       var P = obj.elements || obj;
-      if (P.length == 2) { P.push(0); }
-      return Line.create(this.anchor.reflectionIn(P), this.direction);
+      return Line.create(this.anchor.reflectionIn([P[0], P[1], (P[2] || 0)]), this.direction);
     }
   },
 
   // Set the line's anchor point and direction.
   setVectors: function(anchor, direction) {
-    if (!anchor.modulus) { anchor = Vector.create(anchor); }
-    if (!direction.modulus) { direction = Vector.create(direction); }
-    if (anchor.elements.length == 2) { anchor.elements.push(0); }
+    // Need to do this so that line's properties are not
+    // references to the arguments passed in
+    anchor = Vector.create(anchor);
+    direction = Vector.create(direction);
+    if (anchor.elements.length == 2) {anchor.elements.push(0); }
     if (direction.elements.length == 2) { direction.elements.push(0); }
     if (anchor.elements.length > 3 || direction.elements.length > 3) { return null; }
     var mod = direction.modulus();
@@ -1043,11 +1041,10 @@ Plane.prototype = {
   // Returns the result of translating the plane by the given vector
   translate: function(vector) {
     vector = vector.elements || vector;
-    if (vector.length == 2) { vector.push(0); }
     return Plane.create([
       this.anchor.elements[0] + vector[0],
       this.anchor.elements[1] + vector[1],
-      this.anchor.elements[2] + vector[2]
+      this.anchor.elements[2] + (vector[2] || 0)
     ], this.normal);
   },
 
@@ -1082,9 +1079,8 @@ Plane.prototype = {
     } else {
       // obj is a point
       var P = obj.elements || obj;
-      if (P.length == 2) { P.push(0); }
       var A = this.anchor.elements, N = this.normal.elements;
-      return Math.abs((A[0] - P[0]) * N[0] + (A[1] - P[1]) * N[1] + (A[2] - P[2]) * N[2]);
+      return Math.abs((A[0] - P[0]) * N[0] + (A[1] - P[1]) * N[1] + (A[2] - (P[2] || 0)) * N[2]);
     }
   },
 
@@ -1095,9 +1091,8 @@ Plane.prototype = {
       return (this.contains(obj.anchor) && this.contains(obj.anchor.add(obj.direction)));
     } else {
       var P = obj.elements || obj;
-      if (P.length == 2) { P.push(0); }
       var A = this.anchor.elements, N = this.normal.elements;
-      var diff = Math.abs(N[0]*(A[0] - P[0]) + N[1]*(A[1] - P[1]) + N[2]*(A[2] - P[2]));
+      var diff = Math.abs(N[0]*(A[0] - P[0]) + N[1]*(A[1] - P[1]) + N[2]*(A[2] - (P[2] || 0)));
       return (diff <= Sylvester.precision);
     }
   },
@@ -1154,10 +1149,9 @@ Plane.prototype = {
   // Returns the point in the plane closest to the given point
   pointClosestTo: function(point) {
     var P = point.elements || point;
-    if (P.length == 2) { P.push(0); }
     var A = this.anchor.elements, N = this.normal.elements;
-    var dot = (A[0] - P[0]) * N[0] + (A[1] - P[1]) * N[1] + (A[2] - P[2]) * N[2];
-    return Vector.create([P[0] + N[0] * dot, P[1] + N[1] * dot, P[2] + N[2] * dot]);
+    var dot = (A[0] - P[0]) * N[0] + (A[1] - P[1]) * N[1] + (A[2] - (P[2] || 0)) * N[2];
+    return Vector.create([P[0] + N[0] * dot, P[1] + N[1] * dot, (P[2] || 0) + N[2] * dot]);
   },
 
   // Returns a copy of the plane, rotated by t radians about the given line
@@ -1197,8 +1191,7 @@ Plane.prototype = {
     } else {
       // obj is a point
       var P = obj.elements || obj;
-      if (P.length == 2) { P.push(0); }
-      return Plane.create(this.anchor.reflectionIn(P), this.normal);
+      return Plane.create(this.anchor.reflectionIn([P[0], P[1], (P[2] || 0)]), this.normal);
     }
   },
 
@@ -1207,14 +1200,14 @@ Plane.prototype = {
   // If only two are sepcified, the second is taken to be the normal. Normal vector is
   // normalised before storage.
   setVectors: function(anchor, v1, v2) {
-    if (!anchor.modulus) { anchor = Vector.create(anchor); }
+    anchor = Vector.create(anchor);
     anchor = anchor.to3D(); if (anchor === null) { return null; }
-    if (!v1.modulus) { v1 = Vector.create(v1); }
+    v1 = Vector.create(v1);
     v1 = v1.to3D(); if (v1 === null) { return null; }
     if (typeof(v2) == 'undefined') {
       v2 = null;
     } else {
-      if (!v2.modulus) { v2 = Vector.create(v2); }
+      v2 = Vector.create(v2);
       v2 = v2.to3D(); if (v2 === null) { return null; }
     }
     var A1 = anchor.elements[0], A2 = anchor.elements[1], A3 = anchor.elements[2];
