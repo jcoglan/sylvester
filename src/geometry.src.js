@@ -36,11 +36,10 @@ Line.prototype = {
   // Returns the result of translating the line by the given vector/array
   translate: function(vector) {
     vector = vector.elements || vector;
-    if (vector.length == 2) { vector.push(0); }
     return Line.create([
       this.anchor.elements[0] + vector[0],
       this.anchor.elements[1] + vector[1],
-      this.anchor.elements[2] + vector[2]
+      this.anchor.elements[2] + (vector[2] || 0)
     ], this.direction);
   },
 
@@ -67,9 +66,8 @@ Line.prototype = {
     } else {
       // obj is a point
       var P = obj.elements || obj;
-      if (P.length == 2) { P.push(0); }
       var A = this.anchor.elements, D = this.direction.elements;
-      var PA1 = P[0] - A[0], PA2 = P[1] - A[1], PA3 = P[2] - A[2];
+      var PA1 = P[0] - A[0], PA2 = P[1] - A[1], PA3 = (P[2] || 0) - A[2];
       var modPA = Math.sqrt(PA1*PA1 + PA2*PA2 + PA3*PA3);
       if (modPA === 0) return 0;
       // Assumes direction vector is normalized
@@ -84,7 +82,7 @@ Line.prototype = {
     var dist = this.distanceFrom(point);
     return (dist !== null && dist <= Sylvester.precision);
   },
-  
+
   // Returns the distance from the anchor of the given point. Negative values are
   // returned for points that are in the opposite direction to the line's direction from
   // the line's anchor point.
@@ -140,17 +138,17 @@ Line.prototype = {
     } else {
       // obj is a point
       var P = obj.elements || obj;
-      if (P.length == 2) { P.push(0); }
       if (this.contains(P)) { return Vector.create(P); }
       var A = this.anchor.elements, D = this.direction.elements;
       var D1 = D[0], D2 = D[1], D3 = D[2], A1 = A[0], A2 = A[1], A3 = A[2];
-      var x = D1 * (P[1]-A2) - D2 * (P[0]-A1), y = D2 * (P[2]-A3) - D3 * (P[1]-A2), z = D3 * (P[0]-A1) - D1 * (P[2]-A3);
+      var x = D1 * (P[1]-A2) - D2 * (P[0]-A1), y = D2 * ((P[2] || 0) - A3) - D3 * (P[1]-A2),
+          z = D3 * (P[0]-A1) - D1 * ((P[2] || 0) - A3);
       var V = Vector.create([D2 * x - D3 * z, D3 * y - D1 * x, D1 * z - D2 * y]);
       var k = this.distanceFrom(P) / V.modulus();
       return Vector.create([
         P[0] + V.elements[0] * k,
         P[1] + V.elements[1] * k,
-        P[2] + V.elements[2] * k
+        (P[2] || 0) + V.elements[2] * k
       ]);
     }
   },
@@ -177,7 +175,7 @@ Line.prototype = {
       R[2][0] * D[0] + R[2][1] * D[1] + R[2][2] * D[2]
     ]);
   },
-  
+
   // Returns a copy of the line with its direction vector reversed.
   // Useful when using lines for rotations.
   reverse: function() {
@@ -202,16 +200,17 @@ Line.prototype = {
     } else {
       // obj is a point - just reflect the line's anchor in it
       var P = obj.elements || obj;
-      if (P.length == 2) { P.push(0); }
-      return Line.create(this.anchor.reflectionIn(P), this.direction);
+      return Line.create(this.anchor.reflectionIn([P[0], P[1], (P[2] || 0)]), this.direction);
     }
   },
 
   // Set the line's anchor point and direction.
   setVectors: function(anchor, direction) {
-    if (!anchor.modulus) { anchor = Vector.create(anchor); }
-    if (!direction.modulus) { direction = Vector.create(direction); }
-    if (anchor.elements.length == 2) { anchor.elements.push(0); }
+    // Need to do this so that line's properties are not
+    // references to the arguments passed in
+    anchor = Vector.create(anchor);
+    direction = Vector.create(direction);
+    if (anchor.elements.length == 2) {anchor.elements.push(0); }
     if (direction.elements.length == 2) { direction.elements.push(0); }
     if (anchor.elements.length > 3 || direction.elements.length > 3) { return null; }
     var mod = direction.modulus();
@@ -226,7 +225,7 @@ Line.prototype = {
   }
 };
 
-  
+
 // Constructor function
 Line.create = function(anchor, direction) {
   var L = new Line();
@@ -250,25 +249,25 @@ Line.Segment.prototype = {
     var C1 = B[0] - A[0], C2 = B[1] - A[1], C3 = B[2] - A[2];
     return Math.sqrt(C1*C1 + C2*C2 + C3*C3);
   },
-  
+
   // Returns the line segment as a vector equal to its
   // end point relative to its endpoint
   toVector: function() {
     var A = this.start.elements, B = this.end.elements;
     return Vector.create([B[0] - A[0], B[1] - A[1], B[2] - A[2]]);
   },
-  
+
   // Returns the segment's midpoint as a vector
   midpoint: function() {
     var A = this.start.elements, B = this.end.elements;
     return Vector.create([(B[0] + A[0])/2, (B[1] + A[1])/2, (B[2] + A[2])/2]);
   },
-  
+
   // Returns the plane that bisects the segment
   bisectingPlane: function() {
     return Plane.create(this.midpoint(), this.toVector());
   },
-  
+
   // Returns true iff the given point lies on the segment
   contains: function(point) {
     point = point.elements || point;
@@ -278,19 +277,19 @@ Line.Segment.prototype = {
     var vect = this.toVector();
     return V.isAntiparallelTo(vect) && V.modulus() <= vect.modulus();
   },
-  
+
   // Returns true iff the line segment intersects the argument
   intersects: function(obj) {
     return (this.intersectionWith(obj) !== null);
   },
-  
+
   // Returns the unique point of intersection with the argument
   intersectionWith: function(obj) {
     if (!this.line.intersects(obj)) { return null; }
     var P = this.line.intersectionWith(obj);
     return (this.contains(P) ? P : null);
   },
-  
+
   // Set the start and end-points of the segment
   setPoints: function(startPoint, endPoint) {
     startPoint = Vector.create(startPoint).to3D();
@@ -327,11 +326,10 @@ Plane.prototype = {
   // Returns the result of translating the plane by the given vector
   translate: function(vector) {
     vector = vector.elements || vector;
-    if (vector.length == 2) { vector.push(0); }
     return Plane.create([
       this.anchor.elements[0] + vector[0],
       this.anchor.elements[1] + vector[1],
-      this.anchor.elements[2] + vector[2]
+      this.anchor.elements[2] + (vector[2] || 0)
     ], this.normal);
   },
 
@@ -349,7 +347,7 @@ Plane.prototype = {
     }
     return null;
   },
-  
+
   // Returns true iff the receiver is perpendicular to the argument
   isPerpendicularTo: function(plane) {
     var theta = this.normal.angleFrom(plane.normal);
@@ -366,9 +364,8 @@ Plane.prototype = {
     } else {
       // obj is a point
       var P = obj.elements || obj;
-      if (P.length == 2) { P.push(0); }
       var A = this.anchor.elements, N = this.normal.elements;
-      return Math.abs((A[0] - P[0]) * N[0] + (A[1] - P[1]) * N[1] + (A[2] - P[2]) * N[2]);
+      return Math.abs((A[0] - P[0]) * N[0] + (A[1] - P[1]) * N[1] + (A[2] - (P[2] || 0)) * N[2]);
     }
   },
 
@@ -379,9 +376,8 @@ Plane.prototype = {
       return (this.contains(obj.anchor) && this.contains(obj.anchor.add(obj.direction)));
     } else {
       var P = obj.elements || obj;
-      if (P.length == 2) { P.push(0); }
       var A = this.anchor.elements, N = this.normal.elements;
-      var diff = Math.abs(N[0]*(A[0] - P[0]) + N[1]*(A[1] - P[1]) + N[2]*(A[2] - P[2]));
+      var diff = Math.abs(N[0]*(A[0] - P[0]) + N[1]*(A[1] - P[1]) + N[2]*(A[2] - (P[2] || 0)));
       return (diff <= Sylvester.precision);
     }
   },
@@ -438,10 +434,9 @@ Plane.prototype = {
   // Returns the point in the plane closest to the given point
   pointClosestTo: function(point) {
     var P = point.elements || point;
-    if (P.length == 2) { P.push(0); }
     var A = this.anchor.elements, N = this.normal.elements;
-    var dot = (A[0] - P[0]) * N[0] + (A[1] - P[1]) * N[1] + (A[2] - P[2]) * N[2];
-    return Vector.create([P[0] + N[0] * dot, P[1] + N[1] * dot, P[2] + N[2] * dot]);
+    var dot = (A[0] - P[0]) * N[0] + (A[1] - P[1]) * N[1] + (A[2] - (P[2] || 0)) * N[2];
+    return Vector.create([P[0] + N[0] * dot, P[1] + N[1] * dot, (P[2] || 0) + N[2] * dot]);
   },
 
   // Returns a copy of the plane, rotated by t radians about the given line
@@ -481,8 +476,7 @@ Plane.prototype = {
     } else {
       // obj is a point
       var P = obj.elements || obj;
-      if (P.length == 2) { P.push(0); }
-      return Plane.create(this.anchor.reflectionIn(P), this.normal);
+      return Plane.create(this.anchor.reflectionIn([P[0], P[1], (P[2] || 0)]), this.normal);
     }
   },
 
@@ -491,14 +485,14 @@ Plane.prototype = {
   // If only two are sepcified, the second is taken to be the normal. Normal vector is
   // normalised before storage.
   setVectors: function(anchor, v1, v2) {
-    if (!anchor.modulus) { anchor = Vector.create(anchor); }
+    anchor = Vector.create(anchor);
     anchor = anchor.to3D(); if (anchor === null) { return null; }
-    if (!v1.modulus) { v1 = Vector.create(v1); }
+    v1 = Vector.create(v1);
     v1 = v1.to3D(); if (v1 === null) { return null; }
     if (typeof(v2) == 'undefined') {
       v2 = null;
     } else {
-      if (!v2.modulus) { v2 = Vector.create(v2); }
+      v2 = Vector.create(v2);
       v2 = v2.to3D(); if (v2 === null) { return null; }
     }
     var A1 = anchor.elements[0], A2 = anchor.elements[1], A3 = anchor.elements[2];
@@ -591,7 +585,7 @@ Polygon.prototype = {
   dup: function() {
     return Polygon.create(this.vertices);
   },
-  
+
   // Returns a copy of the polygon after it's been translated
   // by the given vector. Any cached properties are transfered
   // to the new copy and changed as necessary.
@@ -609,7 +603,7 @@ Polygon.prototype = {
     }
     return poly;
   },
-  
+
   // Returns a copy of the polygon rotated about the given line
   // Any cached properties are transfered to the new copy and
   // changed as necessary.
@@ -625,7 +619,7 @@ Polygon.prototype = {
     }
     return poly;
   },
-  
+
   // Scales a copy of the polygon relative to the given point
   // Any cached properties are transfered to the new copy and
   // changed as necessary.
@@ -645,12 +639,12 @@ Polygon.prototype = {
     }
     return poly;
   },
-  
+
   // Returns true iff the polygon is a triangle
   isTriangle: function() {
     return this.vertices.length == 3;
   },
-  
+
   // Returns the area of the polygon. Requires that the polygon
   // be converted to triangles, so use with caution.
   area: function() {
@@ -665,7 +659,7 @@ Polygon.prototype = {
       return area;
     }
   },
-  
+
   // Returns the centroid of the polygon. Requires division into
   // triangles - use with caution
   centroid: function() {
@@ -681,14 +675,14 @@ Polygon.prototype = {
       return V.x(1/M);
     }
   },
-  
+
   // Returns the polygon's projection on the given plane as another polygon
   projectionOn: function(plane) {
     var points = [];
     this.vertices.each(function(vertex) { points.push(plane.pointClosestTo(vertex)); });
     return Polygon.create(points);
   },
-  
+
   // Removes the given vertex from the polygon as long as it's not triangular.
   // Warning: vertices are NOT renumbered when removal happens.
   removeVertex: function(i) {
@@ -728,7 +722,7 @@ Polygon.prototype = {
     }
     return this;
   },
-  
+
   // Returns true iff the point is strictly inside the polygon
   contains: function(point) {
     point = point.to3D();
@@ -763,7 +757,7 @@ Polygon.prototype = {
     }
     return (cuts%2 != 0);
   },
-  
+
   // Returns true if the given point lies on an edge of the polygon
   // May cause problems with 'hole-joining' edges
   hasEdgeContaining: function(point) {
@@ -775,14 +769,14 @@ Polygon.prototype = {
     } );
     return success;
   },
-  
+
   // Returns an array of 3-vertex polygons that the original has been split into
   // Stores the first calculation for faster retrieval later on
   toTriangles: function() {
     if (this.cached.triangles !== null) { return this.cached.triangles; }
     return this.setCache('triangles', this.triangulateByEarClipping());
   },
-  
+
   // Implementation of ear clipping algorithm
   // Found in 'Triangulation by ear clipping', by David Eberly
   // at http://www.geometrictools.com
@@ -814,7 +808,7 @@ Polygon.prototype = {
     triangles.push(Polygon.create(poly.vertices.toArray()));
     return triangles;
   },
-  
+
   // Sets the polygon's vertices
   setVertices: function(points) {
     if (points.toArray) { points = points.toArray(); }
@@ -848,14 +842,14 @@ Polygon.prototype = {
     this.clearCache();
     return this;
   },
-  
+
   // Clear any cached properties
   clearCache: function() {
     this.cached = {
       triangles: null
     };
   },
-  
+
   // Set cached value and return the value
   setCache: function(key, value) {
     this.cached[key] = value;
@@ -905,7 +899,7 @@ LinkedList.prototype = {
   length: 0,
   first: null,
   last: null,
-  
+
   each: function(fn) {
     var vertex = this.first;
     for (var i = 0; i < this.length; i++) {
@@ -913,7 +907,7 @@ LinkedList.prototype = {
       vertex = vertex.next;
     }
   },
-  
+
   toArray: function() {
     var arr = [], node = this.first;
     if (node === null) { return arr; }
@@ -923,7 +917,7 @@ LinkedList.prototype = {
     }
     return arr;
   },
-  
+
   randomNode: function() {
     var n = Math.floor(Math.random() * this.length), node = this.first;
     for (var i = 0; i < n; i++) { node = node.next; }

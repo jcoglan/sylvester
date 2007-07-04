@@ -66,7 +66,7 @@ Vector.prototype = {
     });
     return Vector.create(elements);
   },
-  
+
   // Calls the iterator for each element of the vector in turn
   each: function(fn) {
     var n = this.elements.length, k = n, i;
@@ -264,9 +264,8 @@ Vector.prototype = {
     if (obj.anchor) {
       // obj is a plane or line
       var P = this.elements.slice();
-      if (P.length == 2) { P.push(0); }
       var C = obj.pointClosestTo(P).elements;
-      return Vector.create([C[0] + (C[0] - P[0]), C[1] + (C[1] - P[1]), C[2] + (C[2] - P[2])]);
+      return Vector.create([C[0] + (C[0] - P[0]), C[1] + (C[1] - P[1]), C[2] + (C[2] - (P[2] || 0))]);
     } else {
       // obj is a point
       var Q = obj.elements || obj;
@@ -297,7 +296,7 @@ Vector.prototype = {
     return this;
   }
 };
-  
+
 // Constructor function
 Vector.create = function(elements) {
   var V = new Vector();
@@ -619,7 +618,7 @@ Matrix.prototype = {
     } while (--ni);
     return rank;
   },
-  
+
   rk: function() { return this.rank(); },
 
   // Returns the result of attaching the given argument to the right-hand side of the matrix
