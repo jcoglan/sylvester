@@ -837,11 +837,11 @@ Line.prototype = {
 
   // Returns the result of translating the line by the given vector/array
   translate: function(vector) {
-    vector = vector.elements || vector;
+    var V = vector.elements || vector;
     return Line.create([
-      this.anchor.elements[0] + vector[0],
-      this.anchor.elements[1] + vector[1],
-      this.anchor.elements[2] + (vector[2] || 0)
+      this.anchor.elements[0] + V[0],
+      this.anchor.elements[1] + V[1],
+      this.anchor.elements[2] + (V[2] || 0)
     ], this.direction);
   },
 
@@ -1040,11 +1040,11 @@ Plane.prototype = {
 
   // Returns the result of translating the plane by the given vector
   translate: function(vector) {
-    vector = vector.elements || vector;
+    var V = vector.elements || vector;
     return Plane.create([
-      this.anchor.elements[0] + vector[0],
-      this.anchor.elements[1] + vector[1],
-      this.anchor.elements[2] + (vector[2] || 0)
+      this.anchor.elements[0] + V[0],
+      this.anchor.elements[1] + V[1],
+      this.anchor.elements[2] + (V[2] || 0)
     ], this.normal);
   },
 
