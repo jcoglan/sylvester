@@ -270,10 +270,11 @@ Line.Segment.prototype = {
 
   // Returns true iff the given point lies on the segment
   contains: function(point) {
-    point = point.elements || point;
-    if (point.length == 2) { point.push(0); }
-    if (this.start.eql(point)) { return true; }
-    var V = this.start.subtract(point);
+    var P = (point.elements || point).slice();
+    if (P.length == 2) { P.push(0); }
+    if (this.start.eql(P)) { return true; }
+    var S = this.start.elements;
+    var V = Vector.create([S[0] - P[0], S[1] - P[1], S[2] - (P[2] || 0)]);
     var vect = this.toVector();
     return V.isAntiparallelTo(vect) && V.modulus() <= vect.modulus();
   },
