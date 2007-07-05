@@ -903,9 +903,21 @@ LinkedList.prototype = {
   each: function(fn) {
     var vertex = this.first;
     for (var i = 0; i < this.length; i++) {
-      fn(vertex);
+      fn(vertex, i);
       vertex = vertex.next;
     }
+  },
+
+  at: function(i) {
+    if (i >= this.length) { return null; }
+    var node = this.first;
+    for (var j = 0; j < i; j++) { node = node.next; }
+    return node;
+  },
+
+  randomNode: function() {
+    var n = Math.floor(Math.random() * this.length);
+    return this.at(n);
   },
 
   toArray: function() {
@@ -916,12 +928,6 @@ LinkedList.prototype = {
       node = node.next;
     }
     return arr;
-  },
-
-  randomNode: function() {
-    var n = Math.floor(Math.random() * this.length), node = this.first;
-    for (var i = 0; i < n; i++) { node = node.next; }
-    return node;
   }
 };
 
@@ -930,8 +936,8 @@ LinkedList.Circular.prototype = new LinkedList;
 
 LinkedList.Circular.prototype.append = function(node) {
   if (this.first === null) {
-    node.prev = null;
-    node.next = null;
+    node.prev = node;
+    node.next = node;
     this.first = node;
     this.last = node;
   } else {
@@ -981,12 +987,12 @@ LinkedList.Circular.prototype.remove = function(node) {
     node.next.prev = node.prev;
     if (node == this.first) { this.first = node.next; }
     if (node == this.last) { this.last = node.prev; }
-    node.prev = null;
-    node.next = null;
   } else {
     this.first = null;
     this.last = null;
   }
+  node.prev = null;
+  node.next = null;
   this.length--;
 };
 
