@@ -87,10 +87,10 @@ Line.prototype = {
   // returned for points that are in the opposite direction to the line's direction from
   // the line's anchor point.
   positionOf: function(point) {
-    point = point.to3D();
-    if (point === null) { return null; }
     if (!this.contains(point)) { return null; }
-    return point.subtract(this.anchor).dot(this.direction);
+    var P = point.elements || point;
+    var A = this.anchor.elements, D = this.direction.elements;
+    return (P[0] - A[0]) * D[0] + (P[1] - A[1]) * D[1] + ((P[2] || 0) - A[2]) * D[2];
   },
 
   // Returns true iff the line lies in the given plane
