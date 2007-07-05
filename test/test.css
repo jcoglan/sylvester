@@ -1,0 +1,16 @@
+body {
+  font: 13px Helvetica, Arial, sans-serif;
+}
+
+li {
+  font-weight: bold;
+  margin-bottom: 11px;
+}
+
+.success {
+  color: #69c328;
+}
+
+.failure {
+  color: #c34e28;
+}

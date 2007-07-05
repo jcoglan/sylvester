@@ -4,11 +4,13 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
 <title>Sylvester Test Suite</title>
-<script src="lib/base.js" type="text/javascript"></script>
-<script src="lib/geometry.js" type="text/javascript"></script>
+<script src="../lib/base.js" type="text/javascript"></script>
+<script src="../lib/geometry.js" type="text/javascript"></script>
+<script src="test.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="test.css" />
 <script type="text/javascript">
 
-var resultList, summary, nTests = 0, nFailures = 0, i, A, V, V1, V2, M, M1, M2, L, L1, L2, P, P1, P2;
+var summary, i, A, V, V1, V2, M, M1, M2, L, L1, L2, P, P1, P2;
 var begin = new Date().getTime();
 
 window.onload = function() {
@@ -841,61 +843,9 @@ window.onload = function() {
   var fin = new Date().getTime();
   var time = fin - begin;
   summary.innerHTML = 'Tests completed in ' + time/1000 + ' seconds. ' + nTests + ' assertions, ' + nFailures + ' failures.';
-
-};
-
-var assert = function(testName, condition, message) {
-  nTests++;
-  var display, klass;
-  if (condition) {
-    klass = 'success';
-    display = 'Passed';
-  } else {
-    nFailures++;
-    klass = 'failure';
-    display = (message ? '\n\n' + message : 'Failure').replace(/\n/g, '<br />');
-  }
-  var item = document.createElement('li');
-  resultList.appendChild(item);
-  item.className = klass;
-  item.innerHTML = testName + ': ' + display;
-};
-
-var benchmark = function(fn, n) {
-  n = n || 100; k = n;
-  var A = new Date().getTime();
-  do { fn() } while (--n);
-  var B = new Date().getTime();
-  alert('Completed ' + k + ' executions in ' + ((B-A)/1000) + ' seconds');
-};
-
-var title = function(str) {
-  var item = document.createElement('li');
-  resultList.appendChild(item);
-  item.innerHTML = str;
 };
 
 </script>
-<style type="text/css">
-
-body {
-  font: 13px Helvetica, Arial, sans-serif;
-}
-
-li {
-  font-weight: bold;
-  margin-bottom: 11px;
-}
-
-.success {
-  color: #69c328;
-}
-
-.failure {
-  color: #c34e28;
-}
-
-</style>
 </head>
 <body>
 
