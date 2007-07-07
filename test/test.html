@@ -682,6 +682,11 @@ window.onload = function() {
     );
   }
   
+  assert('Position of point',
+    $L([0,0,0], [1,1,-1]).positionOf([3,3,-3]) - Math.sqrt(27) <= Sylvester.precision,
+    $L([0,0,0], [1,1,-1]).positionOf([3,3,-3])
+  );
+  
   assert('Find closest point to a point',
     Line.X.pointClosestTo($V([26,-2,18])).eql($V([26,0,0]))
   );
@@ -751,6 +756,43 @@ window.onload = function() {
   
   assert('Parallel to plane',
     Line.X.isParallelTo($P([0,0,-4], Vector.k))
+  );
+  
+  title('Line segment tests');
+  
+  L1 = Line.Segment.create([5,5,5], [10,10,10]);
+  
+  assert('Line segment length',
+    L1.length() - Math.sqrt(75) <= Sylvester.precision,
+    L1.length() - Math.sqrt(75)
+  );
+  
+  assert('Conversion to vector',
+    L1.toVector().eql([5,5,5])
+  );
+  
+  assert('Midpoint',
+    L1.midpoint().eql([7.5,7.5,7.5])
+  );
+  
+  assert('Bisecting plane',
+    L1.bisectingPlane().eql($P([7.5,7.5,7.5], [1,1,1]))
+  );
+  
+  assert('Contains its midpoint',
+    L1.contains(L1.midpoint())
+  );
+  
+  assert('Contains its start point',
+    L1.contains([5,5,5])
+  );
+  
+  assert('Contains its end point',
+    L1.contains([10,10,10])
+  );
+  
+  assert('Does not contain points outside its ends',
+    !L1.contains([4.9999,4.9999,4.9999]) && !L1.contains([10.00001, 10.00001, 10.00001])
   );
   
   title('Plane tests');
