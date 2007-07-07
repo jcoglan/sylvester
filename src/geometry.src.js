@@ -726,6 +726,11 @@ Polygon.prototype = {
 
   // Returns true iff the point is strictly inside the polygon
   contains: function(point) {
+    return this.containsByWindingNumber(point);
+  },
+
+  // Returns true iff the given point is strictly inside the polygon using the crossing number method
+  containsByCrossingNumber: function(point) {
     point = point.to3D();
     if (point === null) { return null; }
     if (!this.plane.contains(point)) { return false; }
@@ -759,14 +764,33 @@ Polygon.prototype = {
     return (cuts%2 != 0);
   },
 
+  // Returns true iff the given point is strictly inside the polygon using the winding number method
+  containsByWindingNumber: function(point) {
+    var P = (point.elements || point);
+    if (!this.plane.contains(P)) { return false; }
+    if (this.hasEdgeContaining(P)) { return false; }
+    var V, W, A, B, theta = 0, dt, loops = 0, self = this;
+    this.vertices.each(function(vertex) {
+      V = vertex.elements;
+      W = vertex.next.elements;
+      A = Vector.create([V[0] - P[0], V[1] - P[1], V[2] - (P[2] || 0)]);
+      B = Vector.create([W[0] - P[0], W[1] - P[1], W[2] - (P[2] || 0)]);
+      dt = A.angleFrom(B);
+      if (dt === null || dt === 0) { return; }
+      theta += (A.cross(B).isParallelTo(self.plane.normal) ? 1 : -1) * dt;
+      if (theta >= 2 * Math.PI - Sylvester.precision) { loops++; theta -= 2 * Math.PI; }
+      if (theta <= -2 * Math.PI + Sylvester.precision) { loops--; theta += 2 * Math.PI; }
+    });
+    return loops != 0;
+  },
+
   // Returns true if the given point lies on an edge of the polygon
   // May cause problems with 'hole-joining' edges
   hasEdgeContaining: function(point) {
-    point = point.to3D();
-    if (point === null) { return null; }
+    var P = (point.elements || point);
     var success = false;
     this.vertices.each(function(vertex) {
-      if (Line.Segment.create(vertex, vertex.next).contains(point)) { success = true; }
+      if (Line.Segment.create(vertex, vertex.next).contains(P)) { success = true; }
     } );
     return success;
   },
