@@ -795,6 +795,15 @@ window.onload = function() {
     !L1.contains([4.9999,4.9999,4.9999]) && !L1.contains([10.00001, 10.00001, 10.00001])
   );
   
+  assert('Does not intersect various things that it would intersect at infinite length',
+    !L1.intersects(Line.X) && !L1.intersects(Line.Y) && !L1.intersects(Line.Z) &&
+    !L1.intersects(Plane.XY) && !L1.intersects(Plane.YZ) && !L1.intersects(Plane.ZX)
+  );
+  
+  assert('Intersection with bisecting plane',
+    L1.intersectionWith(L1.bisectingPlane()).eql(L1.midpoint())
+  );
+  
   title('Plane tests');
   
   assert('Equality and duplication',
