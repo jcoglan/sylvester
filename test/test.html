@@ -804,6 +804,32 @@ window.onload = function() {
     L1.intersectionWith(L1.bisectingPlane()).eql(L1.midpoint())
   );
   
+  L2 = Line.Segment.create([1,1,0], [1,2,0]);
+  
+  assert('No point closest to line',
+    L2.pointClosestTo(Line.Y) === null
+  );
+  
+  assert('Point closest to line 1',
+    L2.pointClosestTo(Line.X).eql([1,1,0])
+  );
+  
+  assert('Point closest to line 2',
+    L2.pointClosestTo(Line.X.translate([0,10])).eql([1,2,0])
+  );
+  
+  assert('Point closest to line 3',
+    L2.pointClosestTo($L([0,1.5,0], [0,0,1])).eql([1,1.5,0])
+  );
+  
+  assert('Point closest to plane',
+    L2.pointClosestTo(Plane.XZ).eql([1,1,0])
+  );
+  
+  assert('No point closest to plane',
+    L2.pointClosestTo(Plane.YZ) === null
+  );
+  
   title('Plane tests');
   
   assert('Equality and duplication',

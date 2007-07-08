@@ -291,6 +291,23 @@ Line.Segment.prototype = {
     return (this.contains(P) ? P : null);
   },
 
+  // Returns the point on the line segment closest to the given object
+  pointClosestTo: function(obj) {
+    if (obj.normal) {
+      // obj is a plane
+      var V = this.line.intersectionWith(obj);
+      if (V === null) { return null; }
+      return this.pointClosestTo(V);
+    } else {
+      // obj is a line or point
+      var P = this.line.pointClosestTo(obj);
+      if (P === null) { return null; }
+      if (this.contains(P)) { return P; }
+      if (this.line.positionOf(P) < 0) { return this.start.dup(); }
+      return this.end.dup();
+    }
+  },
+
   // Set the start and end-points of the segment
   setPoints: function(startPoint, endPoint) {
     startPoint = Vector.create(startPoint).to3D();
