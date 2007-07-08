@@ -132,7 +132,7 @@ Line.prototype = {
       // Create plane containing obj and the shared normal and intersect this with it
       // Thank you: http://www.cgafaq.info/wiki/Line-line_distance
       var x = (D3 * E1 - D1 * E3), y = (D1 * E2 - D2 * E1), z = (D2 * E3 - D3 * E2);
-      var N = Vector.create([x * E3 - y * E2, y * E1 - z * E3, z * E2 - x * E1]);
+      var N = [x * E3 - y * E2, y * E1 - z * E3, z * E2 - x * E1];
       var P = Plane.create(obj.anchor, N);
       return P.intersectionWith(this);
     } else {
