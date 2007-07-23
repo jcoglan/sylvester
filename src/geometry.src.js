@@ -553,7 +553,7 @@ Plane.YX = Plane.XY; Plane.ZY = Plane.YZ; Plane.XZ = Plane.ZX;
 // Returns the plane containing the given points (can be arrays as
 // well as vectors). If the points are not coplanar, returns null.
 Plane.fromPoints = function(points) {
-  var list = [], i, P, n, N, prevN, totalN = Vector.Zero(3);
+  var list = [], i, P, n, N, A, B, C, D, theta, prevN, totalN = Vector.Zero(3);
   for (i = 0; i < points.length; i++) {
     P = Vector.create(points[i]).to3D();
     if (P === null) { return null; }
@@ -561,13 +561,19 @@ Plane.fromPoints = function(points) {
     n = list.length;
     if (n > 2) {
       // Compute plane normal for the latest three points
-      N = list[n-1].subtract(list[n-2]).cross(list[n-3].subtract(list[n-2])).toUnitVector();
+      A = list[n-1].elements; B = list[n-2].elements; C = list[n-3].elements;
+      N = Vector.create([
+        (A[1] - B[1]) * (C[2] - B[2]) - (A[2] - B[2]) * (C[1] - B[1]),
+        (A[2] - B[2]) * (C[0] - B[0]) - (A[0] - B[0]) * (C[2] - B[2]),
+        (A[0] - B[0]) * (C[1] - B[1]) - (A[1] - B[1]) * (C[0] - B[0])
+      ]).toUnitVector();
       if (n > 3) {
         // If the latest normal is not (anti)parallel to the previous one, we've strayed off the plane.
         // This might be a slightly long-winded way of doing things, but we need the sum of all the normals
         // to find which way the plane normal should point so that the points form an anticlockwise list.
-        if (N.angleFrom(prevN) !== null) {
-          if (!(N.isParallelTo(prevN) || N.isAntiparallelTo(prevN))) { return null; }
+        theta = N.angleFrom(prevN);
+        if (theta !== null) {
+          if (!(Math.abs(theta) <= Sylvester.precision || Math.abs(theta - Math.PI) <= Sylvester.precision)) { return null; }
         }
       }
       totalN = totalN.add(N);
@@ -575,11 +581,16 @@ Plane.fromPoints = function(points) {
     }
   }
   // We need to add in the normals at the start and end points, which the above misses out
-  totalN = totalN.add(
-    list[1].subtract(list[0]).cross(list[n-1].subtract(list[0])).toUnitVector()
-  ).add(
-    list[0].subtract(list[n-1]).cross(list[n-2].subtract(list[n-1])).toUnitVector()
-  );
+  A = list[1].elements; B = list[0].elements; C = list[n-1].elements; D = list[n-2].elements;
+  totalN = totalN.add(Vector.create([
+    (A[1] - B[1]) * (C[2] - B[2]) - (A[2] - B[2]) * (C[1] - B[1]),
+    (A[2] - B[2]) * (C[0] - B[0]) - (A[0] - B[0]) * (C[2] - B[2]),
+    (A[0] - B[0]) * (C[1] - B[1]) - (A[1] - B[1]) * (C[0] - B[0])
+  ]).toUnitVector()).add(Vector.create([
+    (B[1] - C[1]) * (D[2] - C[2]) - (B[2] - C[2]) * (D[1] - C[1]),
+    (B[2] - C[2]) * (D[0] - C[0]) - (B[0] - C[0]) * (D[2] - C[2]),
+    (B[0] - C[0]) * (D[1] - C[1]) - (B[1] - C[1]) * (D[0] - C[0])
+  ]).toUnitVector());
   return Plane.create(list[0], totalN);
 };
 
