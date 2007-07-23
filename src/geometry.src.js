@@ -580,7 +580,7 @@ Plane.fromPoints = function(points) {
   ).add(
     list[0].subtract(list[n-1]).cross(list[n-2].subtract(list[n-1])).toUnitVector()
   );
-  return {plane: Plane.create(list[0], totalN), points: list};
+  return Plane.create(list[0], totalN);
 };
 
 
@@ -780,7 +780,7 @@ Polygon.prototype = {
         convexNode = poly.convexVertices.randomNode();
         mainNode = poly.vertices.withData(convexNode.data);
         // For convex vertices, this order will always be anticlockwise
-        trig = Polygon.create([mainNode.data, mainNode.next.data, mainNode.prev.data]);
+        trig = Polygon.create([mainNode.data, mainNode.next.data, mainNode.prev.data], this.plane);
         // Now test whether any reflex vertices lie within the ear
         poly.reflexVertices.each(function(node) {
           // Don't test points belonging to this triangle. node won't be
@@ -794,25 +794,23 @@ Polygon.prototype = {
       poly.removeVertex(mainNode.data);
     }
     // Need to do this to renumber the remaining vertices
-    triangles.push(Polygon.create(poly.vertices.toArray()));
+    triangles.push(Polygon.create(poly.vertices, this.plane));
     return triangles;
   },
 
   // Sets the polygon's vertices
-  setVertices: function(points) {
-    if (points.toArray) { points = points.toArray(); }
-    var P = Plane.fromPoints(points);
-    if (P === null) { return null; }
-    if (P.plane === null) { return null; }
-    this.plane = P.plane;
+  setVertices: function(points, plane) {
+    var pointSet = points.toArray ? points.toArray() : points;
+    this.plane = (plane && plane.normal) ? plane.dup() : Plane.fromPoints(pointSet);
+    if (this.plane === null) { return null; }
     this.vertices = new LinkedList.Circular();
     this.convexVertices = new LinkedList.Circular();
     this.reflexVertices = new LinkedList.Circular();
-    var i, n = P.points.length, newVertex, k = n, i;
     // Construct linked list of vertices. If each point is already a polygon
     // vertex, we reference it rather than creating a new vertex.
+    var n = pointSet.length, k = n, i, newVertex;
     do { i = k - n;
-      newVertex = points[i].isConvex ? points[i] : new Polygon.Vertex(P.points[i]);
+      newVertex = pointSet[i].isConvex ? pointSet[i] : new Polygon.Vertex(pointSet[i]);
       this.vertices.append(new LinkedList.Node(newVertex));
     } while (--n);
     var self = this;
@@ -840,9 +838,9 @@ Polygon.prototype = {
 };
 
 // Constructor function
-Polygon.create = function(points) {
+Polygon.create = function(points, plane) {
   var P = new Polygon();
-  return P.setVertices(points);
+  return P.setVertices(points, plane);
 };
 
 
@@ -850,6 +848,8 @@ Polygon.create = function(points) {
 // The Polygon.Vertex class. This is used internally when dealing with polygon operations.
 Polygon.Vertex = function(point) {
   this.setElements(point);
+  if (this.elements.length == 2) { this.elements.push(0); }
+  if (this.elements.length != 3) { return null; }
 };
 Polygon.Vertex.prototype = new Vector;
 
