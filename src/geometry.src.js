@@ -614,7 +614,7 @@ Polygon.prototype = {
   // polygon, but the linked list and nodes used to point to them are separate and
   // can be manipulated independently of this one.
   dup: function() {
-    return Polygon.create(this.vertices);
+    return Polygon.create(this.vertices, this.plane);
   },
 
   // Translates the polygon by the given vector and returns the polygon.
