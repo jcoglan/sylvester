@@ -733,16 +733,16 @@ Polygon.prototype = {
     this.clearCache();
     // Previous and next entries in the main vertex list
     var prev = node.prev, next = node.next;
-    var prevWasConvex = prev.data.isConvex(this, prev.prev.data, prev.next.data);
-    var nextWasConvex = next.data.isConvex(this, next.prev.data, next.next.data);
-    if (node.data.isConvex(this, node.prev.data, node.next.data)) {
+    var prevWasConvex = prev.data.isConvex(this);
+    var nextWasConvex = next.data.isConvex(this);
+    if (node.data.isConvex(this)) {
       this.convexVertices.remove(this.convexVertices.withData(node.data));
     } else {
       this.reflexVertices.remove(this.reflexVertices.withData(node.data));
     }
     this.vertices.remove(node);
     // Deal with previous vertex's change of class
-    if (prevWasConvex != prev.data.isConvex(this, prev.prev.data, prev.next.data)) {
+    if (prevWasConvex != prev.data.isConvex(this)) {
       if (prevWasConvex) {
         this.convexVertices.remove(this.convexVertices.withData(prev.data));
         this.reflexVertices.append(new LinkedList.Node(prev.data));
@@ -752,7 +752,7 @@ Polygon.prototype = {
       }
     }
     // Deal with next vertex's change of class
-    if (nextWasConvex != next.data.isConvex(this, next.prev.data, next.next.data)) {
+    if (nextWasConvex != next.data.isConvex(this)) {
       if (nextWasConvex) {
         this.convexVertices.remove(this.convexVertices.withData(next.data));
         this.reflexVertices.append(new LinkedList.Node(next.data));
@@ -858,7 +858,7 @@ Polygon.prototype = {
     this.vertices.each(function(node) {
       // Split vertices into convex / reflex groups
       // The LinkedList.Node class wraps each vertex so it can belong to many linked lists.
-      self[node.data.type(self, node.prev.data, node.next.data) + 'Vertices'].append(new LinkedList.Node(node.data));
+      self[node.data.type(self) + 'Vertices'].append(new LinkedList.Node(node.data));
     });
     this.clearCache();
     return this;
@@ -903,20 +903,27 @@ Polygon.Vertex = function(point) {
 Polygon.Vertex.prototype = new Vector;
 
 // Returns true iff the vertex's internal angle is 0 >= x > 180
-Polygon.Vertex.prototype.isConvex = function(polygon, prev, next) {
+// in the context of the given polygon object. Returns null if the
+// vertex does not exist in the polygon.
+Polygon.Vertex.prototype.isConvex = function(polygon) {
+  var node = polygon.nodeFor(this);
+  if (node === null) { return null; }
+  var prev = node.prev.data, next = node.next.data;
   var A = next.subtract(this);
   var B = prev.subtract(this);
-  if (A.isParallelTo(B)) { return true; }
-  if (A.isAntiparallelTo(B)) { return false; }
-  var N = A.cross(B);
-  return N.isParallelTo(polygon.plane.normal);
+  var theta = A.angleFrom(B);
+  if (theta <= Sylvester.precision) { return true; }
+  if (Math.abs(theta - Math.PI) <= Sylvester.precision) { return false; }
+  return (A.cross(B).dot(polygon.plane.normal) > 0);
 };
 // Returns true iff the vertex's internal angle is 180 >= x > 360
-Polygon.Vertex.prototype.isReflex = function(polygon, prev, next) {
-  return !this.isConvex(polygon, prev, next);
+Polygon.Vertex.prototype.isReflex = function(polygon) {
+  var result = this.isConvex(polygon);
+  return (result === null) ? null : !result;
 };
-Polygon.Vertex.prototype.type = function(polygon, prev, next) {
-  return this.isConvex(polygon, prev, next) ? 'convex' : 'reflex';
+Polygon.Vertex.prototype.type = function(polygon) {
+  var result = this.isConvex(polygon);
+  return (result === null) ? null : (result ? 'convex' : 'reflex');
 };
 
 
