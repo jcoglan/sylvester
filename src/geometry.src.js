@@ -845,8 +845,6 @@ Polygon.prototype = {
     this.plane = (plane && plane.normal) ? plane.dup() : Plane.fromPoints(pointSet);
     if (this.plane === null) { return null; }
     this.vertices = new LinkedList.Circular();
-    this.convexVertices = new LinkedList.Circular();
-    this.reflexVertices = new LinkedList.Circular();
     // Construct linked list of vertices. If each point is already a polygon
     // vertex, we reference it rather than creating a new vertex.
     var n = pointSet.length, k = n, i, newVertex;
@@ -854,14 +852,31 @@ Polygon.prototype = {
       newVertex = pointSet[i].isConvex ? pointSet[i] : new Polygon.Vertex(pointSet[i]);
       this.vertices.append(new LinkedList.Node(newVertex));
     } while (--n);
+    this.clearCache();
+    this.populateVertexTypeLists();
+    return this;
+  },
+
+  // Constructs lists of convex and reflex vertices based on the main vertex list.
+  populateVertexTypeLists: function() {
+    this.convexVertices = new LinkedList.Circular();
+    this.reflexVertices = new LinkedList.Circular();
     var self = this;
     this.vertices.each(function(node) {
       // Split vertices into convex / reflex groups
       // The LinkedList.Node class wraps each vertex so it can belong to many linked lists.
       self[node.data.type(self) + 'Vertices'].append(new LinkedList.Node(node.data));
     });
+  },
+
+  // Gives the polygon its own local set of vertex points, allowing it to be
+  // transformed independently of polygons it may be sharing vertices with.
+  createLocalVertexCopies: function() {
     this.clearCache();
-    return this;
+    this.vertices.each(function(node) {
+      node.data = new Polygon.Vertex(node.data);
+    });
+    this.populateVertexTypeLists();
   },
 
   // Clear any cached properties
