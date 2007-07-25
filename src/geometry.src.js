@@ -727,39 +727,38 @@ Polygon.prototype = {
 
   // Removes the given vertex from the polygon as long as it's not triangular.
   removeVertex: function(vertex) {
+    if (this.isTriangle()) { return; }
     var node = this.nodeFor(vertex);
     if (node === null) { return null; }
-    if (!this.isTriangle()) {
-      this.clearCache();
-      // Previous and next entries in the main vertex list
-      var prev = node.prev, next = node.next;
-      var prevWasConvex = prev.data.isConvex(this, prev.prev.data, prev.next.data);
-      var nextWasConvex = next.data.isConvex(this, next.prev.data, next.next.data);
-      if (node.data.isConvex(this, node.prev.data, node.next.data)) {
-        this.convexVertices.remove(this.convexVertices.withData(node.data));
+    this.clearCache();
+    // Previous and next entries in the main vertex list
+    var prev = node.prev, next = node.next;
+    var prevWasConvex = prev.data.isConvex(this, prev.prev.data, prev.next.data);
+    var nextWasConvex = next.data.isConvex(this, next.prev.data, next.next.data);
+    if (node.data.isConvex(this, node.prev.data, node.next.data)) {
+      this.convexVertices.remove(this.convexVertices.withData(node.data));
+    } else {
+      this.reflexVertices.remove(this.reflexVertices.withData(node.data));
+    }
+    this.vertices.remove(node);
+    // Deal with previous vertex's change of class
+    if (prevWasConvex != prev.data.isConvex(this, prev.prev.data, prev.next.data)) {
+      if (prevWasConvex) {
+        this.convexVertices.remove(this.convexVertices.withData(prev.data));
+        this.reflexVertices.append(new LinkedList.Node(prev.data));
       } else {
-        this.reflexVertices.remove(this.reflexVertices.withData(node.data));
+        this.reflexVertices.remove(this.reflexVertices.withData(prev.data));
+        this.convexVertices.append(new LinkedList.Node(prev.data));
       }
-      this.vertices.remove(node);
-      // Deal with previous vertex's change of class
-      if (prevWasConvex != prev.data.isConvex(this, prev.prev.data, prev.next.data)) {
-        if (prevWasConvex) {
-          this.convexVertices.remove(this.convexVertices.withData(prev.data));
-          this.reflexVertices.append(new LinkedList.Node(prev.data));
-        } else {
-          this.reflexVertices.remove(this.reflexVertices.withData(prev.data));
-          this.convexVertices.append(new LinkedList.Node(prev.data));
-        }
-      }
-      // Deal with next vertex's change of class
-      if (nextWasConvex != next.data.isConvex(this, next.prev.data, next.next.data)) {
-        if (nextWasConvex) {
-          this.convexVertices.remove(this.convexVertices.withData(next.data));
-          this.reflexVertices.append(new LinkedList.Node(next.data));
-        } else {
-          this.reflexVertices.remove(this.reflexVertices.withData(next.data));
-          this.convexVertices.append(new LinkedList.Node(next.data));
-        }
+    }
+    // Deal with next vertex's change of class
+    if (nextWasConvex != next.data.isConvex(this, next.prev.data, next.next.data)) {
+      if (nextWasConvex) {
+        this.convexVertices.remove(this.convexVertices.withData(next.data));
+        this.reflexVertices.append(new LinkedList.Node(next.data));
+      } else {
+        this.reflexVertices.remove(this.reflexVertices.withData(next.data));
+        this.convexVertices.append(new LinkedList.Node(next.data));
       }
     }
     return this;
