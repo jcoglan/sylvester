@@ -624,6 +624,7 @@ Polygon.prototype = {
       var E = node.data.elements;
       node.data.setElements([E[0] + P[0], E[1] + P[1], E[2] + (P[2] || 0)]);
     });
+    this.plane = this.plane.translate(vector);
     return this;
   },
 
@@ -632,6 +633,7 @@ Polygon.prototype = {
     this.vertices.each(function(node) {
       node.data.setElements(node.data.rotate(t, line).elements);
     });
+    this.plane = this.plane.rotate(t, line);
     return this;
   },
 
@@ -646,6 +648,7 @@ Polygon.prototype = {
         (P[2] || 0) + k * (E[2] - (P[2] || 0))
       ]);
     });
+    this.plane.anchor.setElements(this.vertices.first.data);
     return this;
   },
 
