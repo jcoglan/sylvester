@@ -654,17 +654,45 @@ Polygon.prototype = {
     return this.vertices.length == 3;
   },
 
+  // Returns a collection of triangles used for calculating area and center of mass.
+  // Some of the triangles will not lie inside the polygon - this collection is essentially
+  // a series of itervals in a surface integral, so some are 'negative'. If you want the
+  // polygon broken into constituent triangles, use toTriangles(). This method is used
+  // because it's much faster than toTriangles().
+  // The triangles generated share vertices with the original polygon, so they transform
+  // with the polygon. They are cached after first calculation and should remain in sync
+  // with changes to the parent polygon.
+  trianglesForSurfaceIntegral: function() {
+    if (this.cached.surfaceIntegralElements !== null) { return this.cached.surfaceIntegralElements; }
+    var triangles = [];
+    var firstVertex = this.vertices.first.data;
+    var plane = this.plane;
+    this.vertices.each(function(node, i) {
+      if (i < 2) { return; }
+      var points = [firstVertex, node.prev.data, node.data];
+      // If the vertices lie on a straigh line, give the polygon's own plane. If the
+      // element has no area, it doesn't matter which way its normal faces.
+      triangles.push(Polygon.create(points, Plane.fromPoints(points) || plane));
+    });
+    return this.setCache('surfaceIntegralElements', triangles);
+  },
+
   // Returns the area of the polygon. Requires that the polygon
   // be converted to triangles, so use with caution.
   area: function() {
     if (this.isTriangle()) {
-      var base = this.v(2).subtract(this.v(1));
-      return 0.5 * base.modulus() * this.v(3).distanceFrom(Line.create(this.v(1), base));
+      // Area is half the modulus of the cross product of two sides
+      var A = this.v(1).elements, B = this.v(2).elements, C = this.v(3).elements;
+      return 0.5 * Math.abs(
+        (A[1] - B[1]) * (C[2] - B[2]) - (A[2] - B[2]) * (C[1] - B[1]) +
+        (A[2] - B[2]) * (C[0] - B[0]) - (A[0] - B[0]) * (C[2] - B[2]) +
+        (A[0] - B[0]) * (C[1] - B[1]) - (A[1] - B[1]) * (C[0] - B[0])
+      );
     } else {
-      var trigs = this.toTriangles(), area = 0;
+      var trigs = this.trianglesForSurfaceIntegral(), area = 0;
       var n = trigs.length, k = n, i;
       do { i = k - n;
-        area += trigs[i].area();
+        area += trigs[i].area() * trigs[i].plane.normal.dot(this.plane.normal);
       } while (--n);
       return area;
     }
@@ -674,14 +702,17 @@ Polygon.prototype = {
   // triangles - use with caution
   centroid: function() {
     if (this.isTriangle()) {
-      return this.v(1).add(this.v(2)).add(this.v(3)).x(1/3);
+      var A = this.v(1).elements, B = this.v(2).elements, C = this.v(3).elements;
+      return Vector.create([(A[0] + B[0] + C[0])/3, (A[1] + B[1] + C[1])/3, (A[2] + B[2] + C[2])/3]);
     } else {
-      var A, M = 0, V = Vector.Zero(3), trigs = this.toTriangles();
+      var A, M = 0, V = Vector.Zero(3), P, C, trigs = this.trianglesForSurfaceIntegral();
       var n = trigs.length, k = n, i;
       do { i = k - n;
-        A = trigs[i].area();
+        A = trigs[i].area() * trigs[i].plane.normal.dot(this.plane.normal);
         M += A;
-        V = V.add(trigs[i].centroid().x(A));
+        P = V.elements;
+        C = trigs[i].centroid().elements;
+        V.setElements([P[0] + C[0] * A, P[1] + C[1] * A, P[2] + C[2] * A]);
       } while (--n);
       return V.x(1/M);
     }
@@ -837,7 +868,8 @@ Polygon.prototype = {
   // Clear any cached properties
   clearCache: function() {
     this.cached = {
-      triangles: null
+      triangles: null,
+      surfaceIntegralElements: null
     };
   },
 
@@ -845,6 +877,13 @@ Polygon.prototype = {
   setCache: function(key, value) {
     this.cached[key] = value;
     return value;
+  },
+
+  // Returns a string representation of the polygon's vertices.
+  inspect: function() {
+    var points = [];
+    this.vertices.each(function(node) { points.push(node.data.inspect()); });
+    return points.join(' -> ');
   }
 };
 
