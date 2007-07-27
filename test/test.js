@@ -22,7 +22,7 @@ var benchmark = function(fn, n) {
   var A = new Date().getTime();
   do { fn() } while (--n);
   var B = new Date().getTime();
-  alert('Completed ' + k + ' executions in ' + ((B-A)/1000) + ' seconds');
+  console.info('Completed ' + k + ' executions in ' + ((B-A)/1000) + ' seconds');
 };
 
 var title = function(str) {

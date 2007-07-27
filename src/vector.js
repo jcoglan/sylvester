@@ -210,7 +210,8 @@ Vector.prototype = {
   // Rotates the vector about the given object. The object should be a 
   // point if the vector is 2D, and a line if it is 3D. Be careful with line directions!
   rotate: function(t, obj) {
-    var V, R, x, y, z;
+    var V, R = null, x, y, z;
+    if (t.determinant) { R = t.elements; }
     switch (this.elements.length) {
       case 2:
         V = obj.elements || obj;
@@ -226,7 +227,7 @@ Vector.prototype = {
       case 3:
         if (!obj.direction) { return null; }
         var C = obj.pointClosestTo(this).elements;
-        R = Matrix.Rotation(t, obj.direction).elements;
+        if (!R) { R = Matrix.Rotation(t, obj.direction).elements; }
         x = this.elements[0] - C[0];
         y = this.elements[1] - C[1];
         z = this.elements[2] - C[2];

@@ -34,8 +34,9 @@ Polygon.prototype = {
 
   // Rotates the polygon about the given line and returns the polygon.
   rotate: function(t, line) {
+    var R = Matrix.Rotation(t, line.direction);
     this.vertices.each(function(node) {
-      node.data.setElements(node.data.rotate(t, line).elements);
+      node.data.setElements(node.data.rotate(R, line).elements);
     });
     this.plane = this.plane.rotate(t, line);
     return this;
