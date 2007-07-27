@@ -944,6 +944,16 @@ Polygon.Vertex.prototype.type = function(polygon) {
   return (result === null) ? null : (result ? 'convex' : 'reflex');
 };
 
+// Method for converting a set of arrays/vectors/whatever to a set of Polygon.Vertex objects
+Polygon.Vertex.convert = function(points) {
+  var pointSet = points.toArray ? points.toArray() : points;
+  var list = [], n = pointSet.length, k = n, i;
+  do { i = k - n;
+    list.push(new Polygon.Vertex(pointSet[i]));
+  } while (--n);
+  return list;
+};
+
 
 
 // Linked list data structure - required for polygons
