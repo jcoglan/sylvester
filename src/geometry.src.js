@@ -920,7 +920,7 @@ Polygon.Vertex = function(point) {
 };
 Polygon.Vertex.prototype = new Vector;
 
-// Returns true iff the vertex's internal angle is 0 >= x > 180
+// Returns true iff the vertex's internal angle is 0 <= x < 180
 // in the context of the given polygon object. Returns null if the
 // vertex does not exist in the polygon.
 Polygon.Vertex.prototype.isConvex = function(polygon) {
@@ -934,7 +934,7 @@ Polygon.Vertex.prototype.isConvex = function(polygon) {
   if (Math.abs(theta - Math.PI) <= Sylvester.precision) { return false; }
   return (A.cross(B).dot(polygon.plane.normal) > 0);
 };
-// Returns true iff the vertex's internal angle is 180 >= x > 360
+// Returns true iff the vertex's internal angle is 180 <= x < 360
 Polygon.Vertex.prototype.isReflex = function(polygon) {
   var result = this.isConvex(polygon);
   return (result === null) ? null : !result;
