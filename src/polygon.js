@@ -1,3 +1,5 @@
+// Polygon class - depends on Vector, Plane, Polygon.Vertex and LinkedList.
+
 function Polygon() {}
 Polygon.prototype = {
 

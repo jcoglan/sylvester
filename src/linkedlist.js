@@ -1,3 +1,5 @@
+// LinkedList class - required for Polygon class.
+
 function LinkedList() {}
 LinkedList.prototype = {
   length: 0,

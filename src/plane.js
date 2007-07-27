@@ -1,3 +1,5 @@
+// Plane class - depends on Vector. Some methods require Matrix and Line.
+
 function Plane() {}
 Plane.prototype = {
 

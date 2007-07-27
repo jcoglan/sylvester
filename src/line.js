@@ -1,3 +1,5 @@
+// Line class - depends on Vector, and some methods require Matrix and Plane.
+
 function Line() {}
 Line.prototype = {
 

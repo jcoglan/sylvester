@@ -1,3 +1,5 @@
+// Line.Segment class - depends on Line and its dependencies.
+
 Line.Segment = function() {};
 Line.Segment.prototype = {
 

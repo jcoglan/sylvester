@@ -1,3 +1,5 @@
+// Polygon.Vertex class - required for Polygon class.
+
 Polygon.Vertex = function(point) {
   this.setElements(point);
   if (this.elements.length == 2) { this.elements.push(0); }

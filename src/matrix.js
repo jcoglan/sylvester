@@ -1,3 +1,5 @@
+// Matrix class - depends on Vector.
+
 function Matrix() {}
 Matrix.prototype = {
 

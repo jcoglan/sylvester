@@ -4,7 +4,7 @@ require 'fileutils'
 SOURCE_DIR = 'src'
 PACKAGE_DIR = 'lib'
 PACKAGES = {
-  'sylvester'   => %w(base vector matrix line line.segment plane polygon polygon.vertex linkedlist)
+  'sylvester'   => %w(vector matrix line line.segment plane polygon polygon.vertex linkedlist)
 }
 
 task :build => [:create_directory, :destroy] do
