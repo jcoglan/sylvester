@@ -4,14 +4,14 @@ require 'fileutils'
 SOURCE_DIR = 'src'
 PACKAGE_DIR = 'lib'
 PACKAGES = {
-  'sylvester'   => %w(base geometry)
+  'sylvester'   => %w(base vector matrix line line.segment plane polygon polygon.vertex linkedlist)
 }
 
 task :build => [:create_directory, :destroy] do
   PACKAGES.each do |name, files|
     code = ''
     files.each do |source_file|
-      File.open("#{SOURCE_DIR}/#{source_file}.src.js", 'r') do |f|
+      File.open("#{SOURCE_DIR}/#{source_file}.js", 'r') do |f|
         f.each_line do |line|
           unless (src = line.gsub(/\/\/.*$/, '')) =~ /^\s*$/
             code << src.gsub(/\n/, '').strip
