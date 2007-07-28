@@ -21,15 +21,6 @@ LinkedList.prototype = {
     return node;
   },
 
-  withData: function(data) {
-    var node = this.first;
-    for (var i = 0; i < this.length; i++) {
-      if (node.data == data) { return node; }
-      node = node.next;
-    }
-    return null;
-  },
-
   randomNode: function() {
     var n = Math.floor(Math.random() * this.length);
     return this.at(n);
@@ -121,6 +112,17 @@ LinkedList.Circular.Methods = {
       linked.append(list[i]);
     }
     return linked;
+  },
+
+  withData: function(data) {
+    var nodeFromStart = this.first, nodeFromEnd = this.last, n = Math.ceil(this.length / 2);
+    do {
+      if (nodeFromStart.data == data) { return nodeFromStart; }
+      if (nodeFromEnd.data == data) { return nodeFromEnd; }
+      nodeFromStart = nodeFromStart.next;
+      nodeFromEnd = nodeFromEnd.prev;
+    } while (--n);
+    return null;
   }
 };
 
