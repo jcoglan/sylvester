@@ -13,16 +13,21 @@ task :default => :build
 task :build => [:create_directory, :destroy] do
   PACKAGES.each do |name, files|
     code = ''
+    lines = 0
     files.each do |source_file|
       File.open("#{SOURCE_DIR}/#{source_file}.js", 'r') do |f|
         f.each_line do |line|
           unless (src = line.gsub(/\/\/.*$/, '')) =~ /^\s*$/
             code << src.gsub(/\n/, '').gsub(/\s+/, ' ').strip
+            lines += 1
           end
         end
       end
     end
-    File.open("#{PACKAGE_DIR}/#{name}.js", 'wb') { |f| f.write code }
+    filename = "#{PACKAGE_DIR}/#{name}.js"
+    File.open(filename, 'wb') { |f| f.write code }
+    puts "\n  Built package '#{name}': #{lines} lines of code, #{(File.size(filename)/1000).to_i} kb"
+    files.each { |source_file| puts "    - #{source_file}" }
   end
 end
 
