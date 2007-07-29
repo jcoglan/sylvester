@@ -7,17 +7,17 @@ LinkedList.prototype = {
   last: null,
 
   each: function(fn) {
-    var node = this.first;
-    for (var i = 0; i < this.length; i++) {
+    var node = this.first, n = this.length, k = n, i;
+    do { i = k - n;
       fn(node, i);
       node = node.next;
-    }
+    } while (--n);
   },
 
   at: function(i) {
     if (!(i >= 0 && i < this.length)) { return null; }
     var node = this.first;
-    for (var j = 0; j < i; j++) { node = node.next; }
+    while (i--) { node = node.next; }
     return node;
   },
 
@@ -29,10 +29,11 @@ LinkedList.prototype = {
   toArray: function() {
     var arr = [], node = this.first;
     if (node === null) { return arr; }
-    for (var i = 0; i < this.length; i++) {
+    var n = this.length;
+    do {
       arr.push(node.data || node);
       node = node.next;
-    }
+    } while (--n);
     return arr;
   }
 };
@@ -106,14 +107,6 @@ LinkedList.Circular.Methods = {
     this.length--;
   },
 
-  fromArray: function(list) {
-    var linked = new LinkedList.Circular();
-    for (var i = 0; i < list.length; i++) {
-      linked.append(list[i]);
-    }
-    return linked;
-  },
-
   withData: function(data) {
     var nodeFromStart = this.first, nodeFromEnd = this.last, n = Math.ceil(this.length / 2);
     do {
@@ -130,3 +123,12 @@ LinkedList.Circular.prototype = new LinkedList;
 for (var method in LinkedList.Circular.Methods) {
   LinkedList.Circular.prototype[method] = LinkedList.Circular.Methods[method];
 }
+
+LinkedList.Circular.fromArray = function(list, useNodes) {
+  var linked = new LinkedList.Circular();
+  var n = list.length, k = n, i;
+  do { i = k - n;
+    linked.append(useNodes ? new LinkedList.Node(list[i]) : list[i]);
+  } while (--n);
+  return linked;
+};
