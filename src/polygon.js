@@ -29,6 +29,7 @@ Polygon.prototype = {
       node.data.setElements([E[0] + P[0], E[1] + P[1], E[2] + (P[2] || 0)]);
     });
     this.plane = this.plane.translate(vector);
+    this.updateTrianglePlanes(function(plane) { return plane.translate(vector); });
     return this;
   },
 
@@ -39,6 +40,7 @@ Polygon.prototype = {
       node.data.setElements(node.data.rotate(R, line).elements);
     });
     this.plane = this.plane.rotate(t, line);
+    this.updateTrianglePlanes(function(plane) { return plane.rotate(t, line); });
     return this;
   },
 
@@ -53,8 +55,34 @@ Polygon.prototype = {
         (P[2] || 0) + k * (E[2] - (P[2] || 0))
       ]);
     });
-    this.plane.anchor.setElements(this.vertices.first.data);
+    var anchor = this.vertices.first.data;
+    this.plane.anchor.setElements(anchor);
+    this.updateTrianglePlanes(function(plane) { return Plane.create(anchor, plane.normal); });
     return this;
+  },
+
+  // Updates the plane properties of all the cached triangles belonging to
+  // the polygon according to the given function. For example, suppose you
+  // just rotated the polygon, you should call:
+  //
+  //   poly.updateTrianglePlanes(function(plane) { return plane.rotate(t, line); });
+  //
+  // This method is called automatically by Polygon.translate, Polygon.rotate
+  // and Polygon.scale transformation methods.
+  updateTrianglePlanes: function(fn) {
+    var n, k, i;
+    if (this.cached.triangles !== null) {
+      n = this.cached.triangles.length, k = n, i;
+      do { i = k - n;
+        this.cached.triangles[i].plane = fn(this.cached.triangles[i].plane);
+      } while (--n);
+    }
+    if (this.cached.surfaceIntegralElements !== null) {
+      n = this.cached.surfaceIntegralElements.length, k = n, i;
+      do { i = k - n;
+        this.cached.surfaceIntegralElements[i].plane = fn(this.cached.surfaceIntegralElements[i].plane);
+      } while (--n);
+    }
   },
 
   // Returns true iff the polygon is a triangle
@@ -90,12 +118,13 @@ Polygon.prototype = {
   area: function() {
     if (this.isTriangle()) {
       // Area is half the modulus of the cross product of two sides
-      var A = this.v(1).elements, B = this.v(2).elements, C = this.v(3).elements;
-      return 0.5 * Math.abs(
-        (A[1] - B[1]) * (C[2] - B[2]) - (A[2] - B[2]) * (C[1] - B[1]) +
-        (A[2] - B[2]) * (C[0] - B[0]) - (A[0] - B[0]) * (C[2] - B[2]) +
+      var A = this.vertices.first, B = A.next, C = B.next;
+      A = A.data.elements; B = B.data.elements; C = C.data.elements;
+      return 0.5 * Vector.create([
+        (A[1] - B[1]) * (C[2] - B[2]) - (A[2] - B[2]) * (C[1] - B[1]),
+        (A[2] - B[2]) * (C[0] - B[0]) - (A[0] - B[0]) * (C[2] - B[2]),
         (A[0] - B[0]) * (C[1] - B[1]) - (A[1] - B[1]) * (C[0] - B[0])
-      );
+      ]).modulus();
     } else {
       var trigs = this.trianglesForSurfaceIntegral(), area = 0;
       var n = trigs.length, k = n, i;
