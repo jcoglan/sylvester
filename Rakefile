@@ -7,6 +7,8 @@ PACKAGES = {
   'sylvester'   => %w(vector matrix line line.segment plane polygon polygon.vertex linkedlist)
 }
 
+task :default => :build
+
 task :build => [:create_directory, :destroy] do
   PACKAGES.each do |name, files|
     code = ''
@@ -14,7 +16,7 @@ task :build => [:create_directory, :destroy] do
       File.open("#{SOURCE_DIR}/#{source_file}.js", 'r') do |f|
         f.each_line do |line|
           unless (src = line.gsub(/\/\/.*$/, '')) =~ /^\s*$/
-            code << src.gsub(/\n/, '').strip
+            code << src.gsub(/\n/, '').gsub(/\s+/, ' ').strip
           end
         end
       end
