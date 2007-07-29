@@ -216,7 +216,7 @@ Vector.prototype = {
       case 2:
         V = obj.elements || obj;
         if (V.length != 2) { return null; }
-        R = Matrix.Rotation(t).elements;
+        if (!R) { R = Matrix.Rotation(t).elements; }
         x = this.elements[0] - V[0];
         y = this.elements[1] - V[1];
         return Vector.create([
