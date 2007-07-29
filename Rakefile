@@ -18,7 +18,7 @@ task :build => [:create_directory, :destroy] do
       File.open("#{SOURCE_DIR}/#{source_file}.js", 'r') do |f|
         f.each_line do |line|
           unless (src = line.gsub(/\/\/.*$/, '')) =~ /^\s*$/
-            code << src.gsub(/\n/, '').gsub(/\s+/, ' ').strip
+            code << (ENV['d'] ? src : src.gsub(/\n/, '').gsub(/\s+/, ' ').strip)
             lines += 1
           end
         end
