@@ -70,18 +70,18 @@ Polygon.prototype = {
   // This method is called automatically by Polygon.translate, Polygon.rotate
   // and Polygon.scale transformation methods.
   updateTrianglePlanes: function(fn) {
-    var n, k, i;
+    var i;
     if (this.cached.triangles !== null) {
-      n = this.cached.triangles.length, k = n, i;
-      do { i = k - n;
+      i = this.cached.triangles.length;
+      while (i--) {
         this.cached.triangles[i].plane = fn(this.cached.triangles[i].plane);
-      } while (--n);
+      }
     }
     if (this.cached.surfaceIntegralElements !== null) {
-      n = this.cached.surfaceIntegralElements.length, k = n, i;
-      do { i = k - n;
+      i = this.cached.surfaceIntegralElements.length;
+      while (i--) {
         this.cached.surfaceIntegralElements[i].plane = fn(this.cached.surfaceIntegralElements[i].plane);
-      } while (--n);
+      }
     }
   },
 
@@ -127,10 +127,10 @@ Polygon.prototype = {
       ]).modulus();
     } else {
       var trigs = this.trianglesForSurfaceIntegral(), area = 0;
-      var n = trigs.length, k = n, i;
-      do { i = k - n;
+      var i = trigs.length;
+      while (i--) {
         area += trigs[i].area() * trigs[i].plane.normal.dot(this.plane.normal);
-      } while (--n);
+      }
       return area;
     }
   },
@@ -143,14 +143,14 @@ Polygon.prototype = {
       return Vector.create([(A[0] + B[0] + C[0])/3, (A[1] + B[1] + C[1])/3, (A[2] + B[2] + C[2])/3]);
     } else {
       var A, M = 0, V = Vector.Zero(3), P, C, trigs = this.trianglesForSurfaceIntegral();
-      var n = trigs.length, k = n, i;
-      do { i = k - n;
+      var i = trigs.length;
+      while (i--) {
         A = trigs[i].area() * trigs[i].plane.normal.dot(this.plane.normal);
         M += A;
         P = V.elements;
         C = trigs[i].centroid().elements;
         V.setElements([P[0] + C[0] * A, P[1] + C[1] * A, P[2] + C[2] * A]);
-      } while (--n);
+      }
       return V.x(1/M);
     }
   },
@@ -284,11 +284,11 @@ Polygon.prototype = {
     this.vertices = new LinkedList.Circular();
     // Construct linked list of vertices. If each point is already a polygon
     // vertex, we reference it rather than creating a new vertex.
-    var n = pointSet.length, k = n, i, newVertex;
-    do { i = k - n;
+    var i = pointSet.length, newVertex;
+    while (i--) {
       newVertex = pointSet[i].isConvex ? pointSet[i] : new Polygon.Vertex(pointSet[i]);
-      this.vertices.append(new LinkedList.Node(newVertex));
-    } while (--n);
+      this.vertices.prepend(new LinkedList.Node(newVertex));
+    }
     this.clearCache();
     this.populateVertexTypeLists();
     return this;

@@ -34,9 +34,9 @@ Polygon.Vertex.prototype.type = function(polygon) {
 // Method for converting a set of arrays/vectors/whatever to a set of Polygon.Vertex objects
 Polygon.Vertex.convert = function(points) {
   var pointSet = points.toArray ? points.toArray() : points;
-  var list = [], n = pointSet.length, k = n, i;
-  do { i = k - n;
+  var list = [], n = pointSet.length;
+  for (var i = 0; i < n; i++) {
     list.push(new Polygon.Vertex(pointSet[i]));
-  } while (--n);
+  }
   return list;
 };

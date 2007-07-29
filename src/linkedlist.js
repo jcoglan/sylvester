@@ -7,8 +7,8 @@ LinkedList.prototype = {
   last: null,
 
   each: function(fn) {
-    var node = this.first, n = this.length, k = n, i;
-    while (n--) { i = k - (n + 1);
+    var node = this.first, n = this.length;
+    for (var i = 0; i < n; i++) {
       fn(node, i);
       node = node.next;
     }
@@ -64,6 +64,7 @@ LinkedList.Circular.Methods = {
   prepend: function(node) {
     if (this.first === null) {
       this.append(node);
+      return;
     } else {
       node.prev = this.last;
       node.next = this.first;
@@ -126,9 +127,7 @@ for (var method in LinkedList.Circular.Methods) {
 
 LinkedList.Circular.fromArray = function(list, useNodes) {
   var linked = new LinkedList.Circular();
-  var n = list.length, k = n, i;
-  while (n--) { i = k - (n + 1);
-    linked.append(useNodes ? new LinkedList.Node(list[i]) : list[i]);
-  }
+  var n = list.length;
+  while (n--) { linked.prepend(useNodes ? new LinkedList.Node(list[n]) : list[n]); }
   return linked;
 };

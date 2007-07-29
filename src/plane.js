@@ -225,8 +225,8 @@ Plane.YX = Plane.XY; Plane.ZY = Plane.YZ; Plane.XZ = Plane.ZX;
 // Returns the plane containing the given points (can be arrays as
 // well as vectors). If the points are not coplanar, returns null.
 Plane.fromPoints = function(points) {
-  var list = [], i, P, n, N, A, B, C, D, theta, prevN, totalN = Vector.Zero(3);
-  for (i = 0; i < points.length; i++) {
+  var np = points.length, list = [], i, P, n, N, A, B, C, D, theta, prevN, totalN = Vector.Zero(3);
+  for (i = 0; i < np; i++) {
     P = Vector.create(points[i]).to3D();
     if (P === null) { return null; }
     list.push(P);

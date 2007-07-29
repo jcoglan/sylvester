@@ -18,10 +18,8 @@ Matrix.prototype = {
   // Returns column k of the matrix as a vector
   col: function(j) {
     if (j > this.elements[0].length) { return null; }
-    var col = [], n = this.elements.length, k = n, i;
-    do { i = k - n;
-      col.push(this.elements[i][j-1]);
-    } while (--n);
+    var col = [], n = this.elements.length;
+    for (var i = 0; i < n; i++) { col.push(this.elements[i][j-1]); }
     return Vector.create(col);
   },
 
@@ -48,13 +46,12 @@ Matrix.prototype = {
     if (typeof(M[0][0]) == 'undefined') { M = Matrix.create(M).elements; }
     if (this.elements.length != M.length ||
         this.elements[0].length != M[0].length) { return false; }
-    var ni = this.elements.length, ki = ni, i, nj, kj = this.elements[0].length, j;
-    do { i = ki - ni;
-      nj = kj;
-      do { j = kj - nj;
+    var i = this.elements.length, nj = this.elements[0].length, j;
+    while (i--) { j = nj;
+      while (j--) {
         if (Math.abs(this.elements[i][j] - M[i][j]) > Sylvester.precision) { return false; }
-      } while (--nj);
-    } while (--ni);
+      }
+    }
     return true;
   },
 
@@ -65,14 +62,13 @@ Matrix.prototype = {
 
   // Maps the matrix to another matrix (of the same dimensions) according to the given function
   map: function(fn) {
-    var els = [], ni = this.elements.length, ki = ni, i, nj, kj = this.elements[0].length, j;
-    do { i = ki - ni;
-      nj = kj;
+    var els = [], i = this.elements.length, nj = this.elements[0].length, j;
+    while (i--) { j = nj;
       els[i] = [];
-      do { j = kj - nj;
+      while (j--) {
         els[i][j] = fn(this.elements[i][j], i + 1, j + 1);
-      } while (--nj);
-    } while (--ni);
+      }
+    }
     return Matrix.create(els);
   },
 
@@ -120,20 +116,18 @@ Matrix.prototype = {
     var M = matrix.elements || matrix;
     if (typeof(M[0][0]) == 'undefined') { M = Matrix.create(M).elements; }
     if (!this.canMultiplyFromLeft(M)) { return null; }
-    var ni = this.elements.length, ki = ni, i, nj, kj = M[0].length, j;
-    var cols = this.elements[0].length, elements = [], sum, nc, c;
-    do { i = ki - ni;
+    var i = this.elements.length, nj = M[0].length, j;
+    var cols = this.elements[0].length, c, elements = [], sum;
+    while (i--) { j = nj;
       elements[i] = [];
-      nj = kj;
-      do { j = kj - nj;
+      while (j--) { c = cols;
         sum = 0;
-        nc = cols;
-        do { c = cols - nc;
+        while (c--) {
           sum += this.elements[i][c] * M[c][j];
-        } while (--nc);
+        }
         elements[i][j] = sum;
-      } while (--nj);
-    } while (--ni);
+      }
+    }
     var M = Matrix.create(elements);
     return returnVector ? M.col(1) : M;
   },
@@ -147,27 +141,26 @@ Matrix.prototype = {
   minor: function(a, b, c, d) {
     var elements = [], ni = c, i, nj, j;
     var rows = this.elements.length, cols = this.elements[0].length;
-    do { i = c - ni;
+    while (ni--) { i = c - ni - 1;
       elements[i] = [];
       nj = d;
-      do { j = d - nj;
+      while (nj--) { j = d - nj - 1;
         elements[i][j] = this.elements[(a+i-1)%rows][(b+j-1)%cols];
-      } while (--nj);
-    } while (--ni);
+      }
+    }
     return Matrix.create(elements);
   },
 
   // Returns the transpose of the matrix
   transpose: function() {
-    var rows = this.elements.length, cols = this.elements[0].length;
-    var elements = [], ni = cols, i, nj, j;
-    do { i = cols - ni;
+    var rows = this.elements.length, i, cols = this.elements[0].length, j;
+    var elements = [], i = cols;
+    while (i--) { j = rows;
       elements[i] = [];
-      nj = rows;
-      do { j = rows - nj;
+      while (j--) {
         elements[i][j] = this.elements[j][i];
-      } while (--nj);
-    } while (--ni);
+      }
+    }
     return Matrix.create(elements);
   },
 
@@ -178,25 +171,23 @@ Matrix.prototype = {
 
   // Returns the (absolute) largest element of the matrix
   max: function() {
-    var m = 0, ni = this.elements.length, ki = ni, i, nj, kj = this.elements[0].length, j;
-    do { i = ki - ni;
-      nj = kj;
-      do { j = kj - nj;
+    var m = 0, i = this.elements.length, nj = this.elements[0].length, j;
+    while (i--) { j = nj;
+      while (j--) {
         if (Math.abs(this.elements[i][j]) > Math.abs(m)) { m = this.elements[i][j]; }
-      } while (--nj);
-    } while (--ni);
+      }
+    }
     return m;
   },
 
   // Returns the indeces of the first match found by reading row-by-row from left to right
   indexOf: function(x) {
-    var index = null, ni = this.elements.length, ki = ni, i, nj, kj = this.elements[0].length, j;
-    do { i = ki - ni;
-      nj = kj;
-      do { j = kj - nj;
+    var index = null, ni = this.elements.length, i, nj = this.elements[0].length, j;
+    for (i = 0; i < ni; i++) {
+      for (j = 0; j < nj; j++) {
         if (this.elements[i][j] == x) { return {i: i+1, j: j+1}; }
-      } while (--nj);
-    } while (--ni);
+      }
+    }
     return null;
   },
 
@@ -204,10 +195,10 @@ Matrix.prototype = {
   // Otherwise, returns null.
   diagonal: function() {
     if (!this.isSquare) { return null; }
-    var els = [], n = this.elements.length, k = n, i;
-    do { i = k - n;
+    var els = [], n = this.elements.length;
+    for (var i = 0; i < n; i++) {
       els.push(this.elements[i][i]);
-    } while (--n);
+    }
     return Vector.create(els);
   },
 
@@ -216,35 +207,33 @@ Matrix.prototype = {
   // scaled up or switched, and the determinant is preserved.
   toRightTriangular: function() {
     var M = this.dup(), els;
-    var n = this.elements.length, k = n, i, np, kp = this.elements[0].length, p;
-    do { i = k - n;
+    var n = this.elements.length, i, j, np = this.elements[0].length, p;
+    for (i = 0; i < n; i++) {
       if (M.elements[i][i] == 0) {
-        for (j = i + 1; j < k; j++) {
+        for (j = i + 1; j < n; j++) {
           if (M.elements[j][i] != 0) {
-            els = []; np = kp;
-            do { p = kp - np;
-              els.push(M.elements[i][p] + M.elements[j][p]);
-            } while (--np);
+            els = [];
+            for (p = 0; p < np; p++) { els.push(M.elements[i][p] + M.elements[j][p]); }
             M.elements[i] = els;
             break;
           }
         }
       }
       if (M.elements[i][i] != 0) {
-        for (j = i + 1; j < k; j++) {
+        for (j = i + 1; j < n; j++) {
           var multiplier = M.elements[j][i] / M.elements[i][i];
-          els = []; np = kp;
-          do { p = kp - np;
+          els = [];
+          for (p = 0; p < np; p++) {
             // Elements with column numbers up to an including the number
             // of the row that we're subtracting can safely be set straight to
             // zero, since that's the point of this routine and it avoids having
             // to loop over and correct rounding errors later
             els.push(p <= i ? 0 : M.elements[j][p] - M.elements[i][p] * multiplier);
-          } while (--np);
+          }
           M.elements[j] = els;
         }
       }
-    } while (--n);
+    }
     return M;
   },
 
@@ -254,10 +243,10 @@ Matrix.prototype = {
   determinant: function() {
     if (!this.isSquare()) { return null; }
     var M = this.toRightTriangular();
-    var det = M.elements[0][0], n = M.elements.length - 1, k = n, i;
-    do { i = k - n + 1;
+    var det = M.elements[0][0], n = M.elements.length;
+    for (var i = 1; i < n; i++) {
       det = det * M.elements[i][i];
-    } while (--n);
+    }
     return det;
   },
 
@@ -271,10 +260,10 @@ Matrix.prototype = {
   // Returns the trace for square matrices
   trace: function() {
     if (!this.isSquare()) { return null; }
-    var tr = this.elements[0][0], n = this.elements.length - 1, k = n, i;
-    do { i = k - n + 1;
+    var tr = this.elements[0][0], n = this.elements.length;
+    for (var i = 1; i < n; i++) {
       tr += this.elements[i][i];
-    } while (--n);
+    }
     return tr;
   },
 
@@ -283,13 +272,12 @@ Matrix.prototype = {
   // Returns the rank of the matrix
   rank: function() {
     var M = this.toRightTriangular(), rank = 0;
-    var ni = this.elements.length, ki = ni, i, nj, kj = this.elements[0].length, j;
-    do { i = ki - ni;
-      nj = kj;
-      do { j = kj - nj;
+    var i = this.elements.length, nj = this.elements[0].length, j;
+    while (i--) { j = nj;
+      while (j--) {
         if (Math.abs(M.elements[i][j]) > Sylvester.precision) { rank++; break; }
-      } while (--nj);
-    } while (--ni);
+      }
+    }
     return rank;
   },
 
@@ -300,49 +288,49 @@ Matrix.prototype = {
     var M = matrix.elements || matrix;
     if (typeof(M[0][0]) == 'undefined') { M = Matrix.create(M).elements; }
     var T = this.dup(), cols = T.elements[0].length;
-    var ni = T.elements.length, ki = ni, i, nj, kj = M[0].length, j;
-    if (ni != M.length) { return null; }
-    do { i = ki - ni;
-      nj = kj;
-      do { j = kj - nj;
+    var i = T.elements.length, nj = M[0].length, j;
+    if (i != M.length) { return null; }
+    while (i--) { j = nj;
+      while (j--) {
         T.elements[i][cols + j] = M[i][j];
-      } while (--nj);
-    } while (--ni);
+      }
+    }
     return T;
   },
 
   // Returns the inverse (if one exists) using Gauss-Jordan
   inverse: function() {
     if (!this.isSquare() || this.isSingular()) { return null; }
-    var ni = this.elements.length, ki = ni, i, j;
-    var M = this.augment(Matrix.I(ni)).toRightTriangular();
-    var np, kp = M.elements[0].length, p, els, divisor;
+    var n = this.elements.length, i= n, j;
+    var M = this.augment(Matrix.I(n)).toRightTriangular();
+    var np = M.elements[0].length, p, els, divisor;
     var inverse_elements = [], new_element;
     // Matrix is non-singular so there will be no zeros on the diagonal
     // Cycle through rows from last to first
-    do { i = ni - 1;
+    while (i--) {
       // First, normalise diagonal elements to 1
-      els = []; np = kp;
+      els = [];
       inverse_elements[i] = [];
       divisor = M.elements[i][i];
-      do { p = kp - np;
+      for (p = 0; p < np; p++) {
         new_element = M.elements[i][p] / divisor;
         els.push(new_element);
         // Shuffle of the current row of the right hand side into the results
         // array as it will not be modified by later runs through this loop
-        if (p >= ki) { inverse_elements[i].push(new_element); }
-      } while (--np);
+        if (p >= n) { inverse_elements[i].push(new_element); }
+      }
       M.elements[i] = els;
       // Then, subtract this row from those above it to
       // give the identity matrix on the left hand side
-      for (j = 0; j < i; j++) {
-        els = []; np = kp;
-        do { p = kp - np;
+      j = i;
+      while (j--) {
+        els = [];
+        for (p = 0; p < np; p++) {
           els.push(M.elements[j][p] - M.elements[i][p] * M.elements[j][i]);
-        } while (--np);
+        }
         M.elements[j] = els;
       }
-    } while (--ni);
+    }
     return Matrix.create(inverse_elements);
   },
 
@@ -364,34 +352,33 @@ Matrix.prototype = {
   // Returns a string representation of the matrix
   inspect: function() {
     var matrix_rows = [];
-    var n = this.elements.length, k = n, i;
-    do { i = k - n;
+    var n = this.elements.length;
+    for (var i = 0; i < n; i++) {
       matrix_rows.push(Vector.create(this.elements[i]).inspect());
-    } while (--n);
+    }
     return matrix_rows.join('\n');
   },
 
   // Set the matrix's elements from an array. If the argument passed
   // is a vector, the resulting matrix will be a single column.
   setElements: function(els) {
-    var i, elements = els.elements || els;
+    var i, j, elements = els.elements || els;
     if (typeof(elements[0][0]) != 'undefined') {
-      var ni = elements.length, ki = ni, nj, kj, j;
+      i = elements.length;
       this.elements = [];
-      do { i = ki - ni;
-        nj = elements[i].length; kj = nj;
+      while (i--) { j = elements[i].length;
         this.elements[i] = [];
-        do { j = kj - nj;
+        while (j--) {
           this.elements[i][j] = elements[i][j];
-        } while (--nj);
-      } while(--ni);
+        }
+      }
       return this;
     }
-    var n = elements.length, k = n;
+    var n = elements.length;
     this.elements = [];
-    do { i = k - n;
+    for (i = 0; i < n; i++) {
       this.elements.push([elements[i]]);
-    } while (--n);
+    }
     return this;
   }
 };
@@ -405,23 +392,23 @@ var $M = Matrix.create;
 
 // Identity matrix of size n
 Matrix.I = function(n) {
-  var els = [], k = n, i, nj, j;
-  do { i = k - n;
-    els[i] = []; nj = k;
-    do { j = k - nj;
+  var els = [], i = n, j;
+  while (i--) { j = n;
+    els[i] = [];
+    while (j--) {
       els[i][j] = (i == j) ? 1 : 0;
-    } while (--nj);
-  } while (--n);
+    }
+  }
   return Matrix.create(els);
 };
 
 // Diagonal matrix - all off-diagonal elements are zero
 Matrix.Diagonal = function(elements) {
-  var n = elements.length, k = n, i;
-  var M = Matrix.I(n);
-  do { i = k - n;
+  var i = elements.length;
+  var M = Matrix.I(i);
+  while (i--) {
     M.elements[i][i] = elements[i];
-  } while (--n);
+  }
   return M;
 };
 
@@ -484,13 +471,12 @@ Matrix.Random = function(n, m) {
 
 // Matrix filled with zeros
 Matrix.Zero = function(n, m) {
-  var els = [], ni = n, i, nj, j;
-  do { i = n - ni;
+  var els = [], i = n, j;
+  while (i--) { j = m;
     els[i] = [];
-    nj = m;
-    do { j = m - nj;
+    while (j--) {
       els[i][j] = 0;
-    } while (--nj);
-  } while (--ni);
+    }
+  }
   return Matrix.create(els);
 };

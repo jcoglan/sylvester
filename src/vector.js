@@ -29,9 +29,9 @@ Vector.prototype = {
     var n = this.elements.length;
     var V = vector.elements || vector;
     if (n != V.length) { return false; }
-    do {
+    while (n--) {
       if (Math.abs(this.elements[n-1] - V[n-1]) > Sylvester.precision) { return false; }
-    } while (--n);
+    }
     return true;
   },
 
@@ -51,10 +51,10 @@ Vector.prototype = {
 
   // Calls the iterator for each element of the vector in turn
   each: function(fn) {
-    var n = this.elements.length, k = n, i;
-    do { i = k - n;
+    var n = this.elements.length;
+    for (var i = 0; i < n; i++) {
       fn(this.elements[i], i+1);
-    } while (--n);
+    }
   },
 
   // Returns a new vector created by normalizing the receiver
@@ -129,7 +129,7 @@ Vector.prototype = {
     var V = vector.elements || vector;
     var i, product = 0, n = this.elements.length;
     if (n != V.length) { return null; }
-    do { product += this.elements[n-1] * V[n-1]; } while (--n);
+    while (n--) { product += this.elements[n] * V[n]; }
     return product;
   },
 
@@ -148,21 +148,21 @@ Vector.prototype = {
 
   // Returns the (absolute) largest element of the vector
   max: function() {
-    var m = 0, n = this.elements.length, k = n, i;
-    do { i = k - n;
+    var m = 0, i = this.elements.length;
+    while (i--) {
       if (Math.abs(this.elements[i]) > Math.abs(m)) { m = this.elements[i]; }
-    } while (--n);
+    }
     return m;
   },
 
   // Returns the index of the first match found
   indexOf: function(x) {
-    var index = null, n = this.elements.length, k = n, i;
-    do { i = k - n;
+    var index = null, n = this.elements.length;
+    for (var i = 0; i < n; i++) {
       if (index === null && this.elements[i] == x) {
         index = i + 1;
       }
-    } while (--n);
+    }
     return index;
   },
 
@@ -295,15 +295,13 @@ Vector.k = Vector.create([0,0,1]);
 // Random vector of size n
 Vector.Random = function(n) {
   var elements = [];
-  do { elements.push(Math.random());
-  } while (--n);
+  while (n--) { elements.push(Math.random()); }
   return Vector.create(elements);
 };
 
 // Vector filled with zeros
 Vector.Zero = function(n) {
   var elements = [];
-  do { elements.push(0);
-  } while (--n);
+  while (n--) { elements.push(0); }
   return Vector.create(elements);
 };
