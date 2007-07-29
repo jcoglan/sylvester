@@ -8,10 +8,11 @@ LinkedList.prototype = {
 
   each: function(fn) {
     var node = this.first, n = this.length, k = n, i;
-    do { i = k - n;
+    console.log(n);
+    while (n--) { i = k - (n + 1);
       fn(node, i);
       node = node.next;
-    } while (--n);
+    }
   },
 
   at: function(i) {
@@ -30,10 +31,10 @@ LinkedList.prototype = {
     var arr = [], node = this.first;
     if (node === null) { return arr; }
     var n = this.length;
-    do {
+    while (n--) {
       arr.push(node.data || node);
       node = node.next;
-    } while (--n);
+    }
     return arr;
   }
 };
@@ -109,12 +110,12 @@ LinkedList.Circular.Methods = {
 
   withData: function(data) {
     var nodeFromStart = this.first, nodeFromEnd = this.last, n = Math.ceil(this.length / 2);
-    do {
+    while (n--) {
       if (nodeFromStart.data == data) { return nodeFromStart; }
       if (nodeFromEnd.data == data) { return nodeFromEnd; }
       nodeFromStart = nodeFromStart.next;
       nodeFromEnd = nodeFromEnd.prev;
-    } while (--n);
+    }
     return null;
   }
 };
@@ -127,8 +128,8 @@ for (var method in LinkedList.Circular.Methods) {
 LinkedList.Circular.fromArray = function(list, useNodes) {
   var linked = new LinkedList.Circular();
   var n = list.length, k = n, i;
-  do { i = k - n;
+  while (n--) { i = k - (n + 1);
     linked.append(useNodes ? new LinkedList.Node(list[i]) : list[i]);
-  } while (--n);
+  }
   return linked;
 };
