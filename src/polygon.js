@@ -39,8 +39,8 @@ Polygon.prototype = {
     this.vertices.each(function(node) {
       node.data.setElements(node.data.rotate(R, line).elements);
     });
-    this.plane = this.plane.rotate(t, line);
-    this.updateTrianglePlanes(function(plane) { return plane.rotate(t, line); });
+    this.plane = this.plane.rotate(R, line);
+    this.updateTrianglePlanes(function(plane) { return plane.rotate(R, line); });
     return this;
   },
 

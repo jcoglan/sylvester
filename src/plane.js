@@ -132,7 +132,7 @@ Plane.prototype = {
   // Returns a copy of the plane, rotated by t radians about the given line
   // See notes on Line#rotate.
   rotate: function(t, line) {
-    var R = Matrix.Rotation(t, line.direction).elements;
+    var R = t.determinant ? t.elements : Matrix.Rotation(t, line.direction).elements;
     var C = line.pointClosestTo(this.anchor).elements;
     var A = this.anchor.elements, N = this.normal.elements;
     var C1 = C[0], C2 = C[1], C3 = C[2], A1 = A[0], A2 = A[1], A3 = A[2];
