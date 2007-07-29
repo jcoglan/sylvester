@@ -8,7 +8,6 @@ LinkedList.prototype = {
 
   each: function(fn) {
     var node = this.first, n = this.length, k = n, i;
-    console.log(n);
     while (n--) { i = k - (n + 1);
       fn(node, i);
       node = node.next;
