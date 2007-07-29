@@ -596,6 +596,16 @@ window.onload = function() {
     M.tr() == 15
   );
   
+  M = $M([
+    [1,9,4,6],
+    [9,2,7,4],
+    [18,4,14,8]
+  ]);
+  
+  assert('Rank with interdependent rows',
+    M.rank() == 2 && M.transpose().rank() == 2
+  );
+  
   M1 = $M([
     [7,2,9,4],
     [4,8,2,6],
