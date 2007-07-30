@@ -27,9 +27,7 @@ LinkedList.prototype = {
   },
 
   toArray: function() {
-    var arr = [], node = this.first;
-    if (node === null) { return arr; }
-    var n = this.length;
+    var arr = [], node = this.first, n = this.length;
     while (n--) {
       arr.push(node.data || node);
       node = node.next;
