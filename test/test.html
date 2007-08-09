@@ -769,6 +769,10 @@ window.onload = function() {
   
   title('Line segment tests');
   
+  assert('Line contains line segment',
+    $L([0,0,0], [1,1,1]).contains(Line.Segment.create([-2,-2,-2], [13,13,13]))
+  );
+  
   L1 = Line.Segment.create([5,5,5], [10,10,10]);
   
   assert('Line segment length',

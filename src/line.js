@@ -57,9 +57,11 @@ Line.prototype = {
     }
   },
 
-  // Returns true iff the argument is a point on the line
-  contains: function(point) {
-    var dist = this.distanceFrom(point);
+  // Returns true iff the argument is a point on the line, or if the argument
+  // is a line segment lying within the receiver
+  contains: function(obj) {
+    if (obj.start && obj.end) { return this.contains(obj.start) && this.contains(obj.end); }
+    var dist = this.distanceFrom(obj);
     return (dist !== null && dist <= Sylvester.precision);
   },
 
