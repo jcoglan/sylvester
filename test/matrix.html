@@ -109,7 +109,7 @@ new Test.Unit.Runner({
   
   testRandomMatrix: function() { with(this) {
     var M;
-    for (var i = 1; i < 8; i++) {
+    for (var i = 1; i < 5; i++) {
       M = Matrix.Random(4,i);
       assertIdentical(4, M.rows());
       assertIdentical(i, M.cols());
@@ -121,7 +121,7 @@ new Test.Unit.Runner({
   
   testZeroMatrix: function() { with(this) {
     var M;
-    for (var i = 1; i < 8; i++) {
+    for (var i = 1; i < 5; i++) {
       M = Matrix.Random(5,i);
       assertIdentical(5, M.rows());
       assertIdentical(i, M.cols());
@@ -282,7 +282,7 @@ new Test.Unit.Runner({
     assertNull(Matrix.Random(4,5).tr());
   }},
   
-  testRankWithInterDependentRows: function() { with(this) {
+  testRankWithInterdependentRows: function() { with(this) {
     var M = $M([
       [1,9,4,6],
       [9,2,7,4],
