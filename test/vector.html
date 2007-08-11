@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+  <title>Vector tests</title>
+  <script src="lib/prototype.js" type="text/javascript" charset="utf-8"></script>
+  <script src="lib/unittest.js" type="text/javascript" charset="utf-8"></script>
+  <script src="../lib/sylvester.js" type="text/javascript" charset="utf-8"></script>
+  <link rel="stylesheet" href="lib/test.css" type="text/css">
+</head>
+<body>
+  
+<h1 id="vector_test_suite">Vector test suite</h1>
+
+<div id="testlog">
+  
+</div>
+
+<script type="text/javascript" charset="utf-8">
+
+new Test.Unit.Runner({
+  testCreation: function() { with(this) {
+    assertIdentical('[0, 1, 7, 5]', $V([0, 1, 7, 5]).inspect());
+    assertIdentical('[0, 1.4, 7.034, 5.28638]', $V([0, 1.4, 7.034, 5.28638]).inspect());
+  }},
+  
+  testElementRetrieval: function() { with(this) {
+    var V = $V([0,3,4,5]);
+    assertIdentical(0, V.e(1));
+    assertIdentical(5, V.e(4));
+    assertIdentical(null, V.e(5));
+  }},
+  
+  testZeroVector: function() { with(this) {
+    assertIdentical('[0, 0, 0, 0]', Vector.Zero(4).inspect());
+    for (var i = 1; i < 8; i++) {
+      assertIdentical(0, Vector.Zero(i).modulus());
+      assertIdentical(i, Vector.Zero(i).dimensions());
+    }
+  }},
+  
+  testRandomVector: function() { with(this) {
+    for (var i = 1; i < 8; i++) {
+      assertIdentical(i, Vector.Random(i).dimensions());
+    }
+  }},
+  
+  testModulus: function() { with(this) {
+    assertIdentical(Math.sqrt(50), $V([0,3,4,5]).modulus());
+    assertIdentical(1, Vector.i.modulus());
+  }},
+  
+  testDimensions: function() { with(this) {
+    assertIdentical(4, $V([0,3,4,5]).dimensions());
+  }},
+  
+  testEquality: function() { with(this) {
+    var V = Vector.Random(6);
+    assert(V.eql(V));
+    assert(Vector.Zero(3).eql([0,0,0]));
+    assert($V([3,6,9]).eql([3.0,6.0,9.0]));
+    assert(!$V([3.01,6,9]).eql([3.0,6.0,9.0]));
+    assert(!$V([3,6,9]).eql([3,6,10]));
+    assert(!$V([3,6,9]).eql([3,7,9]));
+    assert(!$V([3,6,9]).eql([4,6,9]));
+  }},
+  
+  testSingleElement: function() { with(this) {
+    var V = $V([4]);
+    assertIdentical('[4]', V.inspect());
+    assertIdentical(4, V.modulus());
+  }},
+  
+  testDuplication: function() { with(this) {
+    var V = $V([3,4,5]);
+    var dup = V.dup();
+    assert(V.eql(dup));
+    dup.elements[0] = 24;
+    assert(V.eql([3,4,5]));
+    assert(dup.eql([24,4,5]));
+  }},
+  
+  testMapping: function() { with(this) {
+    var V = $V([1,6,3,9]);
+    assert(V.map(function(x) { return x*x; }).eql([1,36,9,81]));
+  }},
+  
+  testNormalization: function() { with(this) {
+    var V = $V([8,2,9,4]);
+    assertIdentical(1, V.toUnitVector().modulus());
+    assert(V.toUnitVector().x(Math.sqrt(165)).eql(V));
+    assert(V.toUnitVector().isParallelTo(V));
+  }},
+  
+  testAngleFrom: function() { with(this) {
+    var k = Sylvester.precision;
+    assertIdentical(Math.PI/2, Vector.i.angleFrom(Vector.j));
+    assertIdentical(
+      Math.round((Math.PI/4)*k)/k,
+      Math.round(($V([1,0]).angleFrom($V([1,1])))*k)/k
+    );
+    assertNull(Vector.i.angleFrom([1,6,3,5]));
+  }},
+  
+  testAngleTypes: function() { with(this) {
+    assert(Vector.i.isParallelTo(Vector.i.x(235457)));
+    assertNull(Vector.i.isParallelTo([8,9]));
+    assert(Vector.i.isAntiparallelTo(Vector.i.x(-235457)));
+    assertNull(Vector.i.isAntiparallelTo([8,9]));
+    assert(Vector.i.isPerpendicularTo(Vector.k));
+    assertNull(Vector.i.isPerpendicularTo([8,9,0,3]));
+  }},
+  
+  testArithmetic: function() { with(this) {
+    var V1 = $V([2,9,4]);
+    var V2 = $V([5,13,7]);
+    assert(V1.add(V2).eql([7,22,11]));
+    assert(V1.subtract(V2).eql([-3,-4,-3]));
+    assertNull(V1.add([2,8]));
+    assertNull(V1.subtract([9,3,6,1,7]));
+    assert(V1.x(4).eql([8,36,16]));
+  }},
+  
+  testProducts: function() { with(this) {
+    var V1 = $V([2,9,4]);
+    var V2 = $V([5,13,7]);
+    assertIdentical(2* 5 + 9*13 + 4*7, V1.dot(V2));
+    assert(V1.cross(V2).eql([9*7-4*13, 4*5-2*7, 2*13-9*5]));
+    assertNull(V1.dot([7,9]));
+    assertNull(V2.cross([9,1,4,3]));
+  }},
+  
+  testMaximum: function() { with(this) {
+    var V = $V([2,8,5,9,3,7,12]);
+    assertIdentical(12, V.max());
+    V = $V([-17,8,5,9,3,7,12]);
+    assertIdentical(-17, V.max());
+  }},
+  
+  testIndexOf: function() { with(this) {
+    var V = $V([2,6,0,3]);
+    assertIdentical(1, V.indexOf(2));
+    assertIdentical(4, V.indexOf(3));
+    assertIdentical(2, V.indexOf(V.max()));
+    assertNull(V.indexOf(7));
+  }},
+  
+  testDiagonalMatrix: function() { with(this) {
+    assert(
+      $V([2,6,4,3]).toDiagonalMatrix().eql([
+        [2,0,0,0],
+        [0,6,0,0],
+        [0,0,4,0],
+        [0,0,0,3]
+      ])
+    );
+  }},
+  
+  testRounding: function() { with(this) {
+    assert($V([2.56, 3.5, 3.49]).round().eql([3,4,3]));
+  }},
+  
+  testDistances: function() { with(this) {
+    assertIdentical($V([1,9,0,13]).modulus(), $V([3,9,4,6]).distanceFrom([2,0,4,-7]));
+    assertIdentical(Math.sqrt(64 + 49), $V([2,8,7]).distanceFrom(Line.X));
+    assertIdentical(78, $V([28,-43,78]).distanceFrom(Plane.XY));
+  }},
+  
+  testContainedByLineOrPlane: function() { with(this) {
+    assert($V([12,0,0]).liesOn(Line.X));
+    assert(!$V([12,1,0]).liesOn(Line.X));
+    assert(!$V([12,0,3]).liesOn(Line.X));
+    assert($V([0,-3,6]).liesIn(Plane.YZ));
+    assert(!$V([4,-3,6]).liesIn(Plane.YZ));
+  }},
+  
+  testReflection: function() { with(this) {
+    assert($V([3,0,0]).reflectionIn([0,3,0]).eql([-3,6,0]));
+    assert($V([3,0,0]).reflectionIn($L([0,0,0], [1,0,1])).eql([0,0,3]));
+    var V1 = $V([25,-48,77]);
+    var V2 = $V([25,-48,-77]);
+    assert(V1.reflectionIn(Plane.XY).eql(V2));
+    assert(V2.reflectionIn(Plane.YX).eql(V1));
+  }},
+  
+  testRotation: function() { with(this) {
+    assert($V([12,1]).rotate(Math.PI/2, [5,1]).eql([5,8]));
+    assert(Vector.i.rotate(-Math.PI/2, $L([10, 0, 100], Vector.k)).eql([10,9,0]));
+  }}
+});
+
+</script>
+
+</body>
+</html>
