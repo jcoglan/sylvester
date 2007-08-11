@@ -30,7 +30,7 @@ Vector.prototype = {
     var V = vector.elements || vector;
     if (n != V.length) { return false; }
     while (n--) {
-      if (Math.abs(this.elements[n-1] - V[n-1]) > Sylvester.precision) { return false; }
+      if (Math.abs(this.elements[n] - V[n]) > Sylvester.precision) { return false; }
     }
     return true;
   },
