@@ -315,7 +315,7 @@ Matrix.prototype = {
       for (p = 0; p < np; p++) {
         new_element = M.elements[i][p] / divisor;
         els.push(new_element);
-        // Shuffle of the current row of the right hand side into the results
+        // Shuffle off the current row of the right hand side into the results
         // array as it will not be modified by later runs through this loop
         if (p >= n) { inverse_elements[i].push(new_element); }
       }
