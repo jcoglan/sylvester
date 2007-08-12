@@ -1,0 +1,75 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+  <title>Line.Segment tests</title>
+  <script src="lib/prototype.js" type="text/javascript" charset="utf-8"></script>
+  <script src="lib/unittest.js" type="text/javascript" charset="utf-8"></script>
+  <script src="../lib/sylvester.js" type="text/javascript" charset="utf-8"></script>
+  <link rel="stylesheet" href="lib/test.css" type="text/css"/>
+</head>
+<body>
+  
+<h1 id="line.segment_test_suite">Line.Segment test suite</h1>
+
+<div id="testlog">
+</div>
+
+<script type="text/javascript" charset="utf-8">
+
+new Test.Unit.Runner({
+  setup: function() {
+    this.segment = Line.Segment.create([5,5,5], [10,10,10]);
+    this.segment2 = Line.Segment.create([1,1,0], [1,2,0]);
+  },
+  
+  testLength: function() { with(this) {
+    assert(this.segment.length() - Math.sqrt(75) <= Sylvester.precision);
+  }},
+  
+  testConversionToVector: function() { with(this) {
+    assert(this.segment.toVector().eql([5,5,5]));
+  }},
+  
+  testMidpoint: function() { with(this) {
+    assert(this.segment.midpoint().eql([7.5,7.5,7.5]));
+  }},
+  
+  testBisectingPlane: function() { with(this) {
+    assert(this.segment.bisectingPlane().eql($P([7.5,7.5,7.5], [1,1,1])));
+  }},
+  
+  testContainment: function() { with(this) {
+    assert(this.segment.contains(this.segment.midpoint()));
+    assert(this.segment.contains([5,5,5]));
+    assert(this.segment.contains([10,10,10]));
+    assert(!this.segment.contains([4.9999,4.9999,4.9999]));
+    assert(!this.segment.contains([10.00001, 10.00001, 10.00001]));
+  }},
+  
+  testIntersection: function() { with(this) {
+    assert(!this.segment.intersects(Line.X));
+    assert(!this.segment.intersects(Line.Y));
+    assert(!this.segment.intersects(Line.Z));
+    assert(!this.segment.intersects(Plane.XY));
+    assert(!this.segment.intersects(Plane.YZ));
+    assert(!this.segment.intersects(Plane.ZX));
+    assert(this.segment.intersectionWith(this.segment.bisectingPlane()).eql(this.segment.midpoint()));
+  }},
+  
+  testPointClosestTo: function() { with(this) {
+    assertNull(this.segment2.pointClosestTo(Line.Y));
+    assert(this.segment2.pointClosestTo(Line.X).eql([1,1,0]));
+    assert(this.segment2.pointClosestTo(Line.X.translate([0,10])).eql([1,2,0]));
+    assert(this.segment2.pointClosestTo($L([0,1.5,0], [0,0,1])).eql([1,1.5,0]));
+    assert(this.segment2.pointClosestTo(Plane.XZ).eql([1,1,0]));
+    assertNull(this.segment2.pointClosestTo(Plane.YZ));
+  }}
+});
+
+</script>
+
+</body>
+</html>
