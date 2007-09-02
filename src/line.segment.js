@@ -9,6 +9,11 @@ Line.Segment.prototype = {
         (this.start.eql(segment.end) && this.end.eql(segment.start));
   },
 
+  // Returns a copy of the line segment
+  dup: function() {
+    return Line.Segment.create(this.start, this.end);
+  },
+
   // Returns the length of the line segment
   length: function() {
     var A = this.start.elements, B = this.end.elements;
