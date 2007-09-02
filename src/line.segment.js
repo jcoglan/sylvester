@@ -39,6 +39,16 @@ Line.Segment.prototype = {
     return Plane.create(this.midpoint(), this.toVector());
   },
 
+  // Returns the result of translating the line by the given vector/array
+  translate: function(vector) {
+    var V = vector.elements || vector;
+    var S = this.start.elements, E = this.end.elements;
+    return Line.Segment.create(
+      [S[0] + V[0], S[1] + V[1], S[2] + (V[2] || 0)],
+      [E[0] + V[0], E[1] + V[1], E[2] + (V[2] || 0)]
+    );
+  },
+
   // Returns true iff the line segment is parallel to the argument. It simply forwards
   // the method call onto its line property.
   isParallelTo: function(obj) {

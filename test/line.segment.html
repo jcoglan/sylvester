@@ -55,6 +55,10 @@ new Test.Unit.Runner({
     assert(this.segment.bisectingPlane().eql($P([7.5,7.5,7.5], [1,1,1])));
   }},
   
+  testTranslation: function() { with(this) {
+    assert(this.segment.translate([9,2,7]).eql(Line.Segment.create([14,7,12], [19,12,17])));
+  }},
+  
   testParallelity: function() { with(this) {
     assert(this.segment2.isParallelTo(Line.Y));
     assert(!this.segment2.isParallelTo(Line.Z));
