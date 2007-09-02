@@ -3,6 +3,12 @@
 Line.Segment = function() {};
 Line.Segment.prototype = {
 
+  // Returns true iff the line segment is equal to the argument
+  eql: function(segment) {
+    return (this.start.eql(segment.start) && this.end.eql(segment.end)) ||
+        (this.start.eql(segment.end) && this.end.eql(segment.start));
+  },
+
   // Returns the length of the line segment
   length: function() {
     var A = this.start.elements, B = this.end.elements;

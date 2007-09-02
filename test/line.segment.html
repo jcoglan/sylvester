@@ -25,6 +25,12 @@ new Test.Unit.Runner({
     this.segment2 = Line.Segment.create([1,1,0], [1,2,0]);
   },
   
+  testEquality: function() { with(this) {
+    assert(this.segment.eql(this.segment));
+    assert(!this.segment.eql(this.segment2));
+    assert(this.segment.eql(Line.Segment.create(this.segment.end, this.segment.start)));
+  }},
+  
   testLength: function() { with(this) {
     assert(this.segment.length() - Math.sqrt(75) <= Sylvester.precision);
   }},
