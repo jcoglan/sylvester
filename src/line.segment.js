@@ -38,6 +38,12 @@ Line.Segment.prototype = {
     var vect = this.toVector();
     return V.isAntiparallelTo(vect) && V.modulus() <= vect.modulus();
   },
+  
+  // Returns the distance between the argument and the line segment's closest point to the argument
+  distanceFrom: function(obj) {
+    var P = this.pointClosestTo(obj);
+    return (P === null) ? null : P.distanceFrom(obj);
+  },
 
   // Returns true iff the line segment intersects the argument
   intersects: function(obj) {

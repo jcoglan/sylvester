@@ -49,6 +49,14 @@ new Test.Unit.Runner({
     assert(!this.segment.contains([10.00001, 10.00001, 10.00001]));
   }},
   
+  testDistances: function() { with(this) {
+    assertIdentical(5, this.segment.distanceFrom([5,5,0]));
+    assertIdentical(2, this.segment.distanceFrom([10,12,10]));
+    assertIdentical(Math.sqrt(2* 25), this.segment.distanceFrom(Line.X));
+    assertIdentical(1, this.segment.distanceFrom($L([11,10,10], [0,1])));
+    assertIdentical(5, this.segment.distanceFrom(Plane.XY));
+  }},
+  
   testIntersection: function() { with(this) {
     assert(!this.segment.intersects(Line.X));
     assert(!this.segment.intersects(Line.Y));

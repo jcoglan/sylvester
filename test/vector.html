@@ -166,6 +166,7 @@ new Test.Unit.Runner({
     assertIdentical($V([1,9,0,13]).modulus(), $V([3,9,4,6]).distanceFrom([2,0,4,-7]));
     assertIdentical(Math.sqrt(64 + 49), $V([2,8,7]).distanceFrom(Line.X));
     assertIdentical(78, $V([28,-43,78]).distanceFrom(Plane.XY));
+    assertIdentical(5, $V([7,4,0]).distanceFrom(Line.Segment.create([0,0,0], [4,0,0])));
   }},
   
   testContainedByLineOrPlane: function() { with(this) {
