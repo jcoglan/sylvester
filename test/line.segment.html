@@ -47,6 +47,8 @@ new Test.Unit.Runner({
     assert(this.segment2.isParallelTo(Plane.XY));
     assert(this.segment2.isParallelTo(Plane.YZ));
     assert(!this.segment2.isParallelTo(Plane.ZX));
+    assert(!this.segment.isParallelTo(this.segment2));
+    assert(this.segment2.isParallelTo(this.segment2));
   }},
   
   testContainment: function() { with(this) {

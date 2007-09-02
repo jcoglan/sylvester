@@ -28,7 +28,7 @@ Line.prototype = {
   // the line's own direction. A line is parallel to a plane if the two do not
   // have a unique intersection.
   isParallelTo: function(obj) {
-    if (obj.normal) { return obj.isParallelTo(this); }
+    if (obj.normal || (obj.start && obj.end)) { return obj.isParallelTo(this); }
     var theta = this.direction.angleFrom(obj.direction);
     return (Math.abs(theta) <= Sylvester.precision || Math.abs(theta - Math.PI) <= Sylvester.precision);
   },
