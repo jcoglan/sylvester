@@ -186,7 +186,7 @@ Vector.prototype = {
 
   // Returns the vector's distance from the argument, when considered as a point in space
   distanceFrom: function(obj) {
-    if (obj.anchor || obj.start) { return obj.distanceFrom(this); }
+    if (obj.anchor || (obj.start && obj.end)) { return obj.distanceFrom(this); }
     var V = obj.elements || obj;
     if (V.length != this.elements.length) { return null; }
     var sum = 0, part;
