@@ -69,8 +69,7 @@ Line.Segment.prototype = {
       var P = this.line.pointClosestTo(obj);
       if (P === null) { return null; }
       if (this.contains(P)) { return P; }
-      if (this.line.positionOf(P) < 0) { return this.start.dup(); }
-      return this.end.dup();
+      return (this.line.positionOf(P) < 0 ? this.start : this.end).dup();
     }
   },
 
