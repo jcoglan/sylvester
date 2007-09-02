@@ -28,6 +28,12 @@ Line.Segment.prototype = {
     return Plane.create(this.midpoint(), this.toVector());
   },
 
+  // Returns true iff the line segment is parallel to the argument. It simply forwards
+  // the method call onto its line property.
+  isParallelTo: function(obj) {
+    return this.line.isParallelTo(obj);
+  },
+
   // Returns the distance between the argument and the line segment's closest point to the argument
   distanceFrom: function(obj) {
     var P = this.pointClosestTo(obj);

@@ -41,6 +41,14 @@ new Test.Unit.Runner({
     assert(this.segment.bisectingPlane().eql($P([7.5,7.5,7.5], [1,1,1])));
   }},
   
+  testParallelity: function() { with(this) {
+    assert(this.segment2.isParallelTo(Line.Y));
+    assert(!this.segment2.isParallelTo(Line.Z));
+    assert(this.segment2.isParallelTo(Plane.XY));
+    assert(this.segment2.isParallelTo(Plane.YZ));
+    assert(!this.segment2.isParallelTo(Plane.ZX));
+  }},
+  
   testContainment: function() { with(this) {
     assert(this.segment.contains(this.segment.midpoint()));
     assert(this.segment.contains([5,5,5]));
