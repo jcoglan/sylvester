@@ -74,6 +74,8 @@ new Test.Unit.Runner({
     assert(Line.X.pointClosestTo($V([26,-2,18])).eql([26,0,0]));
     assert($L([0,0,0], [1,0,0]).pointClosestTo($L([0,0,24], [1,1,0])).eql([0,0,0]));
     assert($L([0,0,24], [1,1,0]).pointClosestTo($L([0,0,0], [-1,0,0])).eql([0,0,24]));
+    assert(Line.X.pointClosestTo(Line.Segment.create([3,5], [9,9])).eql([3,0,0]));
+    assert(Line.X.pointClosestTo(Line.Segment.create([2,-2,2], [4,2,2])).eql([3,0,0]));
   }},
   
   testDistanceFrom: function() { with(this) {

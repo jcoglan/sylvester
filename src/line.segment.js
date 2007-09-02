@@ -28,6 +28,12 @@ Line.Segment.prototype = {
     return Plane.create(this.midpoint(), this.toVector());
   },
 
+  // Returns the distance between the argument and the line segment's closest point to the argument
+  distanceFrom: function(obj) {
+    var P = this.pointClosestTo(obj);
+    return (P === null) ? null : P.distanceFrom(obj);
+  },
+
   // Returns true iff the given point lies on the segment
   contains: function(point) {
     var P = (point.elements || point).slice();
@@ -39,12 +45,6 @@ Line.Segment.prototype = {
     return V.isAntiparallelTo(vect) && V.modulus() <= vect.modulus();
   },
   
-  // Returns the distance between the argument and the line segment's closest point to the argument
-  distanceFrom: function(obj) {
-    var P = this.pointClosestTo(obj);
-    return (P === null) ? null : P.distanceFrom(obj);
-  },
-
   // Returns true iff the line segment intersects the argument
   intersects: function(obj) {
     return (this.intersectionWith(obj) !== null);
@@ -65,7 +65,7 @@ Line.Segment.prototype = {
       if (V === null) { return null; }
       return this.pointClosestTo(V);
     } else {
-      // obj is a line or point
+      // obj is a line (segment) or point
       var P = this.line.pointClosestTo(obj);
       if (P === null) { return null; }
       if (this.contains(P)) { return P; }

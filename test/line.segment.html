@@ -55,6 +55,7 @@ new Test.Unit.Runner({
     assertIdentical(Math.sqrt(2* 25), this.segment.distanceFrom(Line.X));
     assertIdentical(1, this.segment.distanceFrom($L([11,10,10], [0,1])));
     assertIdentical(5, this.segment.distanceFrom(Plane.XY));
+    assertIdentical(Math.sqrt(4 + 25 + 25), this.segment.distanceFrom(Line.Segment.create([7,0,0], [9,0,0])));
   }},
   
   testIntersection: function() { with(this) {

@@ -103,9 +103,13 @@ Line.prototype = {
     return Vector.create([P[0] + k*X1, P[1] + k*X2, P[2] + k*X3]);
   },
 
-  // Returns the point on the line that is closest to the given point or line
+  // Returns the point on the line that is closest to the given point or line/line segment
   pointClosestTo: function(obj) {
-    if (obj.direction) {
+    if (obj.start && obj.end) {
+      // obj is a line segment
+      var P = obj.pointClosestTo(this);
+      return (P === null) ? null : this.pointClosestTo(P);
+    } else if (obj.direction) {
       // obj is a line
       if (this.intersects(obj)) { return this.intersectionWith(obj); }
       if (this.isParallelTo(obj)) { return null; }
