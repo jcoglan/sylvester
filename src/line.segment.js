@@ -44,7 +44,7 @@ Line.Segment.prototype = {
     var vect = this.toVector();
     return V.isAntiparallelTo(vect) && V.modulus() <= vect.modulus();
   },
-  
+
   // Returns true iff the line segment intersects the argument
   intersects: function(obj) {
     return (this.intersectionWith(obj) !== null);

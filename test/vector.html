@@ -173,6 +173,8 @@ new Test.Unit.Runner({
     assert($V([12,0,0]).liesOn(Line.X));
     assert(!$V([12,1,0]).liesOn(Line.X));
     assert(!$V([12,0,3]).liesOn(Line.X));
+    assert($V([9,16,4]).liesOn(Line.Segment.create([2,9,4], [14,21,4])));
+    assert(!$V([9,17,4]).liesOn(Line.Segment.create([2,9,4], [14,21,4])));
     assert($V([0,-3,6]).liesIn(Plane.YZ));
     assert(!$V([4,-3,6]).liesIn(Plane.YZ));
   }},
