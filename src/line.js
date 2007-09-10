@@ -88,7 +88,7 @@ Line.prototype = {
 
   // Returns the unique intersection point with the argument, if one exists
   intersectionWith: function(obj) {
-    if (obj.normal) { return obj.intersectionWith(this); }
+    if (obj.normal || (obj.start && obj.end)) { return obj.intersectionWith(this); }
     if (!this.intersects(obj)) { return null; }
     var P = this.anchor.elements, X = this.direction.elements,
         Q = obj.anchor.elements, Y = obj.direction.elements;
