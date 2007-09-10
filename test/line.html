@@ -45,6 +45,8 @@ new Test.Unit.Runner({
     assert(Line.X.isParallelTo($L([0,0,-12], [-4,0,0])));
     assert(Line.X.isParallelTo($P([0,0,-4], Vector.k)));
     assert(!Line.Z.isParallelTo($P([0,0,-4], Vector.k)));
+    assert(Line.Z.isParallelTo(Line.Segment.create([9,2,6], [9,2,44])));
+    assert(!Line.Z.isParallelTo(Line.Segment.create([9,3,6], [9,2,44])));
   }},
   
   testTranslation: function() { with(this) {
