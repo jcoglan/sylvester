@@ -36,7 +36,7 @@ Line.prototype = {
   // Returns the line's perpendicular distance from the argument,
   // which can be a point, a line or a plane
   distanceFrom: function(obj) {
-    if (obj.normal) { return obj.distanceFrom(this); }
+    if (obj.normal || (obj.start && obj.end)) { return obj.distanceFrom(this); }
     if (obj.direction) {
       // obj is a line
       if (this.isParallelTo(obj)) { return this.distanceFrom(obj.anchor); }
