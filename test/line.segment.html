@@ -107,6 +107,8 @@ new Test.Unit.Runner({
         Line.Segment.create([2,6,2], [0,6,6])
       )
     );
+    assert(this.segment.intersects(Line.Segment.create([6,7,7], [9,7,7])));
+    assert(!this.segment.intersects(this.segment2));
   }},
   
   testPointClosestTo: function() { with(this) {

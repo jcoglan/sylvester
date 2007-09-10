@@ -65,7 +65,12 @@ new Test.Unit.Runner({
       assert(L1.contains(V));
       assert(L2.contains(V));
     }
+  }},
+  
+  testIntersectionTesting: function() { with(this) {
     assert($L([5,0], [0,1]).intersectionWith($L([0,0], [-1,-1])).eql([5,5,0]));
+    assert(Line.X.intersects(Line.Segment.create([7,-4,0], [7,5,0])));
+    assert(!Line.X.intersects(Line.Segment.create([7,-4,-1], [7,5,0])));
   }},
   
   testPositionOfPoint: function() { with(this) {
