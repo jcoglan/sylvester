@@ -75,6 +75,9 @@ new Test.Unit.Runner({
     assert(this.segment.contains([10,10,10]));
     assert(!this.segment.contains([4.9999,4.9999,4.9999]));
     assert(!this.segment.contains([10.00001, 10.00001, 10.00001]));
+    assert(this.segment.contains(Line.Segment.create([5,5,5], [8,8,8])));
+    assert(this.segment.contains(Line.Segment.create([7,7,7], [10,10,10])));
+    assert(!this.segment.contains(Line.Segment.create([4,4,4], [8,8,8])));
   }},
   
   testDistances: function() { with(this) {
