@@ -11,10 +11,9 @@ task :default => :build
 
 task :build => [:create_directory, :destroy] do
   require File.dirname(__FILE__) + '/tools/packr'
-  packr = Packr.new
   PACKAGES.each do |name, files|
     code = files.inject('') { |memo, source_file| memo << File.read("#{SOURCE_DIR}/#{source_file}.js") + "\n" }
-    code = packr.pack(code, :base62 => true, :shrink_vars => true) unless ENV['d']
+    code = Packr.pack(code, :shrink_vars => true) unless ENV['d']
     filename = "#{PACKAGE_DIR}/#{name}.js"
     File.open(filename, 'wb') { |f| f.write code }
     puts "\n  Built package '#{name}': #{(File.size(filename)/1000).to_i} kb"

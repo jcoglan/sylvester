@@ -8,6 +8,23 @@ require File.dirname(__FILE__) + '/packr/words'
 
 class Packr
   
+  class << self
+    def minify(script)
+      @packr ||= self.new
+      @packr.minify(script)
+    end
+    
+    def pack(script, options = {})
+      @packr ||= self.new
+      @packr.pack(script, options)
+    end
+    
+    def pack_file(path, options = {})
+      @packr ||= self.new
+      @packr.pack_file(path, options)
+    end
+  end
+  
   IGNORE = RegexpGroup::IGNORE
   REMOVE = ""
   SPACE = " "
