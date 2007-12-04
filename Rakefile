@@ -10,7 +10,7 @@ PACKAGES = {
 task :default => :build
 
 task :build => [:create_directory, :destroy] do
-  require File.dirname(__FILE__) + '/tools/packr'
+  require 'packr'
   PACKAGES.each do |name, files|
     code = files.inject('') { |memo, source_file| memo << File.read("#{SOURCE_DIR}/#{source_file}.js") + "\n" }
     code = Packr.pack(code, :shrink_vars => true) unless ENV['d']
@@ -34,7 +34,7 @@ end
 
 desc "Searches all project files and lists those whose contents match the regexp"
 task :grape do
-  require File.dirname(__FILE__) + '/tools/grape'
+  require 'grape'
   grape = Grape.new(:dir => 'src', :extensions => %w(js))
   results = grape.search(ENV['q'],
     :case_sensitive => !!ENV['cs'],
