@@ -308,7 +308,7 @@ Polygon.prototype = {
 
   // Gives the polygon its own local set of vertex points, allowing it to be
   // transformed independently of polygons it may be sharing vertices with.
-  createLocalVertexCopies: function() {
+  copyVertices: function() {
     this.clearCache();
     this.vertices.each(function(node) {
       node.data = new Polygon.Vertex(node.data);

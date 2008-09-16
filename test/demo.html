@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+  <title>Polygon demo</title>
+  <script src="../lib/sylvester.js" type="text/javascript" language="javascript" charset="utf-8"></script>
+</head>
+<body>
+  
+    <canvas id="screen" width="800" height="600"></canvas>
+    
+    <script type="text/javascript">
+    (function() {
+  
+        var P = Polygon.create([
+            [0,0], [5,0], [5,5], [0,5], [0,10],
+            
+            [5,10], [0,5], [5,5], [10,10], [10,15],
+            
+            [-5,15], [-5,5],
+            [-10,5], [-10,0], [-5,0], [-5,-5], [0,-5]
+        ])
+        .scale(25, [0,0,0])
+        .translate([400,380,0]);
+        
+        var trigs = P.toTriangles(),
+        screen = document.getElementById('screen'),
+        ctx = screen.getContext('2d');
+        
+        function draw() {
+            ctx.fillStyle = 'black';
+            ctx.fillRect(0,0, 800,600);
+            
+            var i, n, c;
+            
+            for (i = 0, n = trigs.length; i < n; i++) {
+                c = Math.round(255 * (i+1) / n);
+                ctx.fillStyle = 'rgb(' + [c,c,c].join(',') + ')';
+                ctx.beginPath();
+                ctx.moveTo(trigs[i].v(1).e(1), 800 - trigs[i].v(1).e(2));
+                ctx.lineTo(trigs[i].v(2).e(1), 800 - trigs[i].v(2).e(2));
+                ctx.lineTo(trigs[i].v(3).e(1), 800 - trigs[i].v(3).e(2));
+                ctx.fill();
+            }
+        };
+        
+        draw();
+        
+        var angle = Math.PI/36,
+        axis = $L([400,380], [0.3,1.4,1]);
+        
+        setInterval(function() {
+            P.rotate(angle, axis);
+            draw();
+        }, 20);
+        
+        var i = 0;
+        document.onclick = function() {
+            trigs[i++].copyVertices();
+        };
+  
+    })();
+    </script>
+  
+</body>
+</html>
