@@ -1,0 +1,307 @@
+/*================================================================
+	Main rules
+================================================================*/
+
+body {
+	background: #1e5c93;
+  color: #000;
+	font: 14px Helvetica, Arial, sans-serif;
+	margin: 0;
+	padding: 0;
+}
+
+.sub {
+	margin: 0 auto;
+	width: 717px;
+}
+
+h2 {
+  color: #444;
+	font: normal 24px/1.0 Helvetica, Arial, sans-serif;
+	margin: 0 0 24px;
+}
+
+h3 {
+  font: bold 16px Helvetica, Arial, sans-serif;
+  margin: 24px 0;
+}
+
+h3.method {
+  background: #4e9fce;
+  color: #fff;
+  font-family: Andale Mono, Lucida Console, Lucida Sans Typewriter, Courier New, monospace;
+  font-size: 15px;
+  font-weight: normal;
+  padding: 2px 12px;
+}
+
+.arg {
+  font-style: italic;
+}
+
+.version {
+  background: #1e5c93;
+  font-size: 0.6em;
+  padding: 4px;
+}
+
+h3 .icon {
+  margin-right: 12px;
+}
+
+p, ul, ol {
+	font: 15px/1.6 Helvetica, Arial, sans-serif;
+	margin: 24px 0;
+	padding: 0;
+}
+
+li {
+	margin: 0 0 0 36px;
+	padding: 0;
+}
+
+a, .fakeLink {
+  color: #4e9fce;
+  cursor: pointer;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+a img {
+  border: 0;
+}
+
+blockquote {
+  border-left: 4px solid #ccc;
+  color: #666;
+  margin: 12px 0;
+  padding: 0 12px;
+}
+
+hr.clearfix {
+  clear: both;
+  height: 0;
+  margin: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+
+code, pre, tt {
+  background: #eee;
+  font-family: Andale Mono, Lucida Console, Lucida Sans Typewriter, Courier New, monospace;
+  font-size: 0.9em;
+}
+
+pre {
+  border-left: 12px solid #ddd;
+  padding: 12px;
+}
+
+a code {
+  font-weight: normal;
+}
+
+.math {
+  font-family: Georgia, Garamond, Times New Roman, serif;
+}
+
+acronym, .caps {
+  border: 0;
+  font-size: 0.85em;
+  letter-spacing: 0.04em;
+}
+
+sub, sup {
+  font-size: 0.6em;
+}
+
+del {
+  background: #f4bda9;
+  color: #c45f3b;
+  text-decoration: none;
+}
+
+ins {
+  background: #c5e798;
+  text-decoration: none;
+}
+
+.help {
+  background: #4783a5;
+  border-bottom: 8px solid #64a5cb;
+  color: #fff;
+  padding: 8px 12px 10px;
+}
+
+.help .icon {
+  display: inline;
+  float: left;
+  margin: 12px;
+}
+
+
+/*================================================================
+	Header, footer, main
+================================================================*/
+
+#header {
+  background: url(header.gif) center top repeat-x;
+  margin: 0;
+	height: 150px;
+}
+
+#header .sub {
+  position: relative;
+}
+
+#header h1 {
+  background: url(title.gif) left top no-repeat;
+  margin: 0;
+  position: absolute;
+  left: 0;
+  top: 44px;
+}
+
+#header h1 a {
+  display: block;
+  width: 314px;
+  padding-top: 92px;
+  height: 0;
+  overflow: hidden;
+}
+
+#main {
+  background: #fff;
+  border-bottom: 4px solid #174b79;
+  padding: 24px 0 48px;
+}
+
+#main:after {
+	content: '.';
+	display: block;
+	clear: both;
+	height: 0;
+	overflow: hidden;
+	visibility: hidden;
+}
+
+#footer {
+  clear: both;
+  color: #fff;
+  font: 11px/1.6 Helvetica, Arial, sans-serif;
+  height: 30px;
+  padding-top: 12px;
+}
+
+#footer a {
+  color: #8cd5ff;
+}
+
+
+/*================================================================
+	Navigation
+================================================================*/
+
+#nav {
+  list-style: none;
+  margin: 0;
+}
+
+#nav li {
+  list-style: none;
+  position: absolute;
+  top: 112px;
+}
+
+#nav li a {
+  display: block;
+  width: 81px;
+  padding-top: 38px;
+  height: 0;
+  overflow: hidden;
+}
+
+#nav-home {
+  background: url(download.gif) left top no-repeat;
+  right: 174px;
+}
+
+#nav-docs {
+  background: url(docs.gif) left top no-repeat;
+  right: 81px;
+}
+
+#apinav {
+  background: #205e94;
+  list-style: none;
+  margin: 0 0 24px;
+  height: 20px;
+}
+
+#apinav li {
+  display: inline;
+  float: left;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+#apinav a {
+  border-right: 1px solid #fff;
+  color: #fff;
+  display: block;
+  line-height: 20px;
+  padding: 0 12px;
+  width: 56px;
+}
+
+
+/*================================================================
+	Tables
+================================================================*/
+
+table {
+  background: #fff;
+  width: 100%;
+  margin: 18px 0;
+  padding: 0;
+  border-collapse: collapse;
+  border-top: 2px solid #000;
+  border-bottom: 2px solid #000;
+}
+
+th {
+  border-bottom: 1px solid #000;
+  color: #000;
+  font: bold 14px Helvetica, Arial, sans-serif;
+}
+
+th, td {
+  font-size: 13px;
+  padding: 4px 12px;
+  text-align: left;
+}
+
+th.center, td.center {
+  text-align: center;
+}
+
+th.right, td.right {
+  text-align: right;
+}
+
+tbody tr {
+  border-top: 1px solid #ccc;
+}
+
+tr.odd {
+  background: #eee;
+}
+
+tr.even.selected {
+  background: #f5f7cd;
+}
+
+tr.odd.selected {
+  background: #e3e893;
+}

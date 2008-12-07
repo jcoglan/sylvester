@@ -1,0 +1,232 @@
+<?php $title = 'API Documentation - Vector'; ?>
+<?php include '../header.php'; ?>
+
+<?php include '../apinav.php'; ?>
+
+<h2>Class: Vector</h2>
+
+<p>Sylvester version: 0.1.0 onwards</p>
+
+<p>Class methods:
+<a href="#create"><code>create</code></a>,
+<a href="#ijk"><code>i</code></a>,
+<a href="#ijk"><code>j</code></a>,
+<a href="#ijk"><code>k</code></a>,
+<a href="#random"><code>Random</code></a>,
+<a href="#zero"><code>Zero</code></a>
+</p>
+
+<p>Instance methods:
+<a href="#add"><code>add</code></a>,
+<a href="#anglefrom"><code>angleFrom</code></a>,
+<a href="#cross"><code>cross</code></a>,
+<a href="#dimensions"><code>dimensions</code></a>,
+<a href="#distancefrom"><code>distanceFrom</code></a>,
+<a href="#dot"><code>dot</code></a>,
+<a href="#dup"><code>dup</code></a>,
+<a href="#e"><code>e</code></a>,
+<a href="#each"><code>each</code></a>,
+<a href="#eql"><code>eql</code></a>,
+<a href="#indexof"><code>indexOf</code></a>,
+<a href="#inspect"><code>inspect</code></a>,
+<a href="#isantiparallelto"><code>isAntiparallelTo</code></a>,
+<a href="#isparallelto"><code>isParallelTo</code></a>,
+<a href="#isperpendicularto"><code>isPerpendicularTo</code></a>,
+<a href="#liesin"><code>liesIn</code></a>,
+<a href="#lieson"><code>liesOn</code></a>,
+<a href="#map"><code>map</code></a>,
+<a href="#max"><code>max</code></a>,
+<a href="#modulus"><code>modulus</code></a>,
+<a href="#multiply"><code>multiply</code></a>,
+<a href="#reflectionin"><code>reflectionIn</code></a>,
+<a href="#rotate"><code>rotate</code></a>,
+<a href="#round"><code>round</code></a>,
+<a href="#setelements"><code>setElements</code></a>,
+<a href="#snapto"><code>snapTo</code></a>,
+<a href="#subtract"><code>subtract</code></a>,
+<a href="#to3d"><code>to3D</code></a>,
+<a href="#todiagonalmatrix"><code>toDiagonalMatrix</code></a>,
+<a href="#tounitvector"><code>toUnitVector</code></a>,
+<a href="#x"><code>x</code></a>
+</p>
+
+<p>Instance variables:</p>
+
+<ul>
+  <li><code>elements</code> &ndash; an array containing the vector&rsquo;s elements</li>
+</ul>
+
+<h3>Overview</h3>
+
+<p>The <code>Vector</code> class is designed to model vectors in any number of dimensions. All the elements of a vector must be real numbers. Depending on what you&rsquo;re using them for, it can be helpful to think of a vector either as a point in n-dimensional space, or as a line connecting the origin to that same point.</p>
+
+<h3>Class methods</h3>
+
+<a name="create"></a>
+<h3 class="method">Vector.create(<span class="arg">elements</span>) <span class="version">0.1.0</span></h3>
+<p>Creates and returns new <code>Vector</code> instance from the array <code>elements</code>. Example usage:</p>
+<pre><code>var v = Vector.create([6,2,9]);</code></pre>
+<p>This method is aliased as <code>$V</code>.</p>
+
+<a name="ijk"></a>
+<h3 class="method">Vector.i, Vector.j, Vector.k <span class="version">0.1.0</span></h3>
+<p>Predefined <code>Vector</code> instances representing the 3-dimensional <b class="math">i</b>, <b class="math">j</b> and <b class="math">k</b> vectors respectively.</p>
+
+<a name="random"></a>
+<h3 class="method">Vector.Random(<span class="arg">n</span>) <span class="version">0.1.0</span></h3>
+<p>Returns a vector with <code>n</code> elements, each of which is a random number between 0 and 1.</p>
+
+<a name="zero"></a>
+<h3 class="method">Vector.Zero(<span class="arg">n</span>) <span class="version">0.1.0</span></h3>
+<p>Returns a vector with <code>n</code> elements, all of which are zero.</p>
+
+<h3>Instance methods</h3>
+
+<a name="add"></a>
+<h3 class="method">add(<span class="arg">vector</span>) <span class="version">0.1.0</span></h3>
+<p>If the receiver and <code>vector</code> have the same number of elements, returns a <code>Vector</code> formed by adding them together. Otherwise, returns <code>null</code>.</p>
+
+<a name="anglefrom"></a>
+<h3 class="method">angleFrom(<span class="arg">vector</span>) <span class="version">0.1.0</span></h3>
+<p>Returns the angle in radians between <code>vector</code> and the receiver. The return value will always be between 0 and <span class="math">+&pi;</span> inclusive. If the vectors have unequal numbers of elements, <code>null</code> is returned.</p>
+
+<a name="cross"></a>
+<h3 class="method">cross(<span class="arg">vector</span>) <span class="version">0.1.0</span></h3>
+<p>Returns the cross product (aka the vector product) of the receiver with <code>vector</code>, in the order in which they are written. For example, <code>a.cross(b)</code> is the same as the mathematical statement <span class="math"><b>a</b> &times; <b>b</b></span>. Both vectors must have three elements, otherwise this method returns <code>null</code>.</p>
+
+<a name="dimensions"></a>
+<h3 class="method">dimensions() <span class="version">0.1.0</span></h3>
+<p>Returns the number of elements the receiver has &ndash; that is, the dimensionality of the vector space it inhabits.</p>
+
+<a name="distancefrom"></a>
+<h3 class="method">distanceFrom(<span class="arg">vector</span>) <span class="version">0.1.0</span></h3>
+<p>Returns the (always positive) distance of the receiver from <code>vector</code>. That is, <code>a.distanceFrom(b)</code> is equivalent to <span class="math">|<b>a</b> &minus; <b>b</b>|</span>.</p>
+
+<a name="dot"></a>
+<h3 class="method">dot(<span class="arg">vector</span>) <span class="version">0.1.0</span></h3>
+<p>Returns the value of the dot product (aka the scalar product) of the receiver with <code>vector</code>. That is, <code>a.dot(b)</code> is the same as <span class="math"><b>a</b> &bull; <b>b</b></span>. Returns <code>null</code> if the vectors have unequal dimensions.</p>
+
+<a name="dup"></a>
+<h3 class="method">dup() <span class="version">0.1.0</span></h3>
+<p>Returns a copy of the receiver.</p>
+
+<a name="e"></a>
+<h3 class="method">e(<span class="arg">i</span>) <span class="version">0.1.0</span></h3>
+<p>Returns the <code>i</code>th element of the receiver. Element indexes begin at 1, not 0 like array indexes. This is consistent with mathematical notation.</p>
+
+<a name="each"></a>
+<h3 class="method">each(<span class="arg">iterator</span>) <span class="version">0.1.1</span></h3>
+<p>Calls <code>iterator</code> for each element of the receiver. <code>iterator</code> is passed the index (numbered from 1) of each element as the second argument. For example, the following alerts the index and value of each of the vector&rsquo;s elements:</p>
+
+<pre><code>$V([4,9,3,6]).each(function(x, i) {
+  alert(i + ': ' + x);
+});
+
+// Alerts: '1: 4', '2: 9', '3: 3', '4: 6'</pre></code>
+
+<a name="eql"></a>
+<h3 class="method">eql(<span class="arg">vector</span>) <span class="version">0.1.0</span></h3>
+<p>Returns <code>true</code> iff the receiver is equal to <code>vector</code>, that is, if all their elements are equal. <a href="<?php echo ROOT.'/docs'; ?>">See note on accuracy</a>.</p>
+
+<a name="indexof"></a>
+<h3 class="method">indexOf(<span class="arg">x</span>) <span class="version">0.1.0</span></h3>
+<p>Returns the index position (numbered from 1, just as for <a href="#e"><code>e()</code></a>) of the first element exactly equal to <code>x</code>. If no match is found, returns <code>null</code>.</p>
+
+<a name="inspect"></a>
+<h3 class="method">inspect() <span class="version">0.1.0</span></h3>
+<p>Returns a string representation of the receiver, useful for debugging purposes. Example:</p>
+<pre><code>alert($V([7,-2,5]).inspect())
+// alerts "[7, -2, 5]"</code></pre>
+
+<a name="isantiparallelto"></a>
+<h3 class="method">isAntiparallelTo(<span class="arg">vector</span>) <span class="version">0.1.0</span></h3>
+<p>Returns <code>true</code> iff <code>vector</code>&rsquo;s direction is exactly opposed to that of the receiver, that is, if the angle between them is <span class="math">&pi;</span>. <a href="<?php echo ROOT.'/docs'; ?>">See note on accuracy</a>.</p>
+
+<a name="isparallelto"></a>
+<h3 class="method">isParallelTo(<span class="arg">vector</span>) <span class="version">0.1.0</span></h3>
+<p>Returns <code>true</code> iff <code>vector</code>&rsquo;s direction is exactly aligned with that of the receiver, that is, if the angle between them is zero. <a href="<?php echo ROOT.'/docs'; ?>">See note on accuracy</a>.</p>
+
+<a name="isperpendicularto"></a>
+<h3 class="method">isPerpendicularTo(<span class="arg">vector</span>) <span class="version">0.1.0</span></h3>
+<p>Returns <code>true</code> iff <code>vector</code>&rsquo;s direction is perpendicular to that of the receiver, that is, if the angle between them is <span class="math">&pi;/2</span>. <a href="<?php echo ROOT.'/docs'; ?>">See note on accuracy</a>.</p>
+
+<a name="liesin"></a>
+<h3 class="method">liesIn(<span class="arg">plane</span>) <span class="version">0.1.0</span></h3>
+<p>Returns <code>true</code> iff the receiver is a point in the given <a href="<?php echo ROOT.'/api/plane'; ?>"><code>Plane</code></a>. Only works on 3-dimensional vectors.</p>
+
+<a name="lieson"></a>
+<h3 class="method">liesOn(<span class="arg">line</span>) <span class="version">0.1.0</span></h3>
+<p>Returns <code>true</code> iff the receiver is a point on the given <a href="<?php echo ROOT.'/api/line'; ?>"><code>Line</code></a>. Only works on 3-dimensional vectors.</p>
+
+<a name="map"></a>
+<h3 class="method">map(<span class="arg">iterator</span>) <span class="version">0.1.0</span></h3>
+<p>Maps the receiver to another vector by calling <code>iterator</code> with each element in turn. <code>iterator</code> is also passed the index (numbered from 1) of each element as the second argument. Some examples:</p>
+<pre><code>var a = $V([3,4,5]);
+
+// To square the elements of a
+var b = a.map(function(x) { return x * x; });
+
+// To add each element's index to its value
+var c = a.map(function(x, i) { return x + i; });</code></pre>
+
+<a name="max"></a>
+<h3 class="method">max() <span class="version">0.1.0</span></h3>
+<p>Returns the element of the receiver with the largest absolute value. For example, <code>$V([0,-6,5]).max()</code> returns <code>-6</code>.</p>
+
+<a name="modulus"></a>
+<h3 class="method">modulus() <span class="version">0.1.0</span></h3>
+<p>Returns the modulus of the receiver, given by <span class="math">|<b>v</b>| = &radic;( &Sigma; v<sub><i>i</i></sub>&sup2; )</span>.</p>
+
+<a name="multiply"></a>
+<h3 class="method">multiply(<span class="arg">k</span>) <span class="version">0.1.0</span></h3>
+<p>Returns the vector obtained by multiplying all the elements of the receiver by the scalar quantity <code>k</code>. Aliased as <a href="#x"><code>x(k)</code></a>.</p>
+
+<a name="reflectionin"></a>
+<h3 class="method">reflectionIn(<span class="arg">object</span>) <span class="version">0.1.0</span></h3>
+<p>Returns the vector that results from reflecting the receiver in <code>object</code>, which can be a <code>Vector</code>, a <a href="<?php echo ROOT.'/api/line'; ?>"><code>Line</code></a> or a <a href="<?php echo ROOT.'/api/plane'; ?>"><code>Plane</code></a>. If <code>object</code> is a <code>Vector</code>, then <code>a.reflectionIn(b)</code> returns <span class="math"><b>b</b> + (<b>b</b> &minus; <b>a</b>)</span>. Otherwise, the same formula applies but <b class="math">b</b> is the closest point on the line or plane to <b class="math">a</b>.</p>
+
+<a name="rotate"></a>
+<h3 class="method">rotate(<span class="arg">angle</span>, <span class="arg">axis</span>) <span class="version">0.1.0</span></h3>
+<p>Returns a copy of the receiver rotated by <code>angle</code> radians about <code>axis</code>. If the receiver is a 2-vector then <code>axis</code> should also be a 2-vector, and the method returns the result of rotating the receiver about the point given by <code>axis</code>. The rotation is performed anticlockwise from the point of view of someone looking down on the x-y plane, so for example:</p>
+
+<pre><code>var a = $V([10,5]);
+var b = $V([5,5]);
+
+var c = a.rotate(Math.PI/2, b);
+// c is the point (5,10)</code></pre>
+
+<p>If the receiver is a 3-vector, then <code>axis</code> should be a <a href="<?php echo ROOT.'/api/line'; ?>"><code>Line</code></a>, and the rotation is performed in a right-handed fashion around the line&rsquo;s direction. Be careful that the line points in the right direction when using this method!</p>
+
+<a name="round"></a>
+<h3 class="method">round() <span class="version">0.1.0</span></h3>
+<p>Returns a copy of the receiver with all its elements rounded to the nearest integer.</p>
+
+<a name="setelements"></a>
+<h3 class="method">setElements(<span class="arg">els</span>) <span class="version">0.1.0</span></h3>
+<p>Sets the receiver&rsquo;s <code>elements</code> property equal to the array <code>els</code>. Since version 0.1.1, the numericality of <code>els</code>&rsquo;s elements is not checked for performance reasons. It is assumed you&rsquo;ll be using this with numbers, and if you throw anything else in then most method calls won&rsquo;t work.</p>
+
+<a name="snapto"></a>
+<h3 class="method">snapTo(<span class="arg">x</span>) <span class="version">0.1.0</span></h3>
+<p>Returns a copy of the receiver with any elements that differ from <code>x</code> by less than the value of <code>Sylvester.precision</code> set exactly equal to <code>x</code>. This can be useful for working around rounding errors.</p>
+
+<a name="subtract"></a>
+<h3 class="method">subtract(<span class="arg">vector</span>) <span class="version">0.1.0</span></h3>
+<p>If the receiver and <code>vector</code> have the same number of elements, returns a <code>Vector</code> formed by subtracting the latter from the former. Otherwise, returns <code>null</code>.</p>
+
+<a name="to3d"></a>
+<h3 class="method">to3D() <span class="version">0.1.0</span></h3>
+<p>If the receiver is 3-dimensional, it returns a copy of the receiver. If it is 2-dimensional, it returns a copy of the receiver with an additional third element, which is set to zero. For all other sizes, it returns <code>null</code>. Something is similar is done in many of the methods of the <a href="<?php echo ROOT.'/api/line'; ?>"><code>Line</code></a> and <a href="<?php echo ROOT.'/api/plane'; ?>"><code>Plane</code></a> classes, although for performance reasons they don&rsquo;t use this method.</p>
+
+<a name="todiagonalmatrix"></a>
+<h3 class="method">toDiagonalMatrix() <span class="version">0.1.0</span></h3>
+<p>Returns an <code>n</code>&times;<code>n</code> square <a href="<?php echo ROOT.'/api/matrix'; ?>"><code>Matrix</code></a>, where <code>n</code> is the number of elements in the receiver, whose leading-diagonal elements are the elements of the receiver. All the off-diagonal elements are zero.</p>
+
+<a name="tounitvector"></a>
+<h3 class="method">toUnitVector() <span class="version">0.1.0</span></h3>
+<p>Returns a copy of the receiver, whose elements have been scaled such that the <a href="#modulus"><code>modulus</code></a> of the new vector is equal to 1. If the receiver has zero modulus then a copy of it is returned unchanged.</p>
+
+<a name="x"></a>
+<h3 class="method">x(<span class="arg">k</span>) <span class="version">0.1.0</span></h3>
+<p>Alias for <a href="#multiply"><code>multiply(k)</code></a>.</p>
+
+<?php include '../footer.php'; ?>

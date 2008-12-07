@@ -1,0 +1,123 @@
+<?php $title = 'API Documentation - Line'; ?>
+<?php include '../header.php'; ?>
+
+<?php include '../apinav.php'; ?>
+
+<h2>Class: Line</h2>
+
+<p>Sylvester version: 0.1.0 onwards</p>
+
+<p>Class methods:
+<a href="#create"><code>create</code></a>,
+<a href="#xyz"><code>X</code></a>,
+<a href="#xyz"><code>Y</code></a>,
+<a href="#xyz"><code>Z</code></a>
+</p>
+
+<p>Instance methods:
+<a href="#contains"><code>contains</code></a>,
+<a href="#distancefrom"><code>distanceFrom</code></a>,
+<a href="#dup"><code>dup</code></a>,
+<a href="#eql"><code>eql</code></a>,
+<a href="#intersectionwith"><code>intersectionWith</code></a>,
+<a href="#intersects"><code>intersects</code></a>,
+<a href="#isparallelto"><code>isParallelTo</code></a>,
+<a href="#liesin"><code>liesIn</code></a>,
+<a href="#pointclosestto"><code>pointClosestTo</code></a>,
+<a href="#reflectionin"><code>reflectionIn</code></a>,
+<a href="#rotate"><code>rotate</code></a>,
+<a href="#setvectors"><code>setVectors</code></a>,
+<a href="#translate"><code>translate</code></a>
+</p>
+
+<p>Instance variables:</p>
+
+<ul>
+  <li><code>anchor</code> &ndash; a 3D <a href="<?php echo ROOT.'/api/vector'; ?>"><code>Vector</code></a> corresponding to a point on the line</li>
+  <li><code>direction</code> &ndash; a <a href="<?php echo ROOT.'/api/vector#tounitvector'; ?>">normalized</a> 3D <a href="<?php echo ROOT.'/api/vector'; ?>"><code>Vector</code></a> representing the line&rsquo;s direction</li>
+</ul>
+
+<h3>Overview</h3>
+
+<p>The <code>Line</code> class is designed to model infinite straight lines in 3 dimensions. It is possible to specify lines using 2D <a href="<?php echo ROOT.'/api/vector'; ?>"><code>Vector</code></a>s, but they will be stored in the <code>Line</code> instance as 3D vectors whose third element is zero. Lines created in this way are thus 3D lines confined to the <span class="math">x-y</span> plane. You can also specify 2D vectors as arguments for many of <code>Line</code>&rsquo;s instance methods &ndash; again, these will be interpreted as 3D vectors with a zero third component.</p>
+
+<h3>Class methods</h3>
+
+<a name="create"></a>
+<h3 class="method">Line.create(<span class="arg">anchor</span>, <span class="arg">direction</span>) <span class="version">0.1.0</span></h3>
+<p>Creates a <code>Line</code> instance with the specified properties. <code>anchor</code> and <code>direction</code> can each be either 2- or 3-dimensional arrays or <a href="<?php echo ROOT.'/api/vector'; ?>"><code>Vector</code></a>s, and they will be stored in the <code>Line</code>&rsquo;s properties as 3D vectors. (The thrid element will be zero if a 2D vector was supplied.) <code>direction</code> will be <a href="<?php echo ROOT.'/api/vector#tounitvector'; ?>">normalized</a> before being saved. The following are all fine:</p>
+
+<pre><code>var A = Line.create([4,8], [1,5]);
+var B = Line.create($V([4,8]), $V([1,5]));
+var C = Line.create([9,2,5], $V([8,2,0]));</code></pre>
+
+<p>For situations where <span class="math">x</span>, <span class="math">y</span> and <span class="math">z</span> are used to refer to co-ordinates, <span class="math">x</span> corresponds to the first element of a vector, <span class="math">y</span> the second and <span class="math">z</span> the third.</p>
+
+<p>This method is aliased as <code>$L</code>.</p>
+
+<a name="xyz"></a>
+<h3 class="method">Line.X, Line.Y, Line.Z <span class="version">0.1.0</span></h3>
+<p>Predefined <code>Line</code> instances representing the <span class="math">x</span>, <span class="math">y</span> and <span class="math">z</span> axes respectively.</p>
+
+<h3>Instance methods</h3>
+
+<a name="contains"></a>
+<h3 class="method">contains(<span class="arg">point</span>) <span class="version">0.1.0</span></h3>
+<p>Returns <code>true</code> iff the vector <code>point</code> is a point that lies on the receiver.</p>
+
+<a name="distancefrom"></a>
+<h3 class="method">distanceFrom(<span class="arg">obj</span>) <span class="version">0.1.0</span></h3>
+<p>Returns the shortest distance between the receiver and <code>obj</code>, which can be a <code>Line</code>, a <a href="<?php echo ROOT.'/api/plane'; ?>"><code>Plane</code></a> or a <a href="<?php echo ROOT.'/api/vector'; ?>"><code>Vector</code></a>. If a <a href="<?php echo ROOT.'/api/plane'; ?>"><code>Plane</code></a>, this method will only return a non-zero value if the receiver is parallel to <code>obj</code>.</p>
+
+<a name="dup"></a>
+<h3 class="method">dup() <span class="version">0.1.0</span></h3>
+<p>Returns a copy of the receiver.</p>
+
+<a name="eql"></a>
+<h3 class="method">eql(<span class="arg">line</span>) <span class="version">0.1.0</span></h3>
+<p>Returns <code>true</code> iff <code>line</code> is equal to the receiver, that is, if they both represent the same region of space. Their <code>anchor</code> and <code>direction</code> properties do not have to be identical for this to be the case. As long as <code>line.anchor</code> is a point on the receiver, and <code>line.direction</code> is (anti)parallel to the receiver&rsquo;s direction, then this method returns <code>true</code>.</p>
+
+<a name="intersectionwith"></a>
+<h3 class="method">intersectionWith(<span class="arg">obj</span>) <span class="version">0.1.0</span></h3>
+<p>Returns a <a href="<?php echo ROOT.'/api/vector'; ?>"><code>Vector</code></a> representing the unique point of intersection of the receiver with <code>obj</code>, which can be either a <code>Line</code> or a <a href="<?php echo ROOT.'/api/plane'; ?>"><code>Plane</code></a>. If no such point exists, returns <code>null</code>.</p>
+
+<a name="intersects"></a>
+<h3 class="method">intersects(<span class="arg">obj</span>) <span class="version">0.1.0</span></h3>
+<p>Returns <code>true</code> iff the receiver has a unique point of intersection with <code>obj</code>, which can be either a <code>Line</code> or a <a href="<?php echo ROOT.'/api/plane'; ?>"><code>Plane</code></a>.</p>
+
+<a name="isparallelto"></a>
+<h3 class="method">isParallelTo(<span class="arg">line</span>) <span class="version">0.1.0</span></h3>
+<p>Returns <code>true</code> iff the receiver and <code>line</code> are parallel lines. Their direction vectors can point in opposite directions &ndash; two lines with opposing directions represent the same set of points.</p>
+
+<a name="liesin"></a>
+<h3 class="method">liesIn(<span class="arg">plane</span>) <span class="version">0.1.0</span></h3>
+<p>Returns <code>true</code> iff the receiver lies in the given <code>plane</code>.</p>
+
+<a name="pointclosestto"></a>
+<h3 class="method">pointClosestTo(<span class="arg">obj</span>) <span class="version">0.1.0</span></h3>
+<p>Returns a <a href="<?php echo ROOT.'/api/vector'; ?>"><code>Vector</code></a> representing the point on the receiver that is closest to <code>obj</code>, which can be either a <code>Vector</code> or a <code>Line</code>. If a <code>Line</code>, returns <code>null</code> if the lines are parallel &ndash; there is no unique closest point.</p>
+
+<a name="reflectionin"></a>
+<h3 class="method">reflectionIn(<span class="arg">obj</span>) <span class="version">0.1.0</span></h3>
+<p>Returns a <code>Line</code> representing the result of reflecting (inverting) the receiver in <code>obj</code>, which can be a <code>Line</code>, a <a href="<?php echo ROOT.'/api/plane'; ?>"><code>Plane</code></a> or a <a href="<?php echo ROOT.'/api/vector'; ?>"><code>Vector</code></a>.</p>
+
+<a name="rotate"></a>
+<h3 class="method">rotate(<span class="arg">angle</span>, <span class="arg">axis</span>) <span class="version">0.1.0</span></h3>
+<p>Returns the result of rotating the receiver by <code>angle</code> radians about <code>axis</code>, which can be a <code>Line</code>, or a <a href="<?php echo ROOT.'/api/vector'; ?>"><code>Vector</code></a>. If a <code>Vector</code>, the receiver is rotated about a line whose anchor is <code>axis</code> and whose direction is <code>[0, 0, 1]</code>. This is useful for working in 2D:</p>
+
+<pre><code>var L = Line.X.rotate(Math.PI/2, $V([5,0]));
+
+var test = L.eql(Line.create([5,0], [0,1]));
+// Returns true - the 90-degree rotation leaves Line.X parallel to the y axis</code></pre>
+
+<p>Be careful when working with <code>axis</code> as a <code>Line</code> &ndash; rotations are performed in a right-handed fashion about the line&rsquo;s direction.</p>
+
+<a name="setvectors"></a>
+<h3 class="method">setVectors(<span class="arg">anchor</span>, <span class="arg">direction</span>) <span class="version">0.1.0</span></h3>
+<p>Sets the receiver&rsquo;s properties accordingly. See <a href="#create">create</a>.</p>
+
+<a name="translate"></a>
+<h3 class="method">translate(<span class="arg">vector</span>) <span class="version">0.1.0</span></h3>
+<p>Returns the result of translating the receiver by adding <code>vector</code> to its <code>anchor</code> property. <code>vector</code> can be a 2- or 3- dimensional array or <a href="<?php echo ROOT.'/api/vector'; ?>"><code>Vector</code></a>. If 2-dimensional, a zero third component will be added.</p>
+
+<?php include '../footer.php'; ?>
