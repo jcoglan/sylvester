@@ -1,0 +1,23 @@
+---
+source_directory:   src
+build_directory:    lib
+
+builds:
+  src:
+    suffix:         false
+    packer:         false
+  min:
+    shrink_vars:    true
+    private:        true
+
+packages:
+  sylvester:
+    - vector
+    - matrix
+    - line
+    - line.segment
+    - plane
+    - polygon
+    - polygon.vertex
+    - linkedlist
+
