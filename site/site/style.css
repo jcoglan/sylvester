@@ -145,7 +145,7 @@ ins {
 ================================================================*/
 
 #header {
-  background: url(header.gif) center top repeat-x;
+  background: url(/header.gif) center top repeat-x;
   margin: 0;
 	height: 150px;
 }
@@ -155,7 +155,7 @@ ins {
 }
 
 #header h1 {
-  background: url(title.gif) left top no-repeat;
+  background: url(/title.gif) left top no-repeat;
   margin: 0;
   position: absolute;
   left: 0;
@@ -222,12 +222,12 @@ ins {
 }
 
 #nav-home {
-  background: url(download.gif) left top no-repeat;
+  background: url(/download.gif) left top no-repeat;
   right: 174px;
 }
 
 #nav-docs {
-  background: url(docs.gif) left top no-repeat;
+  background: url(/docs.gif) left top no-repeat;
   right: 81px;
 }
 

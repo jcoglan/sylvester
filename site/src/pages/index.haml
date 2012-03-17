@@ -1,0 +1,47 @@
+:plain
+  <p>Sylvester is a vector, matrix and geometry library for JavaScript, that
+    runs in the browser and on the server side. It includes classes for
+    modelling vectors and matrices in any number of dimensions, and for
+    modelling infinite lines and planes in 3-dimensional space. It lets you
+    write object-oriented easy-to-read code that mirrors the maths it represents.
+    For example, it lets you multiply vectors and matrics together:</p>
+  
+  <pre style="float: left; width: 310px;"><code>var V1 = $V([3,4,5]);
+  var V2 = $V([9,-3,0]);
+  
+  var d = V1.dot(V2);
+  // d is 15
+  
+  var c = V1.cross(V2);
+  // c is the vector (15,45,-45)</code></pre>
+  
+  <pre style="float: right; width: 310px;"><code>var M1 = $M([
+    [1,7,3],
+    [9,4,0],
+    [2,7,1]
+  ]);
+  
+  var M2 = $M([
+    [6,2,8],
+    [9,1,3],
+    [0,7,6]
+  ]);
+  
+  var M = M1.x(M2);
+  
+  // M is the matrix
+  //   69 30 47
+  //   90 22 84
+  //   75 18 43</code></pre>
+  
+  <p style="clear: both">and any number of other useful arithmetic and geometric
+    operations. For more information, take a look at <a href="/docs">the API
+    documentation</a>.</p>
+  
+  <a name="download"></a>
+  <h2><a href="assets/sylvester-0-1-3.zip">Download version 0.1.3</a></h2>
+  
+  <p>Sylvester is &copy; 2007&ndash;2012 <a href="http://jcoglan.com">James
+    Coglan</a>, and is released under the MIT license. Source code and bug
+    tracker are available
+    <a href="http://github.com/jcoglan/sylvester">on GitHub</a>.</p>

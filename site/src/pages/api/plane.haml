@@ -1,0 +1,172 @@
+= partial 'api_navigation'
+
+:plain
+  <h2>Class: Plane</h2>
+  
+  <p>Sylvester version: 0.1.0 onwards</p>
+  
+  <p>Class methods:
+  <a href="#create"><code>create</code></a>,
+  <a href="#xyz"><code>XY</code></a>,
+  <a href="#xyz"><code>XZ</code></a>,
+  <a href="#xyz"><code>YX</code></a>,
+  <a href="#xyz"><code>YZ</code></a>,
+  <a href="#xyz"><code>ZX</code></a>,
+  <a href="#xyz"><code>ZY</code></a>
+  </p>
+  
+  <p>Instance methods:
+  <a href="#contains"><code>contains</code></a>,
+  <a href="#distancefrom"><code>distanceFrom</code></a>,
+  <a href="#dup"><code>dup</code></a>,
+  <a href="#eql"><code>eql</code></a>,
+  <a href="#intersectionwith"><code>intersectionWith</code></a>,
+  <a href="#intersects"><code>intersects</code></a>,
+  <a href="#isparallelto"><code>isParallelTo</code></a>,
+  <a href="#isperpendicularto"><code>isPerpendicularTo</code></a>,
+  <a href="#pointclosestto"><code>pointClosestTo</code></a>,
+  <a href="#reflectionin"><code>reflectionIn</code></a>,
+  <a href="#rotate"><code>rotate</code></a>,
+  <a href="#setvectors"><code>setVectors</code></a>,
+  <a href="#translate"><code>translate</code></a>
+  </p>
+  
+  <p>Instance variables:</p>
+  
+  <ul>
+    <li><code>anchor</code> &ndash; a 3D
+      <a href="/api/vector.html"><code>Vector</code></a> corresponding to a
+      point in the plane</li>
+    <li><code>normal</code> &ndash; a
+      <a href="/api/vector.html#tounitvector">normalized</a> 3D
+      <a href="/api/vector.html"><code>Vector</code></a> perpendicular to the
+      plane</li>
+  </ul>
+  
+  <h3>Overview</h3>
+  
+  <p>The <code>Plane</code> class is designed to model infinite flat planes in 3
+    dimensions.</p>
+  
+  <h3>Class methods</h3>
+  
+  <a name="create"></a>
+  <h3 class="method">Plane.create(<span class="arg">anchor</span>, <span class="arg">v1</span> [, <span class="arg">v2</span>]) <span class="version">0.1.0</span></h3>
+  
+  <p>Creates a new <code>Plane</code> instance with the given properties. If two
+    arguments are supplied, <code>v1</code> should be the normal to the plane.
+    If three arguments, <code>v1</code> and <code>v2</code> should be directions
+    of vectors in the plane, such that the normal is <span
+    class="math"><b>v<sub>1</sub></b> &times; <b>v<sub>2</sub></b></span>. The
+    instance will not store these directions, only the calculated normal.
+    <code>anchor</code> is any point in the plane, and the normal vector is
+    normalized before being saved.</p>
+  
+  <a name="xyz"></a>
+  <h3 class="method">Plane.XY, Plane.XZ, Plane.YX, Plane.YZ, Plane.ZX, Plane.ZY <span class="version">0.1.0</span></h3>
+  
+  <p>Predefined <code>Plane</code> instances representing the <span
+    class="math">x-y</span>, <span class="math">y-z</span> and <span
+    class="math">z-x</span> planes.</p>
+  
+  <h3>Instance methods</h3>
+  
+  <a name="contains"></a>
+  <h3 class="method">contains(<span class="arg">obj</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Returns <code>true</code> iff <code>obj</code> is a
+    <a href="/api/line.html"><code>Line</code></a> or a
+    <a href="/api/vector.html"><code>Vector</code></a> that lies in the
+    receiver.</p>
+  
+  <a name="distancefrom"></a>
+  <h3 class="method">distanceFrom(<span class="arg">obj</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Returns the shortest distance between the receiver and <code>obj</code>,
+    which can be a <a href="/api/line"><code>Line</code></a>, a
+    <code>Plane</code> or a <a href="/api/vector"><code>Vector</code></a>.</p>
+  
+  <a name="dup"></a>
+  <h3 class="method">dup() <span class="version">0.1.0</span></h3>
+  
+  <p>Returns a copy of the receiver.</p>
+  
+  <a name="eql"></a>
+  <h3 class="method">eql(<span class="arg">plane</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Returns <code>true</code> iff <code>plane</code> and the receiver represent
+    the same region of space. Their <code>anchor</code> and <code>normal</code>
+    properties need not be identical for this to be the case. As long as
+    <code>plane.anchor</code> is a point in the receiver, and
+    <code>plane.normal</code> is (anti)parallel to the receiver&rsquo;s normal,
+    then this method returns <code>true</code>.</p>
+  
+  <a name="intersectionwith"></a>
+  <h3 class="method">intersectionWith(<span class="arg">obj</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Returns the unique intersection of the receiver with <code>obj</code>,
+    which can be either a <a href="/api/line.html"><code>Line</code></a> or a
+    <code>Plane</code>. If <code>obj</code> is a <code>Line</code>, a
+    <code>Vector</code> is returned. If <code>obj</code> is a <code>Plane</code>,
+    a <code>Line</code> is returned. If no intersection exists, returns
+    <code>null</code>.</p>
+  
+  <a name="intersects"></a>
+  <h3 class="method">intersects(<span class="arg">obj</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Returns <code>true</code> iff the receiver has a unique intersection with
+    <code>obj</code>, which can be either a
+    <a href="/api/line.html"><code>Line</code></a> or a <code>Plane</code>.</p>
+  
+  <a name="isparallelto"></a>
+  <h3 class="method">isParallelTo(<span class="arg">obj</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Returns <code>true</code> iff the receiver and <code>obj</code> are
+    parallel. If <code>obj</code> is a plane, their normal vectors can point in
+    opposite directions &ndash; two planes with opposing normals represent the
+    same set of points. If <code>obj</code> is a
+    <a href="/api/line.html"><code>Line</code></a> then its direction must be
+    perpendicular to the receiver&rsquo;s normal.</p>
+  
+  <a name="isperpendicularto"></a>
+  <h3 class="method">isPerpendicularTo(<span class="arg">plane</span>) <span class="version">0.1.1</span></h3>
+  
+  <p>Returns <code>true</code> iff <code>plane</code> is perpendicular to the
+    receiver.</p>
+  
+  <a name="pointclosestto"></a>
+  <h3 class="method">pointClosestTo(<span class="arg">point</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Returns a <a href="/api/vector.html"><code>Vector</code></a> representing
+    the point on the receiver that is closest to the vector <code>point</code>.</p>
+  
+  <a name="reflectionin"></a>
+  <h3 class="method">reflectionIn(<span class="arg">obj</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Returns a <code>Plane</code> representing the result of reflecting
+    (inverting) the receiver in <code>obj</code>, which can be a
+    <a href="/api/line.html"><code>Line</code></a>, a <code>Plane</code> or a
+    <a href="/api/vector.html"><code>Vector</code></a>.</p>
+  
+  <a name="rotate"></a>
+  <h3 class="method">rotate(<span class="arg">angle</span>, <span class="arg">axis</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Returns the result of rotating the receiver by <code>angle</code> radians
+    about the <a href="/api/line.html"><code>Line</code></a> <code>axis</code>.
+    The rotation is performed in a right-handed fashion about
+    <code>axis.direction</code>.</p>
+  
+  <a name="setvectors"></a>
+  <h3 class="method">setVectors(<span class="arg">anchor</span>, <span class="arg">v1</span> [, <span class="arg">v2</span>]) <span class="version">0.1.0</span></h3>
+  
+  <p>Sets the receiver&rsquo;s properties accordingly. See
+    <a href="#create">create</a>.</p>
+  
+  <a name="translate"></a>
+  <h3 class="method">translate(<span class="arg">vector</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Returns the result of translating the receiver by adding
+    <code>vector</code> to its <code>anchor</code> property. <code>vector</code>
+    can be a 2- or 3- dimensional array or
+    <a href="/api/vector.html"><code>Vector</code></a>. If 2-dimensional, a zero
+    third component will be added.</p>

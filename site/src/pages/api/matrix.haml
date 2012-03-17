@@ -1,0 +1,486 @@
+= partial 'api_navigation'
+
+:plain
+  <h2>Class: Matrix</h2>
+  
+  <p>Sylvester version: 0.1.0 onwards</p>
+  
+  <p>Class methods:
+  <a href="#create"><code>create</code></a>,
+  <a href="#diagonal_class"><code>Diagonal</code></a>,
+  <a href="#i"><code>I</code></a>,
+  <a href="#random"><code>Random</code></a>,
+  <a href="#rotation"><code>Rotation</code></a>,
+  <a href="#rotationxyz"><code>RotationX</code></a>,
+  <a href="#rotationxyz"><code>RotationY</code></a>,
+  <a href="#rotationxyz"><code>RotationZ</code></a>,
+  <a href="#zero"><code>Zero</code></a>
+  </p>
+  
+  <p>Instance methods:
+  <a href="#add"><code>add</code></a>,
+  <a href="#augment"><code>augment</code></a>,
+  <a href="#canmultiplyfromleft"><code>canMultiplyFromLeft</code></a>,
+  <a href="#col"><code>col</code></a>,
+  <a href="#cols"><code>cols</code></a>,
+  <a href="#det"><code>det</code></a>,
+  <a href="#determinant"><code>determinant</code></a>,
+  <a href="#diagonal"><code>diagonal</code></a>,
+  <a href="#dimensions"><code>dimensions</code></a>,
+  <a href="#dup"><code>dup</code></a>,
+  <a href="#e"><code>e</code></a>,
+  <a href="#eql"><code>eql</code></a>,
+  <a href="#indexof"><code>indexOf</code></a>,
+  <a href="#inspect"><code>inspect</code></a>,
+  <a href="#inv"><code>inv</code></a>,
+  <a href="#inverse"><code>inverse</code></a>,
+  <a href="#issamesizeas"><code>isSameSizeAs</code></a>,
+  <a href="#issingular"><code>isSingular</code></a>,
+  <a href="#issquare"><code>isSquare</code></a>,
+  <a href="#map"><code>map</code></a>,
+  <a href="#max"><code>max</code></a>,
+  <a href="#minor"><code>minor</code></a>,
+  <a href="#multiply"><code>multiply</code></a>,
+  <a href="#rank"><code>rank</code></a>,
+  <a href="#rk"><code>rk</code></a>,
+  <a href="#round"><code>round</code></a>,
+  <a href="#row"><code>row</code></a>,
+  <a href="#rows"><code>rows</code></a>,
+  <a href="#setelements"><code>setElements</code></a>,
+  <a href="#snapto"><code>snapTo</code></a>,
+  <a href="#subtract"><code>subtract</code></a>,
+  <a href="#torighttriangular"><code>toRightTriangular</code></a>,
+  <a href="#touppertriangular"><code>toUpperTriangular</code></a>,
+  <a href="#tr"><code>tr</code></a>,
+  <a href="#trace"><code>trace</code></a>,
+  <a href="#transpose"><code>transpose</code></a>,
+  <a href="#x"><code>x</code></a>
+  </p>
+  
+  <p>Instance variables:</p>
+  
+  <ul>
+    <li><code>elements</code> &ndash; a nested array containing the matrix&rsquo;s elements</li>
+  </ul>
+  
+  <h3>Overview</h3>
+  
+  <p>The <code>Matrix</code> class is designed to model real matrices in any
+    number of dimensions. All the elements in a matrix must be real numbers.</p>
+  
+  <h3>Class methods</h3>
+  
+  <a name="create"></a>
+  <h3 class="method">Matrix.create(<span class="arg">elements</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Creates and returns a new <code>Matrix</code> instance from the array
+    <code>elements</code>. <code>elements</code> should be a nested array: the
+    top level array is the rows, and each row is an array of elements. This
+    means you write out a matrix in code in the same orientation you would on
+    paper.</p>
+  
+  <pre><code>var M = $M([
+    [8,3,9],
+    [2,0,7],
+    [1,9,3]
+  ]);</code></pre>
+  
+  <p>Every row must have the same number of elements, otherwise the method will
+    return <code>null</code>.</p>
+  
+  <p>This method is aliased as <code>$M</code>.</p>
+  
+  <a name="diagonal_class"></a>
+  <h3 class="method">Matrix.Diagonal(<span class="arg">elements</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Returns a square matrix whose leading-diagonal elements are the values in
+    the array <code>elements</code>, and whose off-diagonal elements are zero.</p>
+  
+  <pre><code>var D = Matrix.Diagonal([4,3,7,1]);
+  
+  // D is the matrix
+  //    4 0 0 0
+  //    0 3 0 0
+  //    0 0 7 0
+  //    0 0 0 1</code></pre>
+  
+  <a name="i"></a>
+  <h3 class="method">Matrix.I(<span class="arg">n</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Returns the <code>n</code>&times;<code>n</code> identity matrix.</p>
+  
+  <a name="random"></a>
+  <h3 class="method">Matrix.Random(<span class="arg">n</span>, <span class="arg">m</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Returns a matrix with <code>n</code> rows and <code>m</code> columns, all
+    the elements of which are random numbers between 0 and 1.</p>
+  
+  <a name="rotation"></a>
+  <h3 class="method">Matrix.Rotation(<span class="arg">angle</span> [, <span class="arg">axis</span>]) <span class="version">0.1.0</span></h3>
+  
+  <p>If called with only one argument, returns the 2&times;2 matrix for an
+    anticlockwise rotation of <code>angle</code> radians about the origin. That
+    is, vectors are rotated anticlockwise with respect to the coordinate system,
+    not the other way round.</p>
+  
+  <p>If called with two arguments, returns the 3&times;3 matrix for a
+    right-handed rotation of <code>angle</code> radians about the axis given by
+    the 3-vector <code>axis</code>, keeping the origin fixed.</p>
+  
+  <a name="rotationxyz"></a>
+  <h3 class="method">Matrix.RotationX(<span class="arg">angle</span>), Matrix.RotationY(<span class="arg">angle</span>), Matrix.RotationZ(<span class="arg">angle</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Each of these return the 3&times;3 matrix representing a right-handed
+    rotation of points in 3-dimensional space relative to the coordinate system
+    through an angle of <code>angle</code> radians about the <span
+    class="math">x</span>, <span class="math">y</span> and <span
+    class="math">z</span> axes respectively. They are used as a foundation for
+    the more general <a href="#rotation"><code>Matrix.Rotation</code></a>.</p>
+  
+  <a name="zero"></a>
+  <h3 class="method">Matrix.Zero(<span class="arg">n</span>, <span class="arg">m</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Returns a matrix with <code>n</code> rows and <code>m</code> columns, all
+    the elements of which are zero.</p>
+  
+  <h3>Instance methods</h3>
+  
+  <a name="add"></a>
+  <h3 class="method">add(<span class="arg">matrix</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Returns the matrix sum of the receiver and <code>matrix</code>. Thus,
+    <code>A.add(B)</code> is equivalent to <span class="math"><b>A</b> +
+    <b>B</b></span>. Returns <code>null</code> if the matrices are different
+    sizes.</p>
+  
+  <a name="augment"></a>
+  <h3 class="method">augment(<span class="arg">matrix</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Returns the result of augmenting the receiver with <code>matrix</code>,
+    that is, appending <code>matrix</code> to the right hand side of the
+    receiver. Both matrices must have the same number of rows for this to
+    work.</p>
+  
+  <pre><code>var M = $M([
+    [8,3,0],
+    [4,4,2],
+    [9,1,5]
+  ]).augment(Matrix.I(3));
+  
+  // M is the matrix
+  //    8 3 0 1 0 0
+  //    4 4 2 0 1 0
+  //    9 1 5 0 0 1</code></pre>
+  
+  <p><code>matrix</code> can also be a
+    <a href="/api/vector.html"><code>Vector</code></a>, as long as it has the
+    same number of elements as the receiver has rows. It will be appended to the
+    receiver as an extra column on the right hand side.</p>
+  
+  <a name="canmultiplyfromleft"></a>
+  <h3 class="method">canMultiplyFromLeft(<span class="arg">matrix</span>) <span class="version">0.1.0</span></h3>
+  
+  <p><code>A.canMultiplyFromLeft(B)</code> returns <code>true</code> iff
+    <b class="math">AB</b> is a mathematically valid expression. This is the
+    case iff <b class="math">A</b> has the same number of columns as <b
+    class="math">B</b> has rows. <code>matrix</code> can also be a
+    <a href="/api/vector.html"><code>Vector</code></a>, as long as it has the
+    same number of elements as the receiver has rows.</p>
+  
+  <a name="col"></a>
+  <h3 class="method">col(<span class="arg">j</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Returns the <code>j</code>th column of the receiver as a
+    <a href="/api/vector.html"><code>Vector</code></a>.</p>
+  
+  <a name="cols"></a>
+  <h3 class="method">cols() <span class="version">0.1.0</span></h3>
+  
+  <p>Returns the number of columns the receiver has.</p>
+  
+  <a name="det"></a>
+  <h3 class="method">det() <span class="version">0.1.0</span></h3>
+  
+  <p>Alias for <a href="#determinant">determinant</a>.</p>
+  
+  <a name="determinant"></a>
+  <h3 class="method">determinant() <span class="version">0.1.0</span></h3>
+  
+  <p>If the receiver is square, returns its determinant, otherwise returns
+    <code>null</code>. Note that if the receiver is singular, this method will
+    return exactly zero, with no rounding errors.</p>
+  
+  <a name="diagonal"></a>
+  <h3 class="method">diagonal() <span class="version">0.1.0</span></h3>
+  
+  <p>If the receiver is square, returns its leading-diagonal elements as a 
+    <a href="/api/vector.html"><code>Vector</code></a>. Otherwise, returns
+    <code>null</code>.</p>
+  
+  <a name="dimensions"></a>
+  <h3 class="method">dimensions() <span class="version">0.1.0</span></h3>
+  
+  <p>Returns an object containing the receiver&rsquo;s dimensions.</p>
+  
+  <pre><code>var dims = Matrix.Zero(4,3).dimensions();
+  // dims is {rows: 4, cols: 3}</code></pre>
+  
+  <a name="dup"></a>
+  <h3 class="method">dup() <span class="version">0.1.0</span></h3>
+  
+  <p>Returns a copy of the receiver.</p>
+  
+  <a name="e"></a>
+  <h3 class="method">e(<span class="arg">i</span>, <span class="arg">j</span>) <span class="version">0.1.0</span></h3>
+  
+  <p><code>A.e(i,j)</code> returns the element <span
+    class="math"><i>A<sub>ij</sub></i></span> of matrix <b class="math">A</b>,
+    that is the element in the <code>i</code>th row and <code>j</code>th column.
+    Indexes begin at 1, in agreement with mathematical notation.</p>
+  
+  <a name="eql"></a>
+  <h3 class="method">eql(<span class="arg">matrix</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Returns <code>true</code> iff <code>matrix</code> has all its elements
+    equal to those of the receiver.</p>
+  
+  <a name="indexof"></a>
+  <h3 class="method">indexOf(<span class="arg">x</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Reads the receiver&rsquo;s elements row by row from left to right and
+    returns an object containing the indeces of the first exact match. Returns
+    <code>null</code> if no match is found.</p>
+  
+  <pre><code>var foo = $M([
+    [0,9,4],
+    [9,5,8],
+    [1,5,3]
+  ]).indexOf(9);
+  
+  // foo is {row: 1, col: 2}</code></pre>
+  
+  <a name="inspect"></a>
+  <h3 class="method">inspect() <span class="version">0.1.0</span></h3>
+  
+  <p>Returns a string representation of the receiver, useful for debugging.</p>
+  
+  <pre><code>alert(Matrix.I(4).inspect());
+  
+  // alerts:
+  // [1, 0, 0, 0]
+  // [0, 1, 0, 0]
+  // [0, 0, 1, 0]
+  // [0, 0, 0, 1]</code></pre>
+  
+  <a name="inv"></a>
+  <h3 class="method">inv() <span class="version">0.1.0</span></h3>
+  
+  <p>Alias for <a href="#inverse">inverse</a>.</p>
+  
+  <a name="inverse"></a>
+  <h3 class="method">inverse() <span class="version">0.1.0</span></h3>
+  
+  <p>Returns the matrix inverse of the receiver, if one exists. If the matrix is
+    singular or not square, then <code>null</code> is returned. The inverse is
+    computed using
+    <a href="http://mathworld.wolfram.com/Gauss-JordanElimination.html">Gauss-Jordan
+    elimination</a>.</p>
+  
+  <a name="issamesizeas"></a>
+  <h3 class="method">isSameSizeAs(<span class="arg">matrix</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Returns <code>true</code> iff <code>matrix</code> has the same number of
+    rows and columns as the receiver. <code>matrix</code> can also be a
+    <a href="/api/vector.html"><code>Vector</code></a>, as long as it has the
+    same number of elements as the receiver has rows.</p>
+  
+  <a name="issingular"></a>
+  <h3 class="method">isSingular() <span class="version">0.1.0</span></h3>
+  
+  <p>Returns <code>true</code> iff the receiver is square and has zero
+    determinant.</p>
+  
+  <a name="issquare"></a>
+  <h3 class="method">isSquare() <span class="version">0.1.0</span></h3>
+  
+  <p>Returns <code>true</code> iff the receiver is square.</p>
+  
+  <a name="map"></a>
+  <h3 class="method">map(<span class="arg">iterator</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Maps the receiver to another matrix by calling <code>iterator</code> on
+    each element of the receiver in turn. <code>iterator</code> receives the row
+    and column index of each element as second and third arguments. Some
+    examples:</p>
+  
+  <pre><code>// Square all the elements of a matrix:
+  
+  var A_sq = A.map(function(x) { return x * x; });
+  
+  // Determine whether a matrix is symmetric:
+  
+  var is_sym = (A.map(
+    function(x, i, j) { return (A.e(i,j) == A.e(j,i)) ? 1 : 0; }
+  ).indexOf(0) === null);</code></pre>
+  
+  <a name="max"></a>
+  <h3 class="method">max() <span class="version">0.1.0</span></h3>
+  
+  <p>Returns the value of the element of the receiver with the largest absolute
+    value.</p>
+  
+  <a name="minor"></a>
+  <h3 class="method">minor(<span class="arg">i</span>, <span class="arg">j</span>, <span class="arg">n</span>, <span class="arg">m</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>This method returns a matrix formed from a subset of the receiver&rsquo;s
+    elements. It selects elements beginning at row <code>i</code> and column
+    <code>j</code> of the receiver, and returns a matrix with <code>n</code>
+    rows and <code>m</code> columns. The selection wraps to the other side of
+    the receiver if <code>n</code> or <code>m</code> is large enough. This is
+    best illustrated by example:</p>
+  
+  <pre><code>var M = $M([
+    [9,2,6,5],
+    [0,1,7,4],
+    [4,2,6,7],
+    [1,8,5,3]
+  ]);
+  
+  var A = M.minor(2,1,2,3);
+  // 0 1 7
+  // 4 2 6
+  
+  var B = M.minor(1,4,3,3);
+  // 5 9 2
+  // 4 0 1
+  // 7 4 2
+  
+  // Augment M with itself
+  var C = M.minor(1,1,4,8);
+  // 9 2 6 5 9 2 6 5
+  // 0 1 7 4 0 1 7 4
+  // 4 2 6 7 4 2 6 7
+  // 1 8 5 3 1 8 5 3</code></pre>
+  
+  <a name="multiply"></a>
+  <h3 class="method">multiply(<span class="arg">object</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>If <code>object</code> is a matrix, then this method returns the result of
+    multiplying the receiver by <code>object</code> in that order:
+    <code>A.multiply(B)</code> means <b class="math">AB</b>. If
+    <code>object</code> is a <a href="/api/vector.html"><code>Vector</code></a>,
+    then it is converted to a column matrix, multiplied by the receiver, and the
+    result is returned as a <a href="/api/vector.html"><code>Vector</code></a>
+    (this saves you having to call <code>col(1)</code> on the result). If
+    <code>object</code> is a scalar, then the method returns a copy of the
+    receiver with all its elements multiplied by <code>object</code>.</p>
+  
+  <p>This method is aliased as <a href="#x"><code>x</code></a>.</p>
+  
+  <a name="rank"></a>
+  <h3 class="method">rank() <span class="version">0.1.0</span></h3>
+  
+  <p>Returns the receiver&rsquo;s rank, which is the number of linearly
+    independent rows/columns it contains.</p>
+  
+  <a name="rk"></a>
+  <h3 class="method">rk() <span class="version">0.1.0</span></h3>
+  
+  <p>Alias for <a href="#rank"><code>rank</code></a>.</p>
+  
+  <a name="round"></a>
+  <h3 class="method">round() <span class="version">0.1.0</span></h3>
+  
+  <p>Returns a copy of the receiver with all its elements rounded to the nearest
+    integer.</p>
+  
+  <a name="row"></a>
+  <h3 class="method">row(<span class="arg">i</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Returns the <code>i</code>th row of the receiver as a
+    <a href="/api/vector.html"><code>Vector</code></a>.</p>
+  
+  <a name="rows"></a>
+  <h3 class="method">rows() <span class="version">0.1.0</span></h3>
+  
+  <p>Returns the number of rows the receiver has.</p>
+  
+  <a name="setelements"></a>
+  <h3 class="method">setElements(<span class="arg">elements</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Sets the receiver&rsquo;s elements from the array <code>elements</code>.
+    The element array&rsquo; top-level elements should be the rows, and each row
+    is an array of values reading from left to right across the columns. See
+    <a href="#create"><code>Matrix.create</code></a>.</p>
+  
+  <a name="snapto"></a>
+  <h3 class="method">snapTo(<span class="arg">x</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Returns a copy of the receiver in which any elements that differ from
+    <code>x</code> by less than the value of <code>Sylvester.precision</code>
+    are set exactly equal to <code>x</code>.</p>
+  
+  <a name="subtract"></a>
+  <h3 class="method">subtract(<span class="arg">matrix</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Returns the result of subtracting <code>matrix</code> from the receiver.
+    Thus, <code>A.subtract(B)</code> is equivalent to <span class="math"><b>A</b>
+    &minus; <b>B</b></span>. Returns <code>null</code> if the matrices are
+    different sizes.</p>
+  
+  <a name="torighttriangular"></a>
+  <h3 class="method">toRightTriangular() <span class="version">0.1.0</span></h3>
+  
+  <p>Returns a copy of the receiver converted to
+    <a href="http://en.wikipedia.org/wiki/Triangular_matrix">right triangular
+    form</a>. The conversion is done only by adding multiples of rows to other
+    rows, so the determinant (if the matrix is square) is unchanged. This method
+    can be used on non-square matrices, which lets you use it to solve sets of
+    simultaneous equations. For example: solving the system of linear
+    equations</p>
+  
+  <ul>
+    <li class="math">3<i>x</i> + 2<i>y</i> &minus; <i>z</i> = 1</li>
+    <li class="math">2<i>x</i> &minus; 2<i>y</i> + 4<i>z</i> = &minus;2</li>
+    <li class="math">&minus;<i>x</i> + &frac12;<i>y</i> &minus; <i>z</i> = 0</li>
+  </ul>
+  
+  <p>would be written as:</p>
+  
+  <pre><code>var equations = $M([
+    [ 3,   2, -1,  1],
+    [ 2,  -2,  4, -2],
+    [-1, 0.5, -1,  0]
+  ]);
+  
+  var eqns = equations.toRightTriangular();
+  
+  var sol_z = eqns.e(3,4) / eqns.e(3,3);
+  var sol_y = (eqns.e(2,4) - eqns.e(2,3)*sol_z) / eqns.e(2,2);
+  var sol_x = (eqns.e(1,4) - eqns.e(1,3)*sol_z - eqns.e(1,2)*sol_y) / eqns.e(1,1);</code></pre>
+  
+  <a name="touppertriangular"></a>
+  <h3 class="method">toUpperTriangular() <span class="version">0.1.0</span></h3>
+  
+  <p>Alias for <a href="#torighttriangular"><code>toRightTriangular</code></a>.</p>
+  
+  <a name="tr"></a>
+  <h3 class="method">tr() <span class="version">0.1.0</span></h3>
+  
+  <p>Alias for <a href="#trace"><code>trace</code></a>.</p>
+  
+  <a name="trace"></a>
+  <h3 class="method">trace() <span class="version">0.1.0</span></h3>
+  
+  <p>Returns the trace for square matrices, which is the sum of their
+    leading-diagonal elements.</p>
+  
+  <a name="transpose"></a>
+  <h3 class="method">transpose() <span class="version">0.1.0</span></h3>
+  
+  <p>Returns the matrix transpose of the receiver.</p>
+  
+  <a name="x"></a>
+  <h3 class="method">x(<span class="arg">k</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Alias for <a href="#multiply"><code>multiply(k)</code></a>.</p>
