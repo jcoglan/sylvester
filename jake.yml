@@ -12,6 +12,7 @@ builds:
 
 packages:
   sylvester:
+    - sylvester
     - vector
     - matrix
     - line
@@ -20,4 +21,4 @@ packages:
     - polygon
     - polygon.vertex
     - linkedlist
-
+    - exports

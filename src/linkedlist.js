@@ -1,7 +1,6 @@
-// LinkedList class - required for Polygon class.
+Sylvester.LinkedList = function() {};
 
-function LinkedList() {}
-LinkedList.prototype = {
+Sylvester.LinkedList.prototype = {
   length: 0,
   first: null,
   last: null,
@@ -36,13 +35,13 @@ LinkedList.prototype = {
   }
 };
 
-LinkedList.Node = function(data) {
+Sylvester.LinkedList.Node = function(data) {
   this.prev = null; this.next = null;
   this.data = data;
 };
 
-LinkedList.Circular = function() {};
-LinkedList.Circular.Methods = {
+Sylvester.LinkedList.Circular = function() {};
+Sylvester.LinkedList.Circular.Methods = {
   append: function(node) {
     if (this.first === null) {
       node.prev = node;
@@ -118,14 +117,14 @@ LinkedList.Circular.Methods = {
   }
 };
 
-LinkedList.Circular.prototype = new LinkedList;
-for (var method in LinkedList.Circular.Methods) {
-  LinkedList.Circular.prototype[method] = LinkedList.Circular.Methods[method];
+Sylvester.LinkedList.Circular.prototype = new Sylvester.LinkedList;
+for (var method in Sylvester.LinkedList.Circular.Methods) {
+  Sylvester.LinkedList.Circular.prototype[method] = Sylvester.LinkedList.Circular.Methods[method];
 }
 
-LinkedList.Circular.fromArray = function(list, useNodes) {
-  var linked = new LinkedList.Circular();
+Sylvester.LinkedList.Circular.fromArray = function(list, useNodes) {
+  var linked = new Sylvester.LinkedList.Circular();
   var n = list.length;
-  while (n--) { linked.prepend(useNodes ? new LinkedList.Node(list[n]) : list[n]); }
+  while (n--) { linked.prepend(useNodes ? new Sylvester.LinkedList.Node(list[n]) : list[n]); }
   return linked;
 };

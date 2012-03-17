@@ -1,7 +1,7 @@
-// Line.Segment class - depends on Line and its dependencies.
+// Sylvester.Line.Segment class - depends on Sylvester.Line and its dependencies.
 
-Line.Segment = function() {};
-Line.Segment.prototype = {
+Sylvester.Line.Segment = function() {};
+Sylvester.Line.Segment.prototype = {
 
   // Returns true iff the line segment is equal to the argument
   eql: function(segment) {
@@ -11,7 +11,7 @@ Line.Segment.prototype = {
 
   // Returns a copy of the line segment
   dup: function() {
-    return Line.Segment.create(this.start, this.end);
+    return Sylvester.Line.Segment.create(this.start, this.end);
   },
 
   // Returns the length of the line segment
@@ -25,25 +25,25 @@ Line.Segment.prototype = {
   // end point relative to its endpoint
   toVector: function() {
     var A = this.start.elements, B = this.end.elements;
-    return Vector.create([B[0] - A[0], B[1] - A[1], B[2] - A[2]]);
+    return Sylvester.Vector.create([B[0] - A[0], B[1] - A[1], B[2] - A[2]]);
   },
 
   // Returns the segment's midpoint as a vector
   midpoint: function() {
     var A = this.start.elements, B = this.end.elements;
-    return Vector.create([(B[0] + A[0])/2, (B[1] + A[1])/2, (B[2] + A[2])/2]);
+    return Sylvester.Vector.create([(B[0] + A[0])/2, (B[1] + A[1])/2, (B[2] + A[2])/2]);
   },
 
   // Returns the plane that bisects the segment
   bisectingPlane: function() {
-    return Plane.create(this.midpoint(), this.toVector());
+    return Sylvester.Plane.create(this.midpoint(), this.toVector());
   },
 
   // Returns the result of translating the line by the given vector/array
   translate: function(vector) {
     var V = vector.elements || vector;
     var S = this.start.elements, E = this.end.elements;
-    return Line.Segment.create(
+    return Sylvester.Line.Segment.create(
       [S[0] + V[0], S[1] + V[1], S[2] + (V[2] || 0)],
       [E[0] + V[0], E[1] + V[1], E[2] + (V[2] || 0)]
     );
@@ -68,7 +68,7 @@ Line.Segment.prototype = {
     if (P.length == 2) { P.push(0); }
     if (this.start.eql(P)) { return true; }
     var S = this.start.elements;
-    var V = Vector.create([S[0] - P[0], S[1] - P[1], S[2] - (P[2] || 0)]);
+    var V = Sylvester.Vector.create([S[0] - P[0], S[1] - P[1], S[2] - (P[2] || 0)]);
     var vect = this.toVector();
     return V.isAntiparallelTo(vect) && V.modulus() <= vect.modulus();
   },
@@ -103,10 +103,10 @@ Line.Segment.prototype = {
 
   // Set the start and end-points of the segment
   setPoints: function(startPoint, endPoint) {
-    startPoint = Vector.create(startPoint).to3D();
-    endPoint = Vector.create(endPoint).to3D();
+    startPoint = Sylvester.Vector.create(startPoint).to3D();
+    endPoint = Sylvester.Vector.create(endPoint).to3D();
     if (startPoint === null || endPoint === null) { return null; }
-    this.line = Line.create(startPoint, endPoint.subtract(startPoint));
+    this.line = Sylvester.Line.create(startPoint, endPoint.subtract(startPoint));
     this.start = startPoint;
     this.end = endPoint;
     return this;
@@ -114,7 +114,7 @@ Line.Segment.prototype = {
 };
 
 // Constructor function
-Line.Segment.create = function(v1, v2) {
-  var S = new Line.Segment();
+Sylvester.Line.Segment.create = function(v1, v2) {
+  var S = new Sylvester.Line.Segment();
   return S.setPoints(v1, v2);
 };

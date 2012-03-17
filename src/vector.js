@@ -1,14 +1,26 @@
-// This file is required in order for any other classes to work. Some Vector methods work with the
-// other Sylvester classes and are useless unless they are included. Other classes such as Line and
-// Plane will not function at all without Vector being loaded first.
+Sylvester.Vector = function() {};
 
-var Sylvester = {
-  precision: 1e-6
+// Constructor function
+Sylvester.Vector.create = function(elements) {
+  var V = new Sylvester.Vector();
+  return V.setElements(elements);
+};
+var $V = Sylvester.Vector.create;
+
+// Random vector of size n
+Sylvester.Vector.Random = function(n) {
+  var elements = [];
+  while (n--) { elements.push(Math.random()); }
+  return Sylvester.Vector.create(elements);
 };
 
-function Vector() {}
-Vector.prototype = {
-
+// Sylvester.Vector filled with zeros
+Sylvester.Vector.Zero = function(n) {
+  var elements = [];
+  while (n--) { elements.push(0); }
+  return Sylvester.Vector.create(elements);
+};
+Sylvester.Vector.prototype = {
   // Returns element i of the vector
   e: function(i) {
     return (i < 1 || i > this.elements.length) ? null : this.elements[i-1];
@@ -37,7 +49,7 @@ Vector.prototype = {
 
   // Returns a copy of the vector
   dup: function() {
-    return Vector.create(this.elements);
+    return Sylvester.Vector.create(this.elements);
   },
 
   // Maps the vector to another vector according to the given function
@@ -46,7 +58,7 @@ Vector.prototype = {
     this.each(function(x, i) {
       elements.push(fn(x, i));
     });
-    return Vector.create(elements);
+    return Sylvester.Vector.create(elements);
   },
 
   // Calls the iterator for each element of the vector in turn
@@ -139,7 +151,7 @@ Vector.prototype = {
     var B = vector.elements || vector;
     if (this.elements.length != 3 || B.length != 3) { return null; }
     var A = this.elements;
-    return Vector.create([
+    return Sylvester.Vector.create([
       (A[1] * B[2]) - (A[2] * B[1]),
       (A[2] * B[0]) - (A[0] * B[2]),
       (A[0] * B[1]) - (A[1] * B[0])
@@ -219,7 +231,7 @@ Vector.prototype = {
         if (!R) { R = Matrix.Rotation(t).elements; }
         x = this.elements[0] - V[0];
         y = this.elements[1] - V[1];
-        return Vector.create([
+        return Sylvester.Vector.create([
           V[0] + R[0][0] * x + R[0][1] * y,
           V[1] + R[1][0] * x + R[1][1] * y
         ]);
@@ -231,7 +243,7 @@ Vector.prototype = {
         x = this.elements[0] - C[0];
         y = this.elements[1] - C[1];
         z = this.elements[2] - C[2];
-        return Vector.create([
+        return Sylvester.Vector.create([
           C[0] + R[0][0] * x + R[0][1] * y + R[0][2] * z,
           C[1] + R[1][0] * x + R[1][1] * y + R[1][2] * z,
           C[2] + R[2][0] * x + R[2][1] * y + R[2][2] * z
@@ -248,7 +260,7 @@ Vector.prototype = {
       // obj is a plane or line
       var P = this.elements.slice();
       var C = obj.pointClosestTo(P).elements;
-      return Vector.create([C[0] + (C[0] - P[0]), C[1] + (C[1] - P[1]), C[2] + (C[2] - (P[2] || 0))]);
+      return Sylvester.Vector.create([C[0] + (C[0] - P[0]), C[1] + (C[1] - P[1]), C[2] + (C[2] - (P[2] || 0))]);
     } else {
       // obj is a point
       var Q = obj.elements || obj;
@@ -280,28 +292,7 @@ Vector.prototype = {
   }
 };
 
-// Constructor function
-Vector.create = function(elements) {
-  var V = new Vector();
-  return V.setElements(elements);
-};
-var $V = Vector.create;
-
 // i, j, k unit vectors
-Vector.i = Vector.create([1,0,0]);
-Vector.j = Vector.create([0,1,0]);
-Vector.k = Vector.create([0,0,1]);
-
-// Random vector of size n
-Vector.Random = function(n) {
-  var elements = [];
-  while (n--) { elements.push(Math.random()); }
-  return Vector.create(elements);
-};
-
-// Vector filled with zeros
-Vector.Zero = function(n) {
-  var elements = [];
-  while (n--) { elements.push(0); }
-  return Vector.create(elements);
-};
+Sylvester.Vector.i = Sylvester.Vector.create([1,0,0]);
+Sylvester.Vector.j = Sylvester.Vector.create([0,1,0]);
+Sylvester.Vector.k = Sylvester.Vector.create([0,0,1]);

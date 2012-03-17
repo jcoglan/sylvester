@@ -1,0 +1,10 @@
+.git
+.gitignore
+.npmignore
+.redcar
+Gemfile
+jake.yml
+node_modules
+site
+src
+test

@@ -1,8 +1,6 @@
-// Polygon class - depends on Vector, Plane, Polygon.Vertex and LinkedList.
+Sylvester.Polygon = function() {};
 
-function Polygon() {}
-Polygon.prototype = {
-
+Sylvester.Polygon.prototype = {
   // Returns the vertex at the given position on the vertex list, numbered from 1.
   v: function(i) {
     return this.vertices.at(i - 1).data;
@@ -18,7 +16,7 @@ Polygon.prototype = {
   // polygon, but the linked list and nodes used to point to them are separate and
   // can be manipulated independently of this one.
   dup: function() {
-    return Polygon.create(this.vertices, this.plane);
+    return Sylvester.Polygon.create(this.vertices, this.plane);
   },
 
   // Translates the polygon by the given vector and returns the polygon.
@@ -35,7 +33,7 @@ Polygon.prototype = {
 
   // Rotates the polygon about the given line and returns the polygon.
   rotate: function(t, line) {
-    var R = Matrix.Rotation(t, line.direction);
+    var R = Sylvester.Matrix.Rotation(t, line.direction);
     this.vertices.each(function(node) {
       node.data.setElements(node.data.rotate(R, line).elements);
     });
@@ -57,7 +55,7 @@ Polygon.prototype = {
     });
     var anchor = this.vertices.first.data;
     this.plane.anchor.setElements(anchor);
-    this.updateTrianglePlanes(function(plane) { return Plane.create(anchor, plane.normal); });
+    this.updateTrianglePlanes(function(plane) { return Sylvester.Plane.create(anchor, plane.normal); });
     return this;
   },
 
@@ -67,8 +65,8 @@ Polygon.prototype = {
   //
   //   poly.updateTrianglePlanes(function(plane) { return plane.rotate(t, line); });
   //
-  // This method is called automatically by Polygon.translate, Polygon.rotate
-  // and Polygon.scale transformation methods.
+  // This method is called automatically by Sylvester.Polygon.translate, Sylvester.Polygon.rotate
+  // and Sylvester.Polygon.scale transformation methods.
   updateTrianglePlanes: function(fn) {
     var i;
     if (this.cached.triangles !== null) {
@@ -108,7 +106,7 @@ Polygon.prototype = {
       var points = [firstVertex, node.prev.data, node.data];
       // If the vertices lie on a straigh line, give the polygon's own plane. If the
       // element has no area, it doesn't matter which way its normal faces.
-      triangles.push(Polygon.create(points, Plane.fromPoints(points) || plane));
+      triangles.push(Sylvester.Polygon.create(points, Sylvester.Plane.fromPoints(points) || plane));
     });
     return this.setCache('surfaceIntegralElements', triangles);
   },
@@ -120,7 +118,7 @@ Polygon.prototype = {
       // Area is half the modulus of the cross product of two sides
       var A = this.vertices.first, B = A.next, C = B.next;
       A = A.data.elements; B = B.data.elements; C = C.data.elements;
-      return 0.5 * Vector.create([
+      return 0.5 * Sylvester.Vector.create([
         (A[1] - B[1]) * (C[2] - B[2]) - (A[2] - B[2]) * (C[1] - B[1]),
         (A[2] - B[2]) * (C[0] - B[0]) - (A[0] - B[0]) * (C[2] - B[2]),
         (A[0] - B[0]) * (C[1] - B[1]) - (A[1] - B[1]) * (C[0] - B[0])
@@ -140,9 +138,9 @@ Polygon.prototype = {
   centroid: function() {
     if (this.isTriangle()) {
       var A = this.v(1).elements, B = this.v(2).elements, C = this.v(3).elements;
-      return Vector.create([(A[0] + B[0] + C[0])/3, (A[1] + B[1] + C[1])/3, (A[2] + B[2] + C[2])/3]);
+      return Sylvester.Vector.create([(A[0] + B[0] + C[0])/3, (A[1] + B[1] + C[1])/3, (A[2] + B[2] + C[2])/3]);
     } else {
-      var A, M = 0, V = Vector.Zero(3), P, C, trigs = this.trianglesForSurfaceIntegral();
+      var A, M = 0, V = Sylvester.Vector.Zero(3), P, C, trigs = this.trianglesForSurfaceIntegral();
       var i = trigs.length;
       while (i--) {
         A = trigs[i].area() * trigs[i].plane.normal.dot(this.plane.normal);
@@ -159,7 +157,7 @@ Polygon.prototype = {
   projectionOn: function(plane) {
     var points = [];
     this.vertices.each(function(node) { points.push(plane.pointClosestTo(node.data)); });
-    return Polygon.create(points);
+    return Sylvester.Polygon.create(points);
   },
 
   // Removes the given vertex from the polygon as long as it's not triangular.
@@ -182,20 +180,20 @@ Polygon.prototype = {
     if (prevWasConvex != prev.data.isConvex(this)) {
       if (prevWasConvex) {
         this.convexVertices.remove(this.convexVertices.withData(prev.data));
-        this.reflexVertices.append(new LinkedList.Node(prev.data));
+        this.reflexVertices.append(new Sylvester.LinkedList.Node(prev.data));
       } else {
         this.reflexVertices.remove(this.reflexVertices.withData(prev.data));
-        this.convexVertices.append(new LinkedList.Node(prev.data));
+        this.convexVertices.append(new Sylvester.LinkedList.Node(prev.data));
       }
     }
     // Deal with next vertex's change of class
     if (nextWasConvex != next.data.isConvex(this)) {
       if (nextWasConvex) {
         this.convexVertices.remove(this.convexVertices.withData(next.data));
-        this.reflexVertices.append(new LinkedList.Node(next.data));
+        this.reflexVertices.append(new Sylvester.LinkedList.Node(next.data));
       } else {
         this.reflexVertices.remove(this.reflexVertices.withData(next.data));
-        this.convexVertices.append(new LinkedList.Node(next.data));
+        this.convexVertices.append(new Sylvester.LinkedList.Node(next.data));
       }
     }
     return this;
@@ -215,8 +213,8 @@ Polygon.prototype = {
     this.vertices.each(function(node) {
       V = node.data.elements;
       W = node.next.data.elements;
-      A = Vector.create([V[0] - P[0], V[1] - P[1], V[2] - (P[2] || 0)]);
-      B = Vector.create([W[0] - P[0], W[1] - P[1], W[2] - (P[2] || 0)]);
+      A = Sylvester.Vector.create([V[0] - P[0], V[1] - P[1], V[2] - (P[2] || 0)]);
+      B = Sylvester.Vector.create([W[0] - P[0], W[1] - P[1], W[2] - (P[2] || 0)]);
       dt = A.angleFrom(B);
       if (dt === null || dt === 0) { return; }
       theta += (A.cross(B).isParallelTo(self.plane.normal) ? 1 : -1) * dt;
@@ -232,7 +230,7 @@ Polygon.prototype = {
     var P = (point.elements || point);
     var success = false;
     this.vertices.each(function(node) {
-      if (Line.Segment.create(node.data, node.next.data).contains(P)) { success = true; }
+      if (Sylvester.Line.Segment.create(node.data, node.next.data).contains(P)) { success = true; }
     });
     return success;
   },
@@ -258,7 +256,7 @@ Polygon.prototype = {
         convexNode = poly.convexVertices.randomNode();
         mainNode = poly.vertices.withData(convexNode.data);
         // For convex vertices, this order will always be anticlockwise
-        trig = Polygon.create([mainNode.data, mainNode.next.data, mainNode.prev.data], this.plane);
+        trig = Sylvester.Polygon.create([mainNode.data, mainNode.next.data, mainNode.prev.data], this.plane);
         // Now test whether any reflex vertices lie within the ear
         poly.reflexVertices.each(function(node) {
           // Don't test points belonging to this triangle. node won't be
@@ -272,22 +270,22 @@ Polygon.prototype = {
       poly.removeVertex(mainNode.data);
     }
     // Need to do this to renumber the remaining vertices
-    triangles.push(Polygon.create(poly.vertices, this.plane));
+    triangles.push(Sylvester.Polygon.create(poly.vertices, this.plane));
     return triangles;
   },
 
   // Sets the polygon's vertices
   setVertices: function(points, plane) {
     var pointSet = points.toArray ? points.toArray() : points;
-    this.plane = (plane && plane.normal) ? plane.dup() : Plane.fromPoints(pointSet);
+    this.plane = (plane && plane.normal) ? plane.dup() : Sylvester.Plane.fromPoints(pointSet);
     if (this.plane === null) { return null; }
-    this.vertices = new LinkedList.Circular();
+    this.vertices = new Sylvester.LinkedList.Circular();
     // Construct linked list of vertices. If each point is already a polygon
     // vertex, we reference it rather than creating a new vertex.
     var i = pointSet.length, newVertex;
     while (i--) {
-      newVertex = pointSet[i].isConvex ? pointSet[i] : new Polygon.Vertex(pointSet[i]);
-      this.vertices.prepend(new LinkedList.Node(newVertex));
+      newVertex = pointSet[i].isConvex ? pointSet[i] : new Sylvester.Polygon.Vertex(pointSet[i]);
+      this.vertices.prepend(new Sylvester.LinkedList.Node(newVertex));
     }
     this.clearCache();
     this.populateVertexTypeLists();
@@ -296,13 +294,13 @@ Polygon.prototype = {
 
   // Constructs lists of convex and reflex vertices based on the main vertex list.
   populateVertexTypeLists: function() {
-    this.convexVertices = new LinkedList.Circular();
-    this.reflexVertices = new LinkedList.Circular();
+    this.convexVertices = new Sylvester.LinkedList.Circular();
+    this.reflexVertices = new Sylvester.LinkedList.Circular();
     var self = this;
     this.vertices.each(function(node) {
       // Split vertices into convex / reflex groups
-      // The LinkedList.Node class wraps each vertex so it can belong to many linked lists.
-      self[node.data.type(self) + 'Vertices'].append(new LinkedList.Node(node.data));
+      // The Sylvester.LinkedList.Node class wraps each vertex so it can belong to many linked lists.
+      self[node.data.type(self) + 'Vertices'].append(new Sylvester.LinkedList.Node(node.data));
     });
   },
 
@@ -311,7 +309,7 @@ Polygon.prototype = {
   copyVertices: function() {
     this.clearCache();
     this.vertices.each(function(node) {
-      node.data = new Polygon.Vertex(node.data);
+      node.data = new Sylvester.Polygon.Vertex(node.data);
     });
     this.populateVertexTypeLists();
   },
@@ -339,7 +337,7 @@ Polygon.prototype = {
 };
 
 // Constructor function
-Polygon.create = function(points, plane) {
-  var P = new Polygon();
+Sylvester.Polygon.create = function(points, plane) {
+  var P = new Sylvester.Polygon();
   return P.setVertices(points, plane);
 };
