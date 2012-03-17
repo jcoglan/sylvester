@@ -15,6 +15,10 @@ Install the build tools (requires Rubygems and npm)
     bundle install
     npm install
 
+To build the library from source:
+
+    bundle exec jake
+
 To test, run using various JS binaries and open the tests in the browser:
 
     node test/console.js
