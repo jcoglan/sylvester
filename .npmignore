@@ -3,6 +3,7 @@
 .npmignore
 .redcar
 Gemfile
+Gemfile.lock
 jake.yml
 node_modules
 site
