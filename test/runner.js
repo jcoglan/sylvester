@@ -3,7 +3,10 @@ JS.Packages(function() { with(this) {
   autoload(/.*Spec$/, {from: ROOT + '/test/specs', require: 'JS.Test'})
 }})
 
-JS.require('VectorSpec', function() {
-  
-  JS.Test.autorun()
-})
+JS.require( 'VectorSpec',
+            'MatrixSpec',
+            'LineSpec',
+            'LineSegmentSpec',
+            'PlaneSpec',
+
+  function() { JS.Test.autorun() })

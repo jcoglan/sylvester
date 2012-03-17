@@ -180,7 +180,7 @@ Sylvester.Vector.prototype = {
 
   // Returns a diagonal matrix with the vector's elements as its diagonal elements
   toDiagonalMatrix: function() {
-    return Matrix.Diagonal(this.elements);
+    return Sylvester.Matrix.Diagonal(this.elements);
   },
 
   // Returns the result of rounding the elements of the vector
@@ -228,7 +228,7 @@ Sylvester.Vector.prototype = {
       case 2:
         V = obj.elements || obj;
         if (V.length != 2) { return null; }
-        if (!R) { R = Matrix.Rotation(t).elements; }
+        if (!R) { R = Sylvester.Matrix.Rotation(t).elements; }
         x = this.elements[0] - V[0];
         y = this.elements[1] - V[1];
         return Sylvester.Vector.create([
@@ -239,7 +239,7 @@ Sylvester.Vector.prototype = {
       case 3:
         if (!obj.direction) { return null; }
         var C = obj.pointClosestTo(this).elements;
-        if (!R) { R = Matrix.Rotation(t, obj.direction).elements; }
+        if (!R) { R = Sylvester.Matrix.Rotation(t, obj.direction).elements; }
         x = this.elements[0] - C[0];
         y = this.elements[1] - C[1];
         z = this.elements[2] - C[2];

@@ -1,19 +1,16 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!doctype html>
 
 <html>
-<head>
-  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-  <title>Polygon demo</title>
-  <script src="../lib/sylvester.js" type="text/javascript" language="javascript" charset="utf-8"></script>
-</head>
-<body>
-  
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Polygon demo</title>
+    <script type="text/javascript" src="../lib/sylvester-min.js"></script>
+  </head>
+  <body>
+    
     <canvas id="screen" width="800" height="600"></canvas>
     
     <script type="text/javascript">
-    (function() {
-  
         var P = Polygon.create([
             [0,0], [5,0], [5,5], [0,5], [0,10],
             
@@ -60,9 +57,7 @@
         document.onclick = function() {
             trigs[i++].copyVertices();
         };
-  
-    })();
     </script>
-  
-</body>
+    
+  </body>
 </html>

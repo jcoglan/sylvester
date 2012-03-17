@@ -1,0 +1,42 @@
+<!doctype html>
+
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Vectors / Matrices</title>
+    <script type="text/javascript" src="../lib/sylvester-min.js"></script>
+  </head>
+  <body style="background: #000;">
+    
+    <script type="text/javascript">
+      var dots = [], images = [], h = 500;
+      var axis = Vector.create([0.7,1,0.3]);
+      var rot = Matrix.Rotation(0.1, axis);
+      
+      for (var i = 0; i < 16; i++) {
+        dots[i] = Vector.create([h*(Math.random()-0.5), h*(Math.random()-0.5), h*(Math.random()-0.5)]);
+        image = document.createElement('img');
+        image.id = 'img_' + i;
+        image.src = './dot.png';
+        document.body.appendChild(image);
+        images[i] = image;
+      }
+      
+      setInterval(function() {
+        for (var i = 0; i < dots.length; i++) {
+          f = (dots[i].e(3) + h)/(2*h) + 0.1;
+          
+          images[i].style.opacity = f - 0.1;
+          images[i].style.width = (100 * f) + 'px';
+          images[i].style.height = (100 * f) + 'px';
+          images[i].style.position = 'absolute';
+          images[i].style.top = (300 - dots[i].e(2)*f) + 'px';
+          images[i].style.left = (600 + dots[i].e(1)*f) + 'px';
+          
+          dots[i] = rot.x(dots[i]);
+        }
+      }, 20);
+    </script>
+    
+  </body>
+</html>

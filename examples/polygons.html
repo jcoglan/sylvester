@@ -1,0 +1,72 @@
+<!doctype html>
+
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Vectors / Matrices</title>
+    <script type="text/javascript" src="../lib/sylvester-min.js"></script>
+  </head>
+  <body>
+    
+    <canvas id="canv" width="600" height="450" style="display: block; margin: 20px auto;" onclick="rotate();"></canvas>
+    
+    <script type="text/javascript">
+      var O = $V([300,225,0]);
+      
+      var Foo = Polygon.create([ [0,0], [5,0], [5,5], [0,5], [0,10], [5,10], [0,5],
+          [5,5], [10,10], [10,15], [-5,15], [-5,5], [-10,5], [-10,0], [-5,0],
+          [-5,-5], [0,-5] ]).scale(20, $V([0,5])).rotate(Math.PI/3, $L([0,5], [0,2,1]));
+      
+      var canvas, ctx;
+      
+      window.onload = function() {
+        canvas = document.getElementById('canv');
+        ctx = canvas.getContext('2d');
+        ctx.fillColor = '#000000';
+        ctx.fillRect(0,0, canvas.width, canvas.height);
+        
+        draw(ctx, Foo, 100);
+        
+        var trigs;
+        trigs = Foo.toTriangles();
+        var C = 255;
+        for (var i = 0; i < trigs.length; i++) {
+          draw(ctx, trigs[i], C);
+          C -= Math.round((255 - 100) / trigs.length);
+        }
+        
+        var c = Foo.centroid();
+        ctx.fillStyle = 'red';
+        ctx.fillRect(300 + c.e(1) - 5, 225 - c.e(2) - 5, 10, 10);
+      };
+      
+      function draw(ctx, poly, color) {
+        ctx.fillStyle = 'rgb(' + color +',' + color + ',' + color + ')';
+        ctx.beginPath();
+        poly.vertices.each(function(node) {
+          point = O.add(node.data).reflectionIn($L(O, Vector.i));
+          if (node.data == poly.vertices.first.data) {
+            ctx.moveTo(point.e(1), point.e(2));
+          } else {
+            ctx.lineTo(point.e(1), point.e(2));
+          }
+        } );
+        ctx.fill();
+      }
+      
+      function rotate() {
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(0,0, canvas.width, canvas.height);
+        Foo.rotate(Math.PI/20, $L([0,5], [0,2,1]));
+        var trigs = Foo.toTriangles();
+        var C = 255;
+        for (var i = 0; i < trigs.length; i++) {
+          draw(ctx, trigs[i], C);
+          C -= Math.round((255 - 100) / trigs.length);
+        }
+        setTimeout(rotate, 20);
+      }
+    </script>
+
+  </body>
+</html>

@@ -225,7 +225,7 @@ Sylvester.Matrix.prototype = {
       }
     }
     var M = Sylvester.Matrix.create(elements);
-    return returnSylvester.Vector ? M.col(1) : M;
+    return returnVector ? M.col(1) : M;
   },
 
   x: function(matrix) { return this.multiply(matrix); },
