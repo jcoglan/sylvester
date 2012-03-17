@@ -312,6 +312,7 @@ JS.ENV.MatrixSpec = JS.Test.describe("Matrix", function() { with(this) {
       assert( M.x(M.inv()).eql(Matrix.I(4)) )
       assert( M.inv().x(M).eql(Matrix.I(4)) )
     }
+    assert( $M([[4]]).inv().eql($M([[0.25]])) )
   }})
   
   test("Rotation", function() { with(this) {
