@@ -16,6 +16,7 @@ Build:
 
 Test:
 
+    npm install
     node test/console.js
     open test/browser.html
 
