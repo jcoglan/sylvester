@@ -62,10 +62,10 @@ Sylvester.Vector.prototype = {
   },
 
   // Calls the iterator for each element of the vector in turn
-  each: function(fn) {
+  forEach: function(fn, context) {
     var n = this.elements.length;
     for (var i = 0; i < n; i++) {
-      fn(this.elements[i], i+1);
+      fn.call(context, this.elements[i], i+1);
     }
   },
 
@@ -132,8 +132,6 @@ Sylvester.Vector.prototype = {
   multiply: function(k) {
     return this.map(function(x) { return x*k; });
   },
-
-  x: function(k) { return this.multiply(k); },
 
   // Returns the scalar product of the vector with the argument
   // Both vectors must have equal dimensionality
@@ -291,6 +289,9 @@ Sylvester.Vector.prototype = {
     return this;
   }
 };
+
+Sylvester.Vector.prototype.x = Sylvester.Vector.prototype.multiply;
+Sylvester.Vector.prototype.each = Sylvester.Vector.prototype.forEach;
 
 // i, j, k unit vectors
 Sylvester.Vector.i = Sylvester.Vector.create([1,0,0]);

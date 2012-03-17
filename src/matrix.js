@@ -228,8 +228,6 @@ Sylvester.Matrix.prototype = {
     return returnVector ? M.col(1) : M;
   },
 
-  x: function(matrix) { return this.multiply(matrix); },
-
   // Returns a submatrix taken from the matrix
   // Argument order is: start row, start col, nrows, ncols
   // Element selection wraps if the required index is outside the matrix's bounds, so you could
@@ -333,8 +331,6 @@ Sylvester.Matrix.prototype = {
     return M;
   },
 
-  toUpperTriangular: function() { return this.toRightTriangular(); },
-
   // Returns the determinant for square matrices
   determinant: function() {
     if (!this.isSquare()) { return null; }
@@ -345,8 +341,6 @@ Sylvester.Matrix.prototype = {
     }
     return det;
   },
-
-  det: function() { return this.determinant(); },
 
   // Returns true iff the matrix is singular
   isSingular: function() {
@@ -363,8 +357,6 @@ Sylvester.Matrix.prototype = {
     return tr;
   },
 
-  tr: function() { return this.trace(); },
-
   // Returns the rank of the matrix
   rank: function() {
     var M = this.toRightTriangular(), rank = 0;
@@ -376,8 +368,6 @@ Sylvester.Matrix.prototype = {
     }
     return rank;
   },
-
-  rk: function() { return this.rank(); },
 
   // Returns the result of attaching the given argument to the right-hand side of the matrix
   augment: function(matrix) {
@@ -430,8 +420,6 @@ Sylvester.Matrix.prototype = {
     return Sylvester.Matrix.create(inverse_elements);
   },
 
-  inv: function() { return this.inverse(); },
-
   // Returns the result of rounding all the elements
   round: function() {
     return this.map(function(x) { return Math.round(x); });
@@ -478,3 +466,10 @@ Sylvester.Matrix.prototype = {
     return this;
   }
 };
+
+Sylvester.Matrix.prototype.toUpperTriangular = Sylvester.Matrix.prototype.toRightTriangular;
+Sylvester.Matrix.prototype.det = Sylvester.Matrix.prototype.determinant;
+Sylvester.Matrix.prototype.tr = Sylvester.Matrix.prototype.trace;
+Sylvester.Matrix.prototype.rk = Sylvester.Matrix.prototype.rank;
+Sylvester.Matrix.prototype.inv = Sylvester.Matrix.prototype.inverse;
+Sylvester.Matrix.prototype.x = Sylvester.Matrix.prototype.multiply;
