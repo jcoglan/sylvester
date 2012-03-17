@@ -1,8 +1,6 @@
-// Sylvester.Line.Segment class - depends on Sylvester.Line and its dependencies.
-
 Sylvester.Line.Segment = function() {};
-Sylvester.Line.Segment.prototype = {
 
+Sylvester.Line.Segment.prototype = {
   // Returns true iff the line segment is equal to the argument
   eql: function(segment) {
     return (this.start.eql(segment.start) && this.end.eql(segment.end)) ||

@@ -1,5 +1,3 @@
-// Sylvester.Polygon.Vertex class - required for Sylvester.Polygon class.
-
 Sylvester.Polygon.Vertex = function(point) {
   this.setElements(point);
   if (this.elements.length == 2) { this.elements.push(0); }
