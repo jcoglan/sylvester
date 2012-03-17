@@ -13,6 +13,13 @@ JS.ENV.MatrixSpec = JS.Test.describe("Matrix", function() { with(this) {
     assertEqual( '[0, 2, 7, 5]', $M([[0,2,7,5]]).inspect() )
     assertEqual( '[0]\n[2]\n[7]\n[5]', $M([[0],[2],[7],[5]]).inspect() )
     assertEqual( '[128]', $M([[128]]).inspect() )
+    assertEqual( '[]', $M([]).inspect() )
+  }})
+  
+  test("I", function() { with(this) {
+    assert( Matrix.I(3).eql($M([[1,0,0],[0,1,0],[0,0,1]])) )
+    assert( Matrix.I(1).eql($M([[1]])) )
+    assert( Matrix.I(0).eql($M([])) )
   }})
   
   test("e", function() { with(this) {
@@ -34,6 +41,8 @@ JS.ENV.MatrixSpec = JS.Test.describe("Matrix", function() { with(this) {
     assertNull( M.row(3) )
     assert( M.col(2).eql([3,9]) )
     assertNull( M.col(6) )
+    assertNull( $M([]).row(1) )
+    assertNull( $M([]).col(1) )
   }})
   
   test("dimensions", function() { with(this) {
@@ -43,6 +52,8 @@ JS.ENV.MatrixSpec = JS.Test.describe("Matrix", function() { with(this) {
     ])
     assertEqual( 2, M.rows() )
     assertEqual( 4, M.cols() )
+    assertEqual( [0,0], [$M([]).rows(), $M([]).cols()] )
+    assertEqual( {rows: 0, cols: 0}, $M([]).dimensions() )
   }})
   
   test("dup", function() { with(this) {
@@ -112,6 +123,7 @@ JS.ENV.MatrixSpec = JS.Test.describe("Matrix", function() { with(this) {
       assertEqual( i, M.rows() )
       assertEqual( 2, M.cols() )
     }
+    assert( Matrix.Random(0,0).eql($M([])) )
   }})
   
   test("isSameSizeAs", function() { with(this) {
@@ -191,6 +203,7 @@ JS.ENV.MatrixSpec = JS.Test.describe("Matrix", function() { with(this) {
     assert( Matrix.Zero(9,9).isSquare() )
     assert( ! Matrix.Zero(4,9).isSquare() )
     assert( ! Matrix.Zero(9,3).isSquare() )
+    assert( $M([]).isSquare() )
   }})
   
   test("max and index", function() { with(this) {
@@ -247,6 +260,7 @@ JS.ENV.MatrixSpec = JS.Test.describe("Matrix", function() { with(this) {
       )
     }
     assertNull( Matrix.Random(3,4).determinant() )
+    assertEqual( 1, $M([]).det() )
   }})
   
   test("isSingular", function() { with(this) {

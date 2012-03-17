@@ -113,6 +113,7 @@ Sylvester.Matrix.prototype = {
 
   // Returns column k of the matrix as a vector
   col: function(j) {
+    if (this.elements.length === 0) { return null; }
     if (j > this.elements[0].length) { return null; }
     var col = [], n = this.elements.length;
     for (var i = 0; i < n; i++) { col.push(this.elements[i][j-1]); }
@@ -121,7 +122,8 @@ Sylvester.Matrix.prototype = {
 
   // Returns the number of rows/columns the matrix has
   dimensions: function() {
-    return {rows: this.elements.length, cols: this.elements[0].length};
+    var cols = (this.elements.length === 0) ? 0 : this.elements[0].length;
+    return {rows: this.elements.length, cols: cols};
   },
 
   // Returns the number of rows in the matrix
@@ -131,6 +133,7 @@ Sylvester.Matrix.prototype = {
 
   // Returns the number of columns in the matrix
   cols: function() {
+    if (this.elements.length === 0) { return 0; }
     return this.elements[0].length;
   },
 
@@ -139,9 +142,12 @@ Sylvester.Matrix.prototype = {
   // one-column matrix equal to the vector.
   eql: function(matrix) {
     var M = matrix.elements || matrix;
-    if (typeof(M[0][0]) == 'undefined') { M = Sylvester.Matrix.create(M).elements; }
-    if (this.elements.length != M.length ||
-        this.elements[0].length != M[0].length) { return false; }
+    if (!M[0] || typeof(M[0][0]) == 'undefined') { M = Sylvester.Matrix.create(M).elements; }
+    if (this.elements.length === 0 || M.length === 0) {
+      return this.elements.length === M.length;
+    }
+    if (this.elements.length !== M.length) { return false; }
+    if (this.elements[0].length != M[0].length) { return false; }
     var i = this.elements.length, nj = this.elements[0].length, j;
     while (i--) { j = nj;
       while (j--) {
@@ -158,6 +164,7 @@ Sylvester.Matrix.prototype = {
 
   // Maps the matrix to another matrix (of the same dimensions) according to the given function
   map: function(fn) {
+    if (this.elements.length === 0) { return Sylvester.Matrix.create([]); }
     var els = [], i = this.elements.length, nj = this.elements[0].length, j;
     while (i--) { j = nj;
       els[i] = [];
@@ -172,12 +179,14 @@ Sylvester.Matrix.prototype = {
   isSameSizeAs: function(matrix) {
     var M = matrix.elements || matrix;
     if (typeof(M[0][0]) == 'undefined') { M = Sylvester.Matrix.create(M).elements; }
+    if (this.elements.length === 0) { return M.length === 0; }
     return (this.elements.length == M.length &&
         this.elements[0].length == M[0].length);
   },
 
   // Returns the result of adding the argument to the matrix
   add: function(matrix) {
+    if (this.elements.length === 0) return this.map(function(x) { return x });
     var M = matrix.elements || matrix;
     if (typeof(M[0][0]) == 'undefined') { M = Sylvester.Matrix.create(M).elements; }
     if (!this.isSameSizeAs(M)) { return null; }
@@ -186,6 +195,7 @@ Sylvester.Matrix.prototype = {
 
   // Returns the result of subtracting the argument from the matrix
   subtract: function(matrix) {
+    if (this.elements.length === 0) return this.map(function(x) { return x });
     var M = matrix.elements || matrix;
     if (typeof(M[0][0]) == 'undefined') { M = Sylvester.Matrix.create(M).elements; }
     if (!this.isSameSizeAs(M)) { return null; }
@@ -194,6 +204,7 @@ Sylvester.Matrix.prototype = {
 
   // Returns true iff the matrix can multiply the argument from the left
   canMultiplyFromLeft: function(matrix) {
+    if (this.elements.length === 0) { return false; }
     var M = matrix.elements || matrix;
     if (typeof(M[0][0]) == 'undefined') { M = Sylvester.Matrix.create(M).elements; }
     // this.columns should equal matrix.rows
@@ -205,6 +216,7 @@ Sylvester.Matrix.prototype = {
   // a vector, a vector is returned, which saves you having to remember calling
   // col(1) on the result.
   multiply: function(matrix) {
+    if (this.elements.length === 0) { return null; }
     if (!matrix.elements) {
       return this.map(function(x) { return x * matrix; });
     }
@@ -233,6 +245,7 @@ Sylvester.Matrix.prototype = {
   // Element selection wraps if the required index is outside the matrix's bounds, so you could
   // use this to perform row/column cycling or copy-augmenting.
   minor: function(a, b, c, d) {
+    if (this.elements.length === 0) { return null; }
     var elements = [], ni = c, i, nj, j;
     var rows = this.elements.length, cols = this.elements[0].length;
     while (ni--) { i = c - ni - 1;
@@ -247,6 +260,7 @@ Sylvester.Matrix.prototype = {
 
   // Returns the transpose of the matrix
   transpose: function() {
+    if (this.elements.length === 0) return Sylvester.Matrix.create([]);
     var rows = this.elements.length, i, cols = this.elements[0].length, j;
     var elements = [], i = cols;
     while (i--) { j = rows;
@@ -260,11 +274,13 @@ Sylvester.Matrix.prototype = {
 
   // Returns true iff the matrix is square
   isSquare: function() {
-    return (this.elements.length == this.elements[0].length);
+    var cols = (this.elements.length === 0) ? 0 : this.elements[0].length;
+    return (this.elements.length == cols);
   },
 
   // Returns the (absolute) largest element of the matrix
   max: function() {
+    if (this.elements.length === 0) { return null; }
     var m = 0, i = this.elements.length, nj = this.elements[0].length, j;
     while (i--) { j = nj;
       while (j--) {
@@ -276,6 +292,7 @@ Sylvester.Matrix.prototype = {
 
   // Returns the indeces of the first match found by reading row-by-row from left to right
   indexOf: function(x) {
+    if (this.elements.length === 0) { return null; }
     var index = null, ni = this.elements.length, i, nj = this.elements[0].length, j;
     for (i = 0; i < ni; i++) {
       for (j = 0; j < nj; j++) {
@@ -300,6 +317,7 @@ Sylvester.Matrix.prototype = {
   // This method only adds multiples of rows to other rows. No rows are
   // scaled up or switched, and the determinant is preserved.
   toRightTriangular: function() {
+    if (this.elements.length === 0) return Sylvester.Matrix.create([]);
     var M = this.dup(), els;
     var n = this.elements.length, i, j, np = this.elements[0].length, p;
     for (i = 0; i < n; i++) {
@@ -333,6 +351,7 @@ Sylvester.Matrix.prototype = {
 
   // Returns the determinant for square matrices
   determinant: function() {
+    if (this.elements.length === 0) { return 1; }
     if (!this.isSquare()) { return null; }
     var M = this.toRightTriangular();
     var det = M.elements[0][0], n = M.elements.length;
@@ -349,6 +368,7 @@ Sylvester.Matrix.prototype = {
 
   // Returns the trace for square matrices
   trace: function() {
+    if (this.elements.length === 0) { return 0; }
     if (!this.isSquare()) { return null; }
     var tr = this.elements[0][0], n = this.elements.length;
     for (var i = 1; i < n; i++) {
@@ -359,6 +379,7 @@ Sylvester.Matrix.prototype = {
 
   // Returns the rank of the matrix
   rank: function() {
+    if (this.elements.length === 0) { return 0; }
     var M = this.toRightTriangular(), rank = 0;
     var i = this.elements.length, nj = this.elements[0].length, j;
     while (i--) { j = nj;
@@ -371,6 +392,7 @@ Sylvester.Matrix.prototype = {
 
   // Returns the result of attaching the given argument to the right-hand side of the matrix
   augment: function(matrix) {
+    if (this.elements.length === 0) { return this.dup(); }
     var M = matrix.elements || matrix;
     if (typeof(M[0][0]) == 'undefined') { M = Sylvester.Matrix.create(M).elements; }
     var T = this.dup(), cols = T.elements[0].length;
@@ -386,6 +408,7 @@ Sylvester.Matrix.prototype = {
 
   // Returns the inverse (if one exists) using Gauss-Jordan
   inverse: function() {
+    if (this.elements.length === 0) { return null; }
     if (!this.isSquare() || this.isSingular()) { return null; }
     var n = this.elements.length, i= n, j;
     var M = this.augment(Sylvester.Matrix.I(n)).toRightTriangular();
@@ -437,6 +460,7 @@ Sylvester.Matrix.prototype = {
   inspect: function() {
     var matrix_rows = [];
     var n = this.elements.length;
+    if (n === 0) return '[]';
     for (var i = 0; i < n; i++) {
       matrix_rows.push(Sylvester.Vector.create(this.elements[i]).inspect());
     }
@@ -447,7 +471,7 @@ Sylvester.Matrix.prototype = {
   // is a vector, the resulting matrix will be a single column.
   setElements: function(els) {
     var i, j, elements = els.elements || els;
-    if (typeof(elements[0][0]) != 'undefined') {
+    if (elements[0] && typeof(elements[0][0]) != 'undefined') {
       i = elements.length;
       this.elements = [];
       while (i--) { j = elements[i].length;
