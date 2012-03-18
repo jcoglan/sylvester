@@ -1,0 +1,224 @@
+= partial 'api_navigation'
+
+:plain
+  <h2>Class: Polygon</h2>
+  
+  <p>Sylvester version: 0.2.0 onwards</p>
+  
+  <p>Class methods:
+  <a href="#create"><code>create</code></a>
+  </p>
+  
+  <p>Instance methods:
+  <a href="#area"><code>area</code></a>,
+  <a href="#centroid"><code>centroid</code></a>,
+  <a href="#contains"><code>contains</code></a>,
+  <a href="#copyvertices"><code>copyVertices</code></a>,
+  <a href="#dup"><code>dup</code></a>,
+  <a href="#hasedgecontaining"><code>hasEdgeContaining</code></a>,
+  <a href="#inspect"><code>inspect</code></a>,
+  <a href="#istriangle"><code>isTriangle</code></a>,
+  <a href="#projectionon"><code>projectionOn</code></a>,
+  <a href="#rotate"><code>rotate</code></a>,
+  <a href="#scale"><code>scale</code></a>,
+  <a href="#totriangles"><code>toTriangles</code></a>,
+  <a href="#translate"><code>translate</code></a>,
+  <a href="#v"><code>v</code></a>
+  </p>
+  
+  <h3>Overview</h3>
+  
+  <p>The <code>Polygon</code> class is designed to model planar regions whose
+    boundary is defined by a set of coplanar points, in 3 dimensions. It is
+    possible to model polygons containing holes by having the boundary
+    &lsquo;cut in&rsquo; to reach the hole &ndash; see
+    <a href="#create"><code>create()</code></a>.</p>
+  
+  <h3>Class methods</h3>
+  
+  <a name="create"></a>
+  <h3 class="method">Polygon.create([<span class="arg">v1</span>, <span class="arg">v2</span>, ...]) <span class="version">0.2.0</span></h3>
+  
+  <p>Creates a <code>Polygon</code> instance using a set of points
+    <code>v1</code>, <code>v2</code, etc. The points can be 2- or 3-dimensional
+    <a href="/api/vector.html"><code>Vector</code></a>s or arrays, and will be
+    coerced into 3-dimensional <code>Vector</code>s internally.</p>
+  
+  <p>For example, this creates a 4&times;4 square in the <span
+    class="math">x-y</span> plane.</p>
+  
+  <pre><code>var p = Polygon.create([[0,0],[4,0],[4,4],[0,4]]);</code></pre>
+  
+  <p>You can create polygons with holes in them by having the boundary
+    &lsquo;cut in&rsquo; to reach the hole, for example consider this shape:</p>
+  
+  <pre><code>3 --  o-----------o
+        |           |
+  2 --  |   o---o   |
+        |   |   |   |
+  1 --  |   o---o   |
+        |           |
+  0 --  o-----------o
+  
+        |   |   |   |
+        0   1   2   3</code></pre>
+  
+  <p>This can be modelled by joining the inside boundary to the outside, for
+    example:</p>
+  
+  <pre><code>3 --  o-----------o
+        |           |
+  2 --  |   o---o   |
+        |   |   |   |
+  1 --  |   o---o---o
+        |           |
+  0 --  o-----------o
+  
+        |   |   |   |
+        0   1   2   3</code></pre>
+  
+  <p>You can think of this as a polygon with no holes, whose boundary touches
+    itself. You might create this shape like so:</p>
+  
+  <pre><code>var p = Polygon.create([
+    [0,0], [3,0], [3,1], [1,1],
+    [1,2], [2,2], [2,1], [3,1],
+    [3,3], [0,3]
+  ]);</code></pre>
+  
+  <h3>Instance methods</h3>
+  
+  <a name="area"></a>
+  <h3 class="method">area() <span class="version">0.2.0</span></h3>
+  
+  <p>Returns the area of the polygon. It correctly accounts for polygons
+    containing holes, for example:</p>
+  
+  <pre><code>var square = Polygon.create([[0,0],[4,0],[4,4],[0,4]]);
+  
+  square.area() // -> 16
+  
+  var ring = Polygon.create([
+    [0,0], [3,0], [3,1], [1,1],
+    [1,2], [2,2], [2,1], [3,1],
+    [3,3], [0,3]
+  ]);
+  
+  ring.area() // -> 8</code></pre>
+
+  <a name="centroid"></a>
+  <h3 class="method">centroid() <span class="version">0.2.0</span></h3>
+  
+  <p>Returns the centroid, or &lsquo;centre of mass&rsquo; of the polygon as
+    a <a href="/api/vector.html"><code>Vector</code></a>.</p>
+
+  <a name="contains"></a>
+  <h3 class="method">contains(<span class="arg">point</span>) <span class="version">0.2.0</span></h3>
+  
+  <p>Returns <code>true</code> iff the given
+    <a href="/api/vector.html"><code>Vector</code></a> <code>point</code> is
+    strictly inside the receiver, not on one of its edges or inside a hole
+    contained within the boundary.</p>
+  
+  <pre><code>var ring = Polygon.create([
+    [0,0], [3,0], [3,1], [1,1],
+    [1,2], [2,2], [2,1], [3,1],
+    [3,3], [0,3]
+  ]);
+  
+  ring.contains([0.5, 0.5]) // -> true    -- strictly inside
+  ring.contains([1.0, 1.0]) // -> false   -- on a vertex
+  ring.contains([1.5, 1.5]) // -> false   -- in a hole</code></pre>
+  
+  <a name="copyvertices"></a>
+  <h3 class="method">copyVertices() <span class="version">0.2.0</span></h3>
+  
+  <p>Copies all the <a href="/api/vector.html"><code>Vector</code></a> objects
+    that make the vertices of the receiver. If the receiver was created through
+    <a href="#totriangles"><code>toTriangles()</code></a>, for example, it may
+    be sharing vertex objects with another <code>Polygon</code>, and will be
+    transformed when the other is transformed. Copying the vertices means the
+    receiver can be transformed independently.</p>
+  
+  <a name="dup"></a>
+  <h3 class="method">dup() <span class="version">0.2.0</span></h3>
+  
+  <p>Returns a copy of the receiver. The vertices themselves are not copied,
+    only the list that defines the polygon boundary. This means that if the
+    original is mutated by changing its vertices, the duplicate will be
+    transformed in the same way. Use
+    <a href="#copyvertices"><code>copyVertices()</code></a> to get a completely
+    new set of vertex objects.</p>
+  
+  <a name="hasedgecontaining"></a>
+  <h3 class="method">hasEdgeContaining(<span class="arg">point</span>) <span class="version">0.2.0</span></h3>
+  
+  <p>Returns <code>true</code> iff the given
+    <a href="/api/vector.html"><code>Vector</code></a> <code>point</code> lies
+    on any line segment or vertex on the polygon&rsquo;s boundary, including
+    edges used as cuts to form holes.</p>
+  
+  <a name="inspect"></a>
+  <h3 class="method">inspect() <span class="version">0.2.0</span></h3>
+  
+  <p>Returns a string representation of the receiver, useful for debugging.</p>
+  
+  <pre><code>var p = Polygon.create([[0,0],[4,0],[4,4]]);
+  p.inspect() // -> "[0, 0, 0] -> [4, 0, 0] -> [4, 4, 0]"</code></pre>
+  
+  <a name="istriangle"></a>
+  <h3 class="method">isTriangle() <span class="version">0.2.0</span></h3>
+  
+  <p>Returns <code>true</code> iff the polygon has exactly 3 vertices.</p>
+  
+  <a name="projectionon"></a>
+  <h3 class="method">projectionOn(<span class="arg">plane</span>) <span class="version">0.2.0</span></h3>
+  
+  <p>Returns a new <code>Polygon</code> representing the projection of the
+    receiver onto the given <a href="/api/plane.html"><code>Plane</code></a>.</p>
+  
+  <a name="rotate"></a>
+  <h3 class="method">rotate(<span class="arg">angle</span>, <span class="arg">axis</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Rotates the receiver by <code>angle</code> radians
+    about the <a href="/api/line.html"><code>Line</code></a> <code>axis</code>.
+    Rotations are performed in a right-handed fashion about the line&rsquo;s
+    direction.</p>
+  
+  <p>Note that while some other classes&rsquo; <code>rotate()</code> method
+    returns a new object, this method mutates and returns the receiver.</p>
+  
+  <a name="scale"></a>
+  <h3 class="method">scale(<span class="arg">k</span>, <span class="arg">point</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Scales all the vertices in the receiver by a factor <code>k</code> relative
+    to the <a href="/api/vector.html"><code>Vector</code></a>
+    <code>point</code>.</p>
+  
+  <p>Note that while some other classes&rsquo; <code>scale()</code> method
+    returns a new object, this method mutates and returns the receiver.</p>
+  
+  <a name="totriangles"></a>
+  <h3 class="method">toTriangles() <span class="version">0.2.0</span></h3>
+  
+  <p>Splits the receiver into triangles and returns them as an array of
+    triangular <code>Polygon</code>s. These polygons share their vertex
+    <code>Vector</code> objects with the receiver, so for example if you call
+    <code>toTriangles()</code> and then
+    <a href="#rotate"><code>rotate()</code></a> the receiver, all the triangles
+    will be rotated as well.</p>
+
+  <a name="translate"></a>
+  <h3 class="method">translate(<span class="arg">vector</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Translates the receiver by adding the given <code>vector</code> to all its
+    vertices.</p>
+  
+  <p>Note that while some other classes&rsquo; <code>translate()</code> method
+    returns a new object, this method mutates and returns the receiver.</p>
+  
+  <a name="v"></a>
+  <h3 class="method">v(<span class="arg">i</span>) <span class="version">0.2.0</span></h3>
+  
+  <p>Returns the <a href="/api/vector.html"><code>Vector</code></a> for the
+    <code>i</code>th vertex, numbered from 1.</p>

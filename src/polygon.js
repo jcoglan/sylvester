@@ -1,25 +1,18 @@
 Sylvester.Polygon = function() {};
 
 Sylvester.Polygon.prototype = {
-  // Returns the vertex at the given position on the vertex list, numbered from 1.
   v: function(i) {
     return this.vertices.at(i - 1).data;
   },
 
-  // Returns the node in the vertices linked list that refers to the given vertex.
   nodeFor: function(vertex) {
     return this.vertices.withData(vertex);
   },
 
-  // Returns a new polygon with the same vertices as the receiver. The vertices
-  // will not be duplicates, they refer to the same objects as the vertices in this
-  // polygon, but the linked list and nodes used to point to them are separate and
-  // can be manipulated independently of this one.
   dup: function() {
     return Sylvester.Polygon.create(this.vertices, this.plane);
   },
 
-  // Translates the polygon by the given vector and returns the polygon.
   translate: function(vector) {
     var P = vector.elements || vector;
     this.vertices.each(function(node) {
@@ -31,7 +24,6 @@ Sylvester.Polygon.prototype = {
     return this;
   },
 
-  // Rotates the polygon about the given line and returns the polygon.
   rotate: function(t, line) {
     var R = Sylvester.Matrix.Rotation(t, line.direction);
     this.vertices.each(function(node) {
@@ -42,7 +34,6 @@ Sylvester.Polygon.prototype = {
     return this;
   },
 
-  // Scales the polygon relative to the given point and returns the polygon.
   scale: function(k, point) {
     var P = point.elements || point;
     this.vertices.each(function(node) {
@@ -59,14 +50,14 @@ Sylvester.Polygon.prototype = {
     return this;
   },
 
-  // Updates the plane properties of all the cached triangles belonging to
-  // the polygon according to the given function. For example, suppose you
-  // just rotated the polygon, you should call:
+  // Updates the plane properties of all the cached triangles belonging to the
+  // polygon according to the given function. For example, suppose you just
+  // rotated the polygon, you should call:
   //
   //   poly.updateTrianglePlanes(function(plane) { return plane.rotate(t, line); });
   //
-  // This method is called automatically by Sylvester.Polygon.translate, Sylvester.Polygon.rotate
-  // and Sylvester.Polygon.scale transformation methods.
+  // This method is called automatically by Sylvester.Polygon.translate,
+  // Sylvester.Polygon.rotate and Sylvester.Polygon.scale transformation methods.
   updateTrianglePlanes: function(fn) {
     var i;
     if (this.cached.triangles !== null) {
@@ -83,19 +74,20 @@ Sylvester.Polygon.prototype = {
     }
   },
 
-  // Returns true iff the polygon is a triangle
   isTriangle: function() {
     return this.vertices.length === 3;
   },
 
-  // Returns a collection of triangles used for calculating area and center of mass.
-  // Some of the triangles will not lie inside the polygon - this collection is essentially
-  // a series of itervals in a surface integral, so some are 'negative'. If you want the
-  // polygon broken into constituent triangles, use toTriangles(). This method is used
-  // because it's much faster than toTriangles().
-  // The triangles generated share vertices with the original polygon, so they transform
-  // with the polygon. They are cached after first calculation and should remain in sync
-  // with changes to the parent polygon.
+  // Returns a collection of triangles used for calculating area and center of
+  // mass. Some of the triangles will not lie inside the polygon - this
+  // collection is essentially a series of itervals in a surface integral, so
+  // some are 'negative'. If you want the polygon broken into constituent
+  // triangles, use toTriangles(). This method is used because it's much faster
+  // than toTriangles().
+  // 
+  // The triangles generated share vertices with the original polygon, so they
+  // transform with the polygon. They are cached after first calculation and
+  // should remain in sync with changes to the parent polygon.
   trianglesForSurfaceIntegral: function() {
     if (this.cached.surfaceIntegralElements !== null) { return this.cached.surfaceIntegralElements; }
     var triangles = [];
@@ -104,15 +96,13 @@ Sylvester.Polygon.prototype = {
     this.vertices.each(function(node, i) {
       if (i < 2) { return; }
       var points = [firstVertex, node.prev.data, node.data];
-      // If the vertices lie on a straigh line, give the polygon's own plane. If the
-      // element has no area, it doesn't matter which way its normal faces.
+      // If the vertices lie on a straigh line, give the polygon's own plane. If
+      // the element has no area, it doesn't matter which way its normal faces.
       triangles.push(Sylvester.Polygon.create(points, Sylvester.Plane.fromPoints(points) || plane));
     });
     return this.setCache('surfaceIntegralElements', triangles);
   },
 
-  // Returns the area of the polygon. Requires that the polygon
-  // be converted to triangles, so use with caution.
   area: function() {
     if (this.isTriangle()) {
       // Area is half the modulus of the cross product of two sides
@@ -133,8 +123,6 @@ Sylvester.Polygon.prototype = {
     }
   },
 
-  // Returns the centroid of the polygon. Requires division into
-  // triangles - use with caution
   centroid: function() {
     if (this.isTriangle()) {
       var A = this.v(1).elements, B = this.v(2).elements, C = this.v(3).elements;
@@ -153,14 +141,12 @@ Sylvester.Polygon.prototype = {
     }
   },
 
-  // Returns the polygon's projection on the given plane as another polygon
   projectionOn: function(plane) {
     var points = [];
     this.vertices.each(function(node) { points.push(plane.pointClosestTo(node.data)); });
     return Sylvester.Polygon.create(points);
   },
 
-  // Removes the given vertex from the polygon as long as it's not triangular.
   removeVertex: function(vertex) {
     if (this.isTriangle()) { return; }
     var node = this.nodeFor(vertex);
@@ -199,12 +185,10 @@ Sylvester.Polygon.prototype = {
     return this;
   },
 
-  // Returns true iff the point is strictly inside the polygon
   contains: function(point) {
     return this.containsByWindingNumber(point);
   },
 
-  // Returns true iff the given point is strictly inside the polygon using the winding number method
   containsByWindingNumber: function(point) {
     var P = point.elements || point;
     if (!this.plane.contains(P)) { return false; }
@@ -224,8 +208,6 @@ Sylvester.Polygon.prototype = {
     return loops !== 0;
   },
 
-  // Returns true if the given point lies on an edge of the polygon
-  // May cause problems with 'hole-joining' edges
   hasEdgeContaining: function(point) {
     var P = (point.elements || point);
     var success = false;
@@ -235,8 +217,6 @@ Sylvester.Polygon.prototype = {
     return success;
   },
 
-  // Returns an array of 3-vertex polygons that the original has been split into
-  // Stores the first calculation for faster retrieval later on
   toTriangles: function() {
     if (this.cached.triangles !== null) { return this.cached.triangles; }
     return this.setCache('triangles', this.triangulateByEarClipping());
@@ -245,7 +225,8 @@ Sylvester.Polygon.prototype = {
   // Implementation of ear clipping algorithm
   // Found in 'Triangulation by ear clipping', by David Eberly
   // at http://www.geometrictools.com
-  // This will not deal with overlapping sections - contruct your polygons sensibly
+  // This will not deal with overlapping sections - contruct your polygons
+  // sensibly
   triangulateByEarClipping: function() {
     var poly = this.dup(), triangles = [], success, convexNode, mainNode, trig;
     while (!poly.isTriangle()) {
@@ -259,8 +240,8 @@ Sylvester.Polygon.prototype = {
         trig = Sylvester.Polygon.create([mainNode.data, mainNode.next.data, mainNode.prev.data], this.plane);
         // Now test whether any reflex vertices lie within the ear
         poly.reflexVertices.each(function(node) {
-          // Don't test points belonging to this triangle. node won't be
-          // equal to convexNode as node is reflex and vertex is convex.
+          // Don't test points belonging to this triangle. node won't be equal
+          // to convexNode as node is reflex and vertex is convex.
           if (node.data !== mainNode.prev.data && node.data !== mainNode.next.data) {
             if (trig.contains(node.data) || trig.hasEdgeContaining(node.data)) { success = false; }
           }
@@ -274,7 +255,6 @@ Sylvester.Polygon.prototype = {
     return triangles;
   },
 
-  // Sets the polygon's vertices
   setVertices: function(points, plane) {
     var pointSet = points.toArray ? points.toArray() : points;
     this.plane = (plane && plane.normal) ? plane.dup() : Sylvester.Plane.fromPoints(pointSet);
@@ -292,20 +272,18 @@ Sylvester.Polygon.prototype = {
     return this;
   },
 
-  // Constructs lists of convex and reflex vertices based on the main vertex list.
   populateVertexTypeLists: function() {
     this.convexVertices = new Sylvester.LinkedList.Circular();
     this.reflexVertices = new Sylvester.LinkedList.Circular();
     var self = this;
     this.vertices.each(function(node) {
-      // Split vertices into convex / reflex groups
-      // The Sylvester.LinkedList.Node class wraps each vertex so it can belong to many linked lists.
+      // Split vertices into convex / reflex groups. The
+      // Sylvester.LinkedList.Node class wraps each vertex so it can belong to
+      // many linked lists.
       self[node.data.type(self) + 'Vertices'].append(new Sylvester.LinkedList.Node(node.data));
     });
   },
 
-  // Gives the polygon its own local set of vertex points, allowing it to be
-  // transformed independently of polygons it may be sharing vertices with.
   copyVertices: function() {
     this.clearCache();
     this.vertices.each(function(node) {
@@ -314,7 +292,6 @@ Sylvester.Polygon.prototype = {
     this.populateVertexTypeLists();
   },
 
-  // Clear any cached properties
   clearCache: function() {
     this.cached = {
       triangles: null,
@@ -322,13 +299,11 @@ Sylvester.Polygon.prototype = {
     };
   },
 
-  // Set cached value and return the value
   setCache: function(key, value) {
     this.cached[key] = value;
     return value;
   },
 
-  // Returns a string representation of the polygon's vertices.
   inspect: function() {
     var points = [];
     this.vertices.each(function(node) { points.push(node.data.inspect()); });
@@ -336,7 +311,6 @@ Sylvester.Polygon.prototype = {
   }
 };
 
-// Constructor function
 Sylvester.Polygon.create = function(points, plane) {
   var P = new Sylvester.Polygon();
   return P.setVertices(points, plane);
