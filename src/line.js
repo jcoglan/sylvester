@@ -170,8 +170,8 @@ Sylvester.Line.prototype = {
   },
 
   setVectors: function(anchor, direction) {
-    // Need to do this so that line's properties are not
-    // references to the arguments passed in
+    // Need to do this so that line's properties are not references to the
+    // arguments passed in
     anchor = Sylvester.Vector.create(anchor);
     direction = Sylvester.Vector.create(direction);
     if (anchor.elements.length === 2) {anchor.elements.push(0); }
