@@ -1,0 +1,173 @@
+= partial 'api_navigation'
+
+:plain
+  <h2>Class: Line.Segment</h2>
+  
+  <p>Sylvester version: 0.2.0 onwards</p>
+  
+  <p>Class methods:
+  <a href="#create"><code>create</code></a>
+  </p>
+  
+  <p>Instance methods:
+  <a href="#bisectingplane"><code>bisectingPlane</code></a>,
+  <a href="#contains"><code>contains</code></a>,
+  <a href="#distancefrom"><code>distanceFrom</code></a>,
+  <a href="#dup"><code>dup</code></a>,
+  <a href="#eql"><code>eql</code></a>,
+  <a href="#intersectionwith"><code>intersectionWith</code></a>,
+  <a href="#intersects"><code>intersects</code></a>,
+  <a href="#isparallelto"><code>isParallelTo</code></a>,
+  <a href="#length"><code>length</code></a>,
+  <a href="#midpoint"><code>midpoint</code></a>,
+  <a href="#pointclosestto"><code>pointClosestTo</code></a>,
+  <a href="#setpoints"><code>setPoints</code></a>,
+  <a href="#tovector"><code>toVector</code></a>,
+  <a href="#translate"><code>translate</code></a>
+  </p>
+  
+  <p>Instance variables:</p>
+  
+  <ul>
+    <li><code>start</code> &ndash; a 3D
+      <a href="/api/vector.html"><code>Vector</code></a> representing the start
+      of the line segment</li>
+    <li><code>end</code> &ndash; a 3D
+      <a href="/api/vector.html"><code>Vector</code></a> representing the end
+      of the line segment</li>
+    <li><code>line</code> &ndash; a
+      <a href="/api/line.html"><code>Line</code></a> representing the infinite
+      line that contains the line segment
+  </ul>
+  
+  <h3>Overview</h3>
+  
+  <p>The <code>Line.Segment</code> is similar to the
+    <a href="/api/line.html"><code>Line</code></a> class, only it represents
+    finite line segments with known start and end points. It supports many of
+    the same operations as the <code>Line</code>, and some additional ones
+    specific to finite lines.</p>
+  
+  <h3>Class methods</h3>
+  
+  <a name="create"></a>
+  <h3 class="method">Line.Segment.create(<span class="arg">start</span>, <span class="arg">end</span>) <span class="version">0.2.0</span></h3>
+  
+  <p>Creates a <code>Line.Segment</code> instance with the given
+    <code>start</code> and <code>end</code> points. <code>start</code> and
+    <code>end</code> can each be either 2- or 3-dimensional arrays or
+    <a href="/api/vector.html"><code>Vector</code></a>s, and they will be stored
+    in the <code>Line.Segments</code>&rsquo;s properties as 3D vectors. (The
+    third element will be zero if a 2D vector was supplied.)
+  
+  <h3>Instance methods</h3>
+  
+  <a name="bisectingplane"></a>
+  <h3 class="method">bisectingPlane() <span class="version">0.2.0</span></h3>
+  
+  <p>Returns a <a href="/api/plane.html"><code>Plane</code></a> representing the
+    receiver&rsquo;s bisecting plane. This is a plane that is perpendicular to
+    the receiver and contains its <a href="#midpoint">midpoint</a>.</p>
+  
+  <a name="contains"></a>
+  <h3 class="method">contains(<span class="arg">point</span>) <span class="version">0.2.0</span></h3>
+  
+  <p>Returns <code>true</code> iff the vector <code>point</code> is a point that
+    lies on the receiver, between its <code>start</code> and <code>and</code>
+    points.</p>
+  
+  <a name="distancefrom"></a>
+  <h3 class="method">distanceFrom(<span class="arg">obj</span>) <span class="version">0.2.0</span></h3>
+  
+  <p>Returns the distance between <b class="math">P</b> and <code>obj</code>,
+    where <b class="math">P</b> is the point within the receiver that&rsquo;s
+    closest to <code>obj</code>. <code>obj</code> can be any object accepted by
+    <a href="#pointclosestto"><code>pointClosestTo(obj)</code></a>.</p>
+  
+  <a name="dup"></a>
+  <h3 class="method">dup() <span class="version">0.2.0</span></h3>
+  
+  <p>Returns a copy of the receiver.</p>
+  
+  <a name="eql"></a>
+  <h3 class="method">eql(<span class="arg">segment</span>) <span class="version">0.2.0</span></h3>
+  
+  <p>Returns <code>true</code> iff <code>segment</code> represents the same line
+    segment as the receiver. <code>segment</code> may have its
+    <code>start</code> and <code>end</code> points reversed compared to the
+    receiver and still be considered equal.</p>
+  
+  <a name="intersectionwith"></a>
+  <h3 class="method">intersectionWith(<span class="arg">obj</span>) <span class="version">0.2.0</span></h3>
+  
+  <p>Returns a <a href="/api/vector.html"><code>Vector</code></a> representing
+    the unique point of intersection of the receiver with <code>obj</code>,
+    which can be either a <code>Line</code> or a
+    <a href="/api/plane.html"><code>Plane</code></a>. If no such point exists
+    within the line segment, returns <code>null</code>.</p>
+  
+  <a name="intersects"></a>
+  <h3 class="method">intersects(<span class="arg">obj</span>) <span class="version">0.2.0</span></h3>
+  
+  <p>Returns <code>true</code> iff the receiver has a unique point of
+    intersection with <code>obj</code>, which can be either a <code>Line</code>
+    or a <a href="/api/plane.html"><code>Plane</code></a>.</p>
+  
+  <a name="isparallelto"></a>
+  <h3 class="method">isParallelTo(<span class="arg">line</span>) <span class="version">0.2.0</span></h3>
+  
+  <p>Returns <code>true</code> iff the receiver and <code>line</code> are
+    parallel lines. Their direction vectors can point in opposite directions
+    &ndash; two lines with opposing directions represent the same set of
+    points. <code>line</code> may be a
+    <a href="/api/line.html"><code>Line</code></a> or a
+    <code>Line.Segment</code>.</p>
+  
+  <a name="length"></a>
+  <h3 class="method">length() <span class="version">0.2.0</span></h3>
+  
+  <p>Returns the distance between the <code>start</code> and <code>end</code>
+    points.</p>
+  
+  <a name="midpoint"></a>
+  <h3 class="method">midpoint() <span class="version">0.2.0</span></h3>
+  
+  <p>Returns a <a href="/api/vector.html"><code>Vector</code></a> representing
+    the midpoint of the receiver. This point lies in the receiver&rsquo;s
+    <a href="#bisectingplane">bisecting plane</a>.</p>
+  
+  <a name="pointclosestto"></a>
+  <h3 class="method">pointClosestTo(<span class="arg">obj</span>) <span class="version">0.2.0</span></h3>
+  
+  <p>Returns a <a href="/api/vector.html"><code>Vector</code></a> representing
+    the point on the receiver that is closest to <code>obj</code>, which can be
+    either a <code>Vector</code>, <a href="/api/line.html"><code>Line</code></a>,
+    <code>Line.Segment</code> or
+    <a href="/api/plane.html"><code>Plane</code></a>. If a <code>Line</code>,
+    returns <code>null</code> if the lines are parallel &ndash; there is no
+    unique closest point.</p>
+  
+  <p>Note that this method returns a point that is within the line segment; it
+    will not return points that lie beyond its <code>start</code> or
+    <code>end</code> points.</p>
+  
+  <a name="setpoints"></a>
+  <h3 class="method">setPoints(<span class="arg">start</span>, <span class="arg">end</span>) <span class="version">0.2.0</span></h3>
+  
+  <p>Sets the <code>start</code> and <code>end</code> points of the receiver.</p>
+  
+  <a name="tovector"></a>
+  <h3 class="method">toVector() <span class="version">0.2.0</span></h3>
+  
+  <p>Returns a <a href="/api/vector.html"><code>Vector</code></a> with the same
+    length and direction as the receiver. That is, it returns <span
+    class="math"><b>end</b> &ndash; <b>start</b></span>.</p>
+  
+  <a name="translate"></a>
+  <h3 class="method">translate(<span class="arg">vector</span>) <span class="version">0.2.0</span></h3>
+  
+  <p>Returns the result of translating the receiver by adding
+    <code>vector</code> to its <code>start</code> and <code>end</code> points.
+    <code>vector</code> can be a 2- or 3- dimensional array or
+    <a href="/api/vector.html"><code>Vector</code></a>. If 2-dimensional, a zero
+    third component will be added.</p>
