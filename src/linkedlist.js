@@ -5,10 +5,10 @@ Sylvester.LinkedList.prototype = {
   first: null,
   last: null,
 
-  each: function(fn) {
+  forEach: function(fn, context) {
     var node = this.first, n = this.length;
     for (var i = 0; i < n; i++) {
-      fn(node, i);
+      fn.call(context, node, i);
       node = node.next;
     }
   },
@@ -34,6 +34,8 @@ Sylvester.LinkedList.prototype = {
     return arr;
   }
 };
+
+Sylvester.LinkedList.prototype.each = Sylvester.LinkedList.prototype.forEach;
 
 Sylvester.LinkedList.Node = function(data) {
   this.prev = null; this.next = null;

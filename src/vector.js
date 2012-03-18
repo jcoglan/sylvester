@@ -53,10 +53,10 @@ Sylvester.Vector.prototype = {
   },
 
   // Maps the vector to another vector according to the given function
-  map: function(fn) {
+  map: function(fn, context) {
     var elements = [];
     this.each(function(x, i) {
-      elements.push(fn(x, i));
+      elements.push(fn.call(context, x, i));
     });
     return Sylvester.Vector.create(elements);
   },

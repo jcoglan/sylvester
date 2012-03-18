@@ -163,13 +163,13 @@ Sylvester.Matrix.prototype = {
   },
 
   // Maps the matrix to another matrix (of the same dimensions) according to the given function
-  map: function(fn) {
+  map: function(fn, context) {
     if (this.elements.length === 0) { return Sylvester.Matrix.create([]); }
     var els = [], i = this.elements.length, nj = this.elements[0].length, j;
     while (i--) { j = nj;
       els[i] = [];
       while (j--) {
-        els[i][j] = fn(this.elements[i][j], i + 1, j + 1);
+        els[i][j] = fn.call(context, this.elements[i][j], i + 1, j + 1);
       }
     }
     return Sylvester.Matrix.create(els);
