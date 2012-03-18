@@ -1,17 +1,14 @@
 Sylvester.Line = function() {};
 
 Sylvester.Line.prototype = {
-  // Returns true if the argument occupies the same space as the line
   eql: function(line) {
     return (this.isParallelTo(line) && this.contains(line.anchor));
   },
 
-  // Returns a copy of the line
   dup: function() {
     return Sylvester.Line.create(this.anchor, this.direction);
   },
 
-  // Returns the result of translating the line by the given vector/array
   translate: function(vector) {
     var V = vector.elements || vector;
     return Sylvester.Line.create([
@@ -21,18 +18,12 @@ Sylvester.Line.prototype = {
     ], this.direction);
   },
 
-  // Returns true if the line is parallel to the argument. Here, 'parallel to'
-  // means that the argument's direction is either parallel or antiparallel to
-  // the line's own direction. A line is parallel to a plane if the two do not
-  // have a unique intersection.
   isParallelTo: function(obj) {
     if (obj.normal || (obj.start && obj.end)) { return obj.isParallelTo(this); }
     var theta = this.direction.angleFrom(obj.direction);
     return (Math.abs(theta) <= Sylvester.precision || Math.abs(theta - Math.PI) <= Sylvester.precision);
   },
 
-  // Returns the line's perpendicular distance from the argument,
-  // which can be a point, a line or a plane
   distanceFrom: function(obj) {
     if (obj.normal || (obj.start && obj.end)) { return obj.distanceFrom(this); }
     if (obj.direction) {
@@ -55,17 +46,12 @@ Sylvester.Line.prototype = {
     }
   },
 
-  // Returns true iff the argument is a point on the line, or if the argument
-  // is a line segment lying within the receiver
   contains: function(obj) {
     if (obj.start && obj.end) { return this.contains(obj.start) && this.contains(obj.end); }
     var dist = this.distanceFrom(obj);
     return (dist !== null && dist <= Sylvester.precision);
   },
 
-  // Returns the distance from the anchor of the given point. Negative values are
-  // returned for points that are in the opposite direction to the line's direction from
-  // the line's anchor point.
   positionOf: function(point) {
     if (!this.contains(point)) { return null; }
     var P = point.elements || point;
@@ -73,18 +59,15 @@ Sylvester.Line.prototype = {
     return (P[0] - A[0]) * D[0] + (P[1] - A[1]) * D[1] + ((P[2] || 0) - A[2]) * D[2];
   },
 
-  // Returns true iff the line lies in the given plane
   liesIn: function(plane) {
     return plane.contains(this);
   },
 
-  // Returns true iff the line has a unique point of intersection with the argument
   intersects: function(obj) {
     if (obj.normal) { return obj.intersects(this); }
     return (!this.isParallelTo(obj) && this.distanceFrom(obj) <= Sylvester.precision);
   },
 
-  // Returns the unique intersection point with the argument, if one exists
   intersectionWith: function(obj) {
     if (obj.normal || (obj.start && obj.end)) { return obj.intersectionWith(this); }
     if (!this.intersects(obj)) { return null; }
@@ -101,7 +84,6 @@ Sylvester.Line.prototype = {
     return Sylvester.Vector.create([P[0] + k*X1, P[1] + k*X2, P[2] + k*X3]);
   },
 
-  // Returns the point on the line that is closest to the given point or line/line segment
   pointClosestTo: function(obj) {
     if (obj.start && obj.end) {
       // obj is a line segment
@@ -113,8 +95,9 @@ Sylvester.Line.prototype = {
       if (this.isParallelTo(obj)) { return null; }
       var D = this.direction.elements, E = obj.direction.elements;
       var D1 = D[0], D2 = D[1], D3 = D[2], E1 = E[0], E2 = E[1], E3 = E[2];
-      // Create plane containing obj and the shared normal and intersect this with it
-      // Thank you: http://www.cgafaq.info/wiki/Sylvester.Line-line_distance
+      // Create plane containing obj and the shared normal and intersect this
+      // with it Thank you:
+      // http://www.cgafaq.info/wiki/Sylvester.Line-line_distance
       var x = (D3 * E1 - D1 * E3), y = (D1 * E2 - D2 * E1), z = (D2 * E3 - D3 * E2);
       var N = [x * E3 - y * E2, y * E1 - z * E3, z * E2 - x * E1];
       var P = Sylvester.Plane.create(obj.anchor, N);
@@ -137,10 +120,11 @@ Sylvester.Line.prototype = {
     }
   },
 
-  // Returns a copy of the line rotated by t radians about the given line. Works by
-  // finding the argument's closest point to this line's anchor point (call this C) and
-  // rotating the anchor about C. Also rotates the line's direction about the argument's.
-  // Be careful with this - the rotation axis' direction affects the outcome!
+  // Returns a copy of the line rotated by t radians about the given line. Works
+  // by finding the argument's closest point to this line's anchor point (call
+  // this C) and rotating the anchor about C. Also rotates the line's direction
+  // about the argument's. Be careful with this - the rotation axis' direction
+  // affects the outcome!
   rotate: function(t, line) {
     // If we're working in 2D
     if (typeof(line.direction) == 'undefined') { line = Sylvester.Line.create(line.to3D(), Sylvester.Vector.k); }
@@ -160,13 +144,10 @@ Sylvester.Line.prototype = {
     ]);
   },
 
-  // Returns a copy of the line with its direction vector reversed.
-  // Useful when using lines for rotations.
   reverse: function() {
     return Sylvester.Line.create(this.anchor, this.direction.x(-1));
   },
 
-  // Returns the line's reflection in the given point or line
   reflectionIn: function(obj) {
     if (obj.normal) {
       // obj is a plane
@@ -188,7 +169,6 @@ Sylvester.Line.prototype = {
     }
   },
 
-  // Set the line's anchor point and direction.
   setVectors: function(anchor, direction) {
     // Need to do this so that line's properties are not
     // references to the arguments passed in
@@ -209,14 +189,12 @@ Sylvester.Line.prototype = {
   }
 };
 
-// Constructor function
 Sylvester.Line.create = function(anchor, direction) {
   var L = new Sylvester.Line();
   return L.setVectors(anchor, direction);
 };
 var $L = Sylvester.Line.create;
 
-// Axes
 Sylvester.Line.X = Sylvester.Line.create(Sylvester.Vector.Zero(3), Sylvester.Vector.i);
 Sylvester.Line.Y = Sylvester.Line.create(Sylvester.Vector.Zero(3), Sylvester.Vector.j);
 Sylvester.Line.Z = Sylvester.Line.create(Sylvester.Vector.Zero(3), Sylvester.Vector.k);

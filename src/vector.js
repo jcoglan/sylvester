@@ -1,42 +1,36 @@
 Sylvester.Vector = function() {};
 
-// Constructor function
 Sylvester.Vector.create = function(elements) {
   var V = new Sylvester.Vector();
   return V.setElements(elements);
 };
 var $V = Sylvester.Vector.create;
 
-// Random vector of size n
 Sylvester.Vector.Random = function(n) {
   var elements = [];
   while (n--) { elements.push(Math.random()); }
   return Sylvester.Vector.create(elements);
 };
 
-// Sylvester.Vector filled with zeros
 Sylvester.Vector.Zero = function(n) {
   var elements = [];
   while (n--) { elements.push(0); }
   return Sylvester.Vector.create(elements);
 };
+
 Sylvester.Vector.prototype = {
-  // Returns element i of the vector
   e: function(i) {
     return (i < 1 || i > this.elements.length) ? null : this.elements[i-1];
   },
 
-  // Returns the number of elements the vector has
   dimensions: function() {
     return this.elements.length;
   },
 
-  // Returns the modulus ('length') of the vector
   modulus: function() {
     return Math.sqrt(this.dot(this));
   },
 
-  // Returns true iff the vector is equal to the argument
   eql: function(vector) {
     var n = this.elements.length;
     var V = vector.elements || vector;
@@ -47,12 +41,10 @@ Sylvester.Vector.prototype = {
     return true;
   },
 
-  // Returns a copy of the vector
   dup: function() {
     return Sylvester.Vector.create(this.elements);
   },
 
-  // Maps the vector to another vector according to the given function
   map: function(fn, context) {
     var elements = [];
     this.each(function(x, i) {
@@ -61,7 +53,6 @@ Sylvester.Vector.prototype = {
     return Sylvester.Vector.create(elements);
   },
 
-  // Calls the iterator for each element of the vector in turn
   forEach: function(fn, context) {
     var n = this.elements.length;
     for (var i = 0; i < n; i++) {
@@ -69,14 +60,12 @@ Sylvester.Vector.prototype = {
     }
   },
 
-  // Returns a new vector created by normalizing the receiver
   toUnitVector: function() {
     var r = this.modulus();
     if (r === 0) { return this.dup(); }
     return this.map(function(x) { return x/r; });
   },
 
-  // Returns the angle between the vector and the argument (also a vector)
   angleFrom: function(vector) {
     var V = vector.elements || vector;
     var n = this.elements.length, k = n, i;
@@ -96,45 +85,37 @@ Sylvester.Vector.prototype = {
     return Math.acos(theta);
   },
 
-  // Returns true iff the vector is parallel to the argument
   isParallelTo: function(vector) {
     var angle = this.angleFrom(vector);
     return (angle === null) ? null : (angle <= Sylvester.precision);
   },
 
-  // Returns true iff the vector is antiparallel to the argument
   isAntiparallelTo: function(vector) {
     var angle = this.angleFrom(vector);
     return (angle === null) ? null : (Math.abs(angle - Math.PI) <= Sylvester.precision);
   },
 
-  // Returns true iff the vector is perpendicular to the argument
   isPerpendicularTo: function(vector) {
     var dot = this.dot(vector);
     return (dot === null) ? null : (Math.abs(dot) <= Sylvester.precision);
   },
 
-  // Returns the result of adding the argument to the vector
   add: function(vector) {
     var V = vector.elements || vector;
     if (this.elements.length != V.length) { return null; }
     return this.map(function(x, i) { return x + V[i-1]; });
   },
 
-  // Returns the result of subtracting the argument from the vector
   subtract: function(vector) {
     var V = vector.elements || vector;
     if (this.elements.length != V.length) { return null; }
     return this.map(function(x, i) { return x - V[i-1]; });
   },
 
-  // Returns the result of multiplying the elements of the vector by the argument
   multiply: function(k) {
     return this.map(function(x) { return x*k; });
   },
 
-  // Returns the scalar product of the vector with the argument
-  // Both vectors must have equal dimensionality
   dot: function(vector) {
     var V = vector.elements || vector;
     var i, product = 0, n = this.elements.length;
@@ -143,8 +124,6 @@ Sylvester.Vector.prototype = {
     return product;
   },
 
-  // Returns the vector product of the vector with the argument
-  // Both vectors must have dimensionality 3
   cross: function(vector) {
     var B = vector.elements || vector;
     if (this.elements.length != 3 || B.length != 3) { return null; }
@@ -156,7 +135,6 @@ Sylvester.Vector.prototype = {
     ]);
   },
 
-  // Returns the (absolute) largest element of the vector
   max: function() {
     var m = 0, i = this.elements.length;
     while (i--) {
@@ -165,7 +143,6 @@ Sylvester.Vector.prototype = {
     return m;
   },
 
-  // Returns the index of the first match found
   indexOf: function(x) {
     var index = null, n = this.elements.length;
     for (var i = 0; i < n; i++) {
@@ -176,25 +153,20 @@ Sylvester.Vector.prototype = {
     return index;
   },
 
-  // Returns a diagonal matrix with the vector's elements as its diagonal elements
   toDiagonalMatrix: function() {
     return Sylvester.Matrix.Diagonal(this.elements);
   },
 
-  // Returns the result of rounding the elements of the vector
   round: function() {
     return this.map(function(x) { return Math.round(x); });
   },
 
-  // Returns a copy of the vector with elements set to the given value if they
-  // differ from it by less than Sylvester.precision
   snapTo: function(x) {
     return this.map(function(y) {
       return (Math.abs(y - x) <= Sylvester.precision) ? x : y;
     });
   },
 
-  // Returns the vector's distance from the argument, when considered as a point in space
   distanceFrom: function(obj) {
     if (obj.anchor || (obj.start && obj.end)) { return obj.distanceFrom(this); }
     var V = obj.elements || obj;
@@ -207,18 +179,14 @@ Sylvester.Vector.prototype = {
     return Math.sqrt(sum);
   },
 
-  // Returns true if the vector is point on the given line
   liesOn: function(line) {
     return line.contains(this);
   },
 
-  // Return true iff the vector is a point in the given plane
   liesIn: function(plane) {
     return plane.contains(this);
   },
 
-  // Rotates the vector about the given object. The object should be a 
-  // point if the vector is 2D, and a line if it is 3D. Be careful with line directions!
   rotate: function(t, obj) {
     var V, R = null, x, y, z;
     if (t.determinant) { R = t.elements; }
@@ -252,7 +220,6 @@ Sylvester.Vector.prototype = {
     }
   },
 
-  // Returns the result of reflecting the point in the given point, line or plane
   reflectionIn: function(obj) {
     if (obj.anchor) {
       // obj is a plane or line
@@ -267,7 +234,6 @@ Sylvester.Vector.prototype = {
     }
   },
 
-  // Utility to make sure vectors are 3D. If they are 2D, a zero z-component is added
   to3D: function() {
     var V = this.dup();
     switch (V.elements.length) {
@@ -278,12 +244,10 @@ Sylvester.Vector.prototype = {
     return V;
   },
 
-  // Returns a string representation of the vector
   inspect: function() {
     return '[' + this.elements.join(', ') + ']';
   },
 
-  // Set vector's elements from an array
   setElements: function(els) {
     this.elements = (els.elements || els).slice();
     return this;
@@ -293,7 +257,6 @@ Sylvester.Vector.prototype = {
 Sylvester.Vector.prototype.x = Sylvester.Vector.prototype.multiply;
 Sylvester.Vector.prototype.each = Sylvester.Vector.prototype.forEach;
 
-// i, j, k unit vectors
 Sylvester.Vector.i = Sylvester.Vector.create([1,0,0]);
 Sylvester.Vector.j = Sylvester.Vector.create([0,1,0]);
 Sylvester.Vector.k = Sylvester.Vector.create([0,0,1]);

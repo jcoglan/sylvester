@@ -1,17 +1,14 @@
 Sylvester.Plane = function() {};
 
 Sylvester.Plane.prototype = {
-  // Returns true iff the plane occupies the same space as the argument
   eql: function(plane) {
     return (this.contains(plane.anchor) && this.isParallelTo(plane));
   },
 
-  // Returns a copy of the plane
   dup: function() {
     return Sylvester.Plane.create(this.anchor, this.normal);
   },
 
-  // Returns the result of translating the plane by the given vector
   translate: function(vector) {
     var V = vector.elements || vector;
     return Sylvester.Plane.create([
@@ -21,8 +18,6 @@ Sylvester.Plane.prototype = {
     ], this.normal);
   },
 
-  // Returns true iff the plane is parallel to the argument. Will return true
-  // if the planes are equal, or if you give a line and it lies in the plane.
   isParallelTo: function(obj) {
     var theta;
     if (obj.normal) {
@@ -36,13 +31,11 @@ Sylvester.Plane.prototype = {
     return null;
   },
 
-  // Returns true iff the receiver is perpendicular to the argument
   isPerpendicularTo: function(plane) {
     var theta = this.normal.angleFrom(plane.normal);
     return (Math.abs(Math.PI/2 - theta) <= Sylvester.precision);
   },
 
-  // Returns the plane's distance from the given object (point, line or plane)
   distanceFrom: function(obj) {
     if (this.intersects(obj) || this.contains(obj)) { return 0; }
     if (obj.anchor) {
@@ -57,7 +50,6 @@ Sylvester.Plane.prototype = {
     }
   },
 
-  // Returns true iff the plane contains the given point or line
   contains: function(obj) {
     if (obj.normal) { return null; }
     if (obj.direction) {
@@ -70,14 +62,11 @@ Sylvester.Plane.prototype = {
     }
   },
 
-  // Returns true iff the plane has a unique point/line of intersection with the argument
   intersects: function(obj) {
     if (typeof(obj.direction) == 'undefined' && typeof(obj.normal) == 'undefined') { return null; }
     return !this.isParallelTo(obj);
   },
 
-  // Returns the unique intersection with the argument, if one exists. The result
-  // will be a vector if a line is supplied, and a line if a plane is supplied.
   intersectionWith: function(obj) {
     if (!this.intersects(obj)) { return null; }
     if (obj.direction) {
@@ -89,8 +78,8 @@ Sylvester.Plane.prototype = {
     } else if (obj.normal) {
       // obj is a plane
       var direction = this.normal.cross(obj.normal).toUnitVector();
-      // To find an anchor point, we find one co-ordinate that has a value
-      // of zero somewhere on the intersection, and remember which one we picked
+      // To find an anchor point, we find one co-ordinate that has a value of
+      // zero somewhere on the intersection, and remember which one we picked
       var N = this.normal.elements, A = this.anchor.elements,
           O = obj.normal.elements, B = obj.anchor.elements;
       var solver = Sylvester.Matrix.Zero(2,2), i = 0;
@@ -111,15 +100,14 @@ Sylvester.Plane.prototype = {
       ];
       var anchor = [];
       for (var j = 1; j <= 3; j++) {
-        // This formula picks the right element from intersection by
-        // cycling depending on which element we set to zero above
+        // This formula picks the right element from intersection by cycling
+        // depending on which element we set to zero above
         anchor.push((i == j) ? 0 : intersection[(j + (5 - i)%3)%3]);
       }
       return Sylvester.Line.create(anchor, direction);
     }
   },
 
-  // Returns the point in the plane closest to the given point
   pointClosestTo: function(point) {
     var P = point.elements || point;
     var A = this.anchor.elements, N = this.normal.elements;
@@ -127,8 +115,6 @@ Sylvester.Plane.prototype = {
     return Sylvester.Vector.create([P[0] + N[0] * dot, P[1] + N[1] * dot, (P[2] || 0) + N[2] * dot]);
   },
 
-  // Returns a copy of the plane, rotated by t radians about the given line
-  // See notes on Sylvester.Line#rotate.
   rotate: function(t, line) {
     var R = t.determinant ? t.elements : Sylvester.Matrix.Rotation(t, line.direction).elements;
     var C = line.pointClosestTo(this.anchor).elements;
@@ -146,7 +132,6 @@ Sylvester.Plane.prototype = {
     ]);
   },
 
-  // Returns the reflection of the plane in the given point, line or plane.
   reflectionIn: function(obj) {
     if (obj.normal) {
       // obj is a plane
@@ -168,10 +153,6 @@ Sylvester.Plane.prototype = {
     }
   },
 
-  // Sets the anchor point and normal to the plane. If three arguments are specified,
-  // the normal is calculated by assuming the three points should lie in the same plane.
-  // If only two are sepcified, the second is taken to be the normal. Normal vector is
-  // normalised before storage.
   setVectors: function(anchor, v1, v2) {
     anchor = Sylvester.Vector.create(anchor);
     anchor = anchor.to3D(); if (anchor === null) { return null; }
@@ -207,21 +188,17 @@ Sylvester.Plane.prototype = {
   }
 };
 
-// Constructor function
 Sylvester.Plane.create = function(anchor, v1, v2) {
   var P = new Sylvester.Plane();
   return P.setVectors(anchor, v1, v2);
 };
 var $P = Sylvester.Plane.create;
 
-// X-Y-Z planes
 Sylvester.Plane.XY = Sylvester.Plane.create(Sylvester.Vector.Zero(3), Sylvester.Vector.k);
 Sylvester.Plane.YZ = Sylvester.Plane.create(Sylvester.Vector.Zero(3), Sylvester.Vector.i);
 Sylvester.Plane.ZX = Sylvester.Plane.create(Sylvester.Vector.Zero(3), Sylvester.Vector.j);
 Sylvester.Plane.YX = Sylvester.Plane.XY; Sylvester.Plane.ZY = Sylvester.Plane.YZ; Sylvester.Plane.XZ = Sylvester.Plane.ZX;
 
-// Returns the plane containing the given points (can be arrays as
-// well as vectors). If the points are not coplanar, returns null.
 Sylvester.Plane.fromPoints = function(points) {
   var np = points.length, list = [], i, P, n, N, A, B, C, D, theta, prevN, totalN = Sylvester.Vector.Zero(3);
   for (i = 0; i < np; i++) {
@@ -238,9 +215,11 @@ Sylvester.Plane.fromPoints = function(points) {
         (A[0] - B[0]) * (C[1] - B[1]) - (A[1] - B[1]) * (C[0] - B[0])
       ]).toUnitVector();
       if (n > 3) {
-        // If the latest normal is not (anti)parallel to the previous one, we've strayed off the plane.
-        // This might be a slightly long-winded way of doing things, but we need the sum of all the normals
-        // to find which way the plane normal should point so that the points form an anticlockwise list.
+        // If the latest normal is not (anti)parallel to the previous one, we've
+        // strayed off the plane. This might be a slightly long-winded way of
+        // doing things, but we need the sum of all the normals to find which
+        // way the plane normal should point so that the points form an
+        // anticlockwise list.
         theta = N.angleFrom(prevN);
         if (theta !== null) {
           if (!(Math.abs(theta) <= Sylvester.precision || Math.abs(theta - Math.PI) <= Sylvester.precision)) { return null; }
@@ -250,7 +229,8 @@ Sylvester.Plane.fromPoints = function(points) {
       prevN = N;
     }
   }
-  // We need to add in the normals at the start and end points, which the above misses out
+  // We need to add in the normals at the start and end points, which the above
+  // misses out
   A = list[1].elements; B = list[0].elements; C = list[n-1].elements; D = list[n-2].elements;
   totalN = totalN.add(Sylvester.Vector.create([
     (A[1] - B[1]) * (C[2] - B[2]) - (A[2] - B[2]) * (C[1] - B[1]),
