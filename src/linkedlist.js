@@ -79,7 +79,7 @@ Sylvester.LinkedList.Circular.Methods = {
     newNode.next = node.next;
     node.next.prev = newNode;
     node.next = newNode;
-    if (newNode.prev == this.last) { this.last = newNode; }
+    if (newNode.prev === this.last) { this.last = newNode; }
     this.length++;
   },
 
@@ -88,7 +88,7 @@ Sylvester.LinkedList.Circular.Methods = {
     newNode.next = node;
     node.prev.next = newNode;
     node.prev = newNode;
-    if (newNode.next == this.first) { this.first = newNode; }
+    if (newNode.next === this.first) { this.first = newNode; }
     this.length++;
   },
 
@@ -96,8 +96,8 @@ Sylvester.LinkedList.Circular.Methods = {
     if (this.length > 1) {
       node.prev.next = node.next;
       node.next.prev = node.prev;
-      if (node == this.first) { this.first = node.next; }
-      if (node == this.last) { this.last = node.prev; }
+      if (node === this.first) { this.first = node.next; }
+      if (node === this.last) { this.last = node.prev; }
     } else {
       this.first = null;
       this.last = null;
@@ -110,8 +110,8 @@ Sylvester.LinkedList.Circular.Methods = {
   withData: function(data) {
     var nodeFromStart = this.first, nodeFromEnd = this.last, n = Math.ceil(this.length / 2);
     while (n--) {
-      if (nodeFromStart.data == data) { return nodeFromStart; }
-      if (nodeFromEnd.data == data) { return nodeFromEnd; }
+      if (nodeFromStart.data === data) { return nodeFromStart; }
+      if (nodeFromEnd.data === data) { return nodeFromEnd; }
       nodeFromStart = nodeFromStart.next;
       nodeFromEnd = nodeFromEnd.prev;
     }

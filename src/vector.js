@@ -34,7 +34,7 @@ Sylvester.Vector.prototype = {
   eql: function(vector) {
     var n = this.elements.length;
     var V = vector.elements || vector;
-    if (n != V.length) { return false; }
+    if (n !== V.length) { return false; }
     while (n--) {
       if (Math.abs(this.elements[n] - V[n]) > Sylvester.precision) { return false; }
     }
@@ -69,7 +69,7 @@ Sylvester.Vector.prototype = {
   angleFrom: function(vector) {
     var V = vector.elements || vector;
     var n = this.elements.length, k = n, i;
-    if (n != V.length) { return null; }
+    if (n !== V.length) { return null; }
     var dot = 0, mod1 = 0, mod2 = 0;
     // Work things out in parallel to save time
     this.each(function(x, i) {
@@ -102,13 +102,13 @@ Sylvester.Vector.prototype = {
 
   add: function(vector) {
     var V = vector.elements || vector;
-    if (this.elements.length != V.length) { return null; }
+    if (this.elements.length !== V.length) { return null; }
     return this.map(function(x, i) { return x + V[i-1]; });
   },
 
   subtract: function(vector) {
     var V = vector.elements || vector;
-    if (this.elements.length != V.length) { return null; }
+    if (this.elements.length !== V.length) { return null; }
     return this.map(function(x, i) { return x - V[i-1]; });
   },
 
@@ -119,14 +119,14 @@ Sylvester.Vector.prototype = {
   dot: function(vector) {
     var V = vector.elements || vector;
     var i, product = 0, n = this.elements.length;
-    if (n != V.length) { return null; }
+    if (n !== V.length) { return null; }
     while (n--) { product += this.elements[n] * V[n]; }
     return product;
   },
 
   cross: function(vector) {
     var B = vector.elements || vector;
-    if (this.elements.length != 3 || B.length != 3) { return null; }
+    if (this.elements.length !== 3 || B.length !== 3) { return null; }
     var A = this.elements;
     return Sylvester.Vector.create([
       (A[1] * B[2]) - (A[2] * B[1]),
@@ -146,7 +146,7 @@ Sylvester.Vector.prototype = {
   indexOf: function(x) {
     var index = null, n = this.elements.length;
     for (var i = 0; i < n; i++) {
-      if (index === null && this.elements[i] == x) {
+      if (index === null && this.elements[i] === x) {
         index = i + 1;
       }
     }
@@ -170,7 +170,7 @@ Sylvester.Vector.prototype = {
   distanceFrom: function(obj) {
     if (obj.anchor || (obj.start && obj.end)) { return obj.distanceFrom(this); }
     var V = obj.elements || obj;
-    if (V.length != this.elements.length) { return null; }
+    if (V.length !== this.elements.length) { return null; }
     var sum = 0, part;
     this.each(function(x, i) {
       part = x - V[i-1];
@@ -193,7 +193,7 @@ Sylvester.Vector.prototype = {
     switch (this.elements.length) {
       case 2:
         V = obj.elements || obj;
-        if (V.length != 2) { return null; }
+        if (V.length !== 2) { return null; }
         if (!R) { R = Sylvester.Matrix.Rotation(t).elements; }
         x = this.elements[0] - V[0];
         y = this.elements[1] - V[1];
@@ -229,7 +229,7 @@ Sylvester.Vector.prototype = {
     } else {
       // obj is a point
       var Q = obj.elements || obj;
-      if (this.elements.length != Q.length) { return null; }
+      if (this.elements.length !== Q.length) { return null; }
       return this.map(function(x, i) { return Q[i-1] + (Q[i-1] - x); });
     }
   },

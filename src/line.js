@@ -127,7 +127,7 @@ Sylvester.Line.prototype = {
   // affects the outcome!
   rotate: function(t, line) {
     // If we're working in 2D
-    if (typeof(line.direction) == 'undefined') { line = Sylvester.Line.create(line.to3D(), Sylvester.Vector.k); }
+    if (typeof(line.direction) === 'undefined') { line = Sylvester.Line.create(line.to3D(), Sylvester.Vector.k); }
     var R = Sylvester.Matrix.Rotation(t, line.direction).elements;
     var C = line.pointClosestTo(this.anchor).elements;
     var A = this.anchor.elements, D = this.direction.elements;
@@ -174,8 +174,8 @@ Sylvester.Line.prototype = {
     // references to the arguments passed in
     anchor = Sylvester.Vector.create(anchor);
     direction = Sylvester.Vector.create(direction);
-    if (anchor.elements.length == 2) {anchor.elements.push(0); }
-    if (direction.elements.length == 2) { direction.elements.push(0); }
+    if (anchor.elements.length === 2) {anchor.elements.push(0); }
+    if (direction.elements.length === 2) { direction.elements.push(0); }
     if (anchor.elements.length > 3 || direction.elements.length > 3) { return null; }
     var mod = direction.modulus();
     if (mod === 0) { return null; }

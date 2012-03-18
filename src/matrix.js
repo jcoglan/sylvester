@@ -11,7 +11,7 @@ Sylvester.Matrix.I = function(n) {
   while (i--) { j = n;
     els[i] = [];
     while (j--) {
-      els[i][j] = (i == j) ? 1 : 0;
+      els[i][j] = (i === j) ? 1 : 0;
     }
   }
   return Sylvester.Matrix.create(els);
@@ -34,7 +34,7 @@ Sylvester.Matrix.Rotation = function(theta, a) {
     ]);
   }
   var axis = a.dup();
-  if (axis.elements.length != 3) { return null; }
+  if (axis.elements.length !== 3) { return null; }
   var mod = axis.modulus();
   var x = axis.elements[0]/mod, y = axis.elements[1]/mod, z = axis.elements[2]/mod;
   var s = Math.sin(theta), c = Math.cos(theta), t = 1 - c;
@@ -125,12 +125,12 @@ Sylvester.Matrix.prototype = {
 
   eql: function(matrix) {
     var M = matrix.elements || matrix;
-    if (!M[0] || typeof(M[0][0]) == 'undefined') { M = Sylvester.Matrix.create(M).elements; }
+    if (!M[0] || typeof(M[0][0]) === 'undefined') { M = Sylvester.Matrix.create(M).elements; }
     if (this.elements.length === 0 || M.length === 0) {
       return this.elements.length === M.length;
     }
     if (this.elements.length !== M.length) { return false; }
-    if (this.elements[0].length != M[0].length) { return false; }
+    if (this.elements[0].length !== M[0].length) { return false; }
     var i = this.elements.length, nj = this.elements[0].length, j;
     while (i--) { j = nj;
       while (j--) {
@@ -158,16 +158,16 @@ Sylvester.Matrix.prototype = {
 
   isSameSizeAs: function(matrix) {
     var M = matrix.elements || matrix;
-    if (typeof(M[0][0]) == 'undefined') { M = Sylvester.Matrix.create(M).elements; }
+    if (typeof(M[0][0]) === 'undefined') { M = Sylvester.Matrix.create(M).elements; }
     if (this.elements.length === 0) { return M.length === 0; }
-    return (this.elements.length == M.length &&
-        this.elements[0].length == M[0].length);
+    return (this.elements.length === M.length &&
+        this.elements[0].length === M[0].length);
   },
 
   add: function(matrix) {
     if (this.elements.length === 0) return this.map(function(x) { return x });
     var M = matrix.elements || matrix;
-    if (typeof(M[0][0]) == 'undefined') { M = Sylvester.Matrix.create(M).elements; }
+    if (typeof(M[0][0]) === 'undefined') { M = Sylvester.Matrix.create(M).elements; }
     if (!this.isSameSizeAs(M)) { return null; }
     return this.map(function(x, i, j) { return x + M[i-1][j-1]; });
   },
@@ -175,7 +175,7 @@ Sylvester.Matrix.prototype = {
   subtract: function(matrix) {
     if (this.elements.length === 0) return this.map(function(x) { return x });
     var M = matrix.elements || matrix;
-    if (typeof(M[0][0]) == 'undefined') { M = Sylvester.Matrix.create(M).elements; }
+    if (typeof(M[0][0]) === 'undefined') { M = Sylvester.Matrix.create(M).elements; }
     if (!this.isSameSizeAs(M)) { return null; }
     return this.map(function(x, i, j) { return x - M[i-1][j-1]; });
   },
@@ -183,9 +183,9 @@ Sylvester.Matrix.prototype = {
   canMultiplyFromLeft: function(matrix) {
     if (this.elements.length === 0) { return false; }
     var M = matrix.elements || matrix;
-    if (typeof(M[0][0]) == 'undefined') { M = Sylvester.Matrix.create(M).elements; }
+    if (typeof(M[0][0]) === 'undefined') { M = Sylvester.Matrix.create(M).elements; }
     // this.columns should equal matrix.rows
-    return (this.elements[0].length == M.length);
+    return (this.elements[0].length === M.length);
   },
 
   multiply: function(matrix) {
@@ -195,7 +195,7 @@ Sylvester.Matrix.prototype = {
     }
     var returnVector = matrix.modulus ? true : false;
     var M = matrix.elements || matrix;
-    if (typeof(M[0][0]) == 'undefined') { M = Sylvester.Matrix.create(M).elements; }
+    if (typeof(M[0][0]) === 'undefined') { M = Sylvester.Matrix.create(M).elements; }
     if (!this.canMultiplyFromLeft(M)) { return null; }
     var i = this.elements.length, nj = M[0].length, j;
     var cols = this.elements[0].length, c, elements = [], sum;
@@ -242,7 +242,7 @@ Sylvester.Matrix.prototype = {
 
   isSquare: function() {
     var cols = (this.elements.length === 0) ? 0 : this.elements[0].length;
-    return (this.elements.length == cols);
+    return (this.elements.length === cols);
   },
 
   max: function() {
@@ -261,7 +261,7 @@ Sylvester.Matrix.prototype = {
     var index = null, ni = this.elements.length, i, nj = this.elements[0].length, j;
     for (i = 0; i < ni; i++) {
       for (j = 0; j < nj; j++) {
-        if (this.elements[i][j] == x) { return {i: i+1, j: j+1}; }
+        if (this.elements[i][j] === x) { return {i: i+1, j: j+1}; }
       }
     }
     return null;
@@ -281,9 +281,9 @@ Sylvester.Matrix.prototype = {
     var M = this.dup(), els;
     var n = this.elements.length, i, j, np = this.elements[0].length, p;
     for (i = 0; i < n; i++) {
-      if (M.elements[i][i] == 0) {
+      if (M.elements[i][i] === 0) {
         for (j = i + 1; j < n; j++) {
-          if (M.elements[j][i] != 0) {
+          if (M.elements[j][i] !== 0) {
             els = [];
             for (p = 0; p < np; p++) { els.push(M.elements[i][p] + M.elements[j][p]); }
             M.elements[i] = els;
@@ -291,7 +291,7 @@ Sylvester.Matrix.prototype = {
           }
         }
       }
-      if (M.elements[i][i] != 0) {
+      if (M.elements[i][i] !== 0) {
         for (j = i + 1; j < n; j++) {
           var multiplier = M.elements[j][i] / M.elements[i][i];
           els = [];
@@ -349,10 +349,10 @@ Sylvester.Matrix.prototype = {
   augment: function(matrix) {
     if (this.elements.length === 0) { return this.dup(); }
     var M = matrix.elements || matrix;
-    if (typeof(M[0][0]) == 'undefined') { M = Sylvester.Matrix.create(M).elements; }
+    if (typeof(M[0][0]) === 'undefined') { M = Sylvester.Matrix.create(M).elements; }
     var T = this.dup(), cols = T.elements[0].length;
     var i = T.elements.length, nj = M[0].length, j;
-    if (i != M.length) { return null; }
+    if (i !== M.length) { return null; }
     while (i--) { j = nj;
       while (j--) {
         T.elements[i][cols + j] = M[i][j];
@@ -419,7 +419,7 @@ Sylvester.Matrix.prototype = {
 
   setElements: function(els) {
     var i, j, elements = els.elements || els;
-    if (elements[0] && typeof(elements[0][0]) != 'undefined') {
+    if (elements[0] && typeof(elements[0][0]) !== 'undefined') {
       i = elements.length;
       this.elements = [];
       while (i--) { j = elements[i].length;

@@ -85,7 +85,7 @@ Sylvester.Polygon.prototype = {
 
   // Returns true iff the polygon is a triangle
   isTriangle: function() {
-    return this.vertices.length == 3;
+    return this.vertices.length === 3;
   },
 
   // Returns a collection of triangles used for calculating area and center of mass.
@@ -177,7 +177,7 @@ Sylvester.Polygon.prototype = {
     }
     this.vertices.remove(node);
     // Deal with previous vertex's change of class
-    if (prevWasConvex != prev.data.isConvex(this)) {
+    if (prevWasConvex !== prev.data.isConvex(this)) {
       if (prevWasConvex) {
         this.convexVertices.remove(this.convexVertices.withData(prev.data));
         this.reflexVertices.append(new Sylvester.LinkedList.Node(prev.data));
@@ -187,7 +187,7 @@ Sylvester.Polygon.prototype = {
       }
     }
     // Deal with next vertex's change of class
-    if (nextWasConvex != next.data.isConvex(this)) {
+    if (nextWasConvex !== next.data.isConvex(this)) {
       if (nextWasConvex) {
         this.convexVertices.remove(this.convexVertices.withData(next.data));
         this.reflexVertices.append(new Sylvester.LinkedList.Node(next.data));
@@ -221,7 +221,7 @@ Sylvester.Polygon.prototype = {
       if (theta >= 2 * Math.PI - Sylvester.precision) { loops++; theta -= 2 * Math.PI; }
       if (theta <= -2 * Math.PI + Sylvester.precision) { loops--; theta += 2 * Math.PI; }
     });
-    return loops != 0;
+    return loops !== 0;
   },
 
   // Returns true if the given point lies on an edge of the polygon
@@ -261,7 +261,7 @@ Sylvester.Polygon.prototype = {
         poly.reflexVertices.each(function(node) {
           // Don't test points belonging to this triangle. node won't be
           // equal to convexNode as node is reflex and vertex is convex.
-          if (node.data != mainNode.prev.data && node.data != mainNode.next.data) {
+          if (node.data !== mainNode.prev.data && node.data !== mainNode.next.data) {
             if (trig.contains(node.data) || trig.hasEdgeContaining(node.data)) { success = false; }
           }
         });

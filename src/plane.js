@@ -63,7 +63,7 @@ Sylvester.Plane.prototype = {
   },
 
   intersects: function(obj) {
-    if (typeof(obj.direction) == 'undefined' && typeof(obj.normal) == 'undefined') { return null; }
+    if (typeof(obj.direction) === 'undefined' && typeof(obj.normal) === 'undefined') { return null; }
     return !this.isParallelTo(obj);
   },
 
@@ -102,7 +102,7 @@ Sylvester.Plane.prototype = {
       for (var j = 1; j <= 3; j++) {
         // This formula picks the right element from intersection by cycling
         // depending on which element we set to zero above
-        anchor.push((i == j) ? 0 : intersection[(j + (5 - i)%3)%3]);
+        anchor.push((i === j) ? 0 : intersection[(j + (5 - i)%3)%3]);
       }
       return Sylvester.Line.create(anchor, direction);
     }
@@ -158,7 +158,7 @@ Sylvester.Plane.prototype = {
     anchor = anchor.to3D(); if (anchor === null) { return null; }
     v1 = Sylvester.Vector.create(v1);
     v1 = v1.to3D(); if (v1 === null) { return null; }
-    if (typeof(v2) == 'undefined') {
+    if (typeof(v2) === 'undefined') {
       v2 = null;
     } else {
       v2 = Sylvester.Vector.create(v2);

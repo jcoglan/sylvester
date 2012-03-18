@@ -1,7 +1,7 @@
 Sylvester.Polygon.Vertex = function(point) {
   this.setElements(point);
-  if (this.elements.length == 2) { this.elements.push(0); }
-  if (this.elements.length != 3) { return null; }
+  if (this.elements.length === 2) { this.elements.push(0); }
+  if (this.elements.length !== 3) { return null; }
 };
 Sylvester.Polygon.Vertex.prototype = new Sylvester.Vector;
 

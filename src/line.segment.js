@@ -51,7 +51,7 @@ Sylvester.Line.Segment.prototype = {
   contains: function(obj) {
     if (obj.start && obj.end) { return this.contains(obj.start) && this.contains(obj.end); }
     var P = (obj.elements || obj).slice();
-    if (P.length == 2) { P.push(0); }
+    if (P.length === 2) { P.push(0); }
     if (this.start.eql(P)) { return true; }
     var S = this.start.elements;
     var V = Sylvester.Vector.create([S[0] - P[0], S[1] - P[1], S[2] - (P[2] || 0)]);
