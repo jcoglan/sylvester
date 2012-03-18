@@ -25,6 +25,7 @@
   <a href="#e"><code>e</code></a>,
   <a href="#each"><code>each</code></a>,
   <a href="#eql"><code>eql</code></a>,
+  <a href="#foreach"><code>forEach</code></a>,
   <a href="#indexof"><code>indexOf</code></a>,
   <a href="#inspect"><code>inspect</code></a>,
   <a href="#isantiparallelto"><code>isAntiparallelTo</code></a>,
@@ -153,7 +154,19 @@
     notation.</p>
   
   <a name="each"></a>
-  <h3 class="method">each(<span class="arg">iterator</span>) <span class="version">0.1.1</span></h3>
+  <h3 class="method">each(<span class="arg">iterator</span>, <span class="arg">context</span>) <span class="version">0.1.1</span></h3>
+  
+  <p>Alias for <a href="#foreach"><code>forEach(iterator, context)</code></a>.</p>
+  
+  <a name="eql"></a>
+  <h3 class="method">eql(<span class="arg">vector</span>) <span class="version">0.1.0</span></h3>
+  
+  <p>Returns <code>true</code> iff the receiver is equal to <code>vector</code>,
+    that is, if all their elements are equal. <a href="/docs.html">See note on
+    accuracy</a>.</p>
+  
+  <a name="foreach"></a>
+  <h3 class="method">forEach(<span class="arg">iterator</span>, <span class="arg">context</span>) <span class="version">0.2.0</span></h3>
   
   <p>Calls <code>iterator</code> for each element of the receiver.
     <code>iterator</code> is passed the index (numbered from 1) of each element
@@ -166,12 +179,7 @@
   
   // Alerts: '1: 4', '2: 9', '3: 3', '4: 6'</pre></code>
   
-  <a name="eql"></a>
-  <h3 class="method">eql(<span class="arg">vector</span>) <span class="version">0.1.0</span></h3>
-  
-  <p>Returns <code>true</code> iff the receiver is equal to <code>vector</code>,
-    that is, if all their elements are equal. <a href="/docs.html">See note on
-    accuracy</a>.</p>
+  <p>This method is aliased as <a href="#each"><code>each(iterator, context)</code></a>.</p>
   
   <a name="indexof"></a>
   <h3 class="method">indexOf(<span class="arg">x</span>) <span class="version">0.1.0</span></h3>
