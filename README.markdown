@@ -9,11 +9,10 @@ for documentation.
 Sylvester is built using `jake` and tested with JS.Test. Tests should run on all
 target platforms, including browsers, Node and other JS runtimes.
 
-Install the build tools (requires Rubygems and npm)
+Install the build tools (requires Rubygems)
 
     gem install bundler
     bundle install
-    npm install
 
 To build the library from source:
 
