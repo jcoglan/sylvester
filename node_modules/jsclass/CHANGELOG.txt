@@ -1,0 +1,445 @@
+Version 3.0.7
+TestSwarm build: http://swarm.jcoglan.com/job/121/
+February 22 2012
+================================================================
+
+* Fix a race condition in the AsyncSteps scheduling code
+
+* Make JS.Console stringify DOM nodes successfully in Chrome
+
+
+Version 3.0.6
+TestSwarm build: http://swarm.jcoglan.com/job/119/
+February 20 2012
+================================================================
+
+* Allow packages to contain multiple files as a convenience
+  for loading 3rd-party libraries
+
+* Fix script loading on Adobe AIR
+
+* Fix fetching of scripts over HTTPS in jsbuild, and fail if
+  requests return a non-200 status
+
+* Make sure Module and Method have all the Kernel methods
+
+* Make tests raise an error if a block takes a resume-callback
+  but doesn't call it after 10 seconds
+
+* Change TestSuite.forEach so that test suites run much faster
+
+* Show stack traces for errors during tests, and use sourceURL
+  mapping to improve reporting of errros from scripts loaded
+  over XHR
+
+
+Version 3.0.5
+TestSwarm build: http://swarm.jcoglan.com/job/109/
+December 6 2011
+================================================================
+
+* Allow yields() and returns() to be used on the same stub
+
+* Remove deprecation warnings about Node's sys module
+
+
+Version 3.0.4
+TestSwarm build: http://swarm.jcoglan.com/job/97/
+August 18 2011
+================================================================
+
+* Add JS.load() function as shorthand method for loading files,
+  and JS.cacheBust setting for bypassing the browser cache
+
+* Make jsbuild error output nicer, e.g. don't show Node backtrace
+
+
+Version 3.0.3
+TestSwarm build: http://swarm.jcoglan.com/job/90/
+August 15 2011
+================================================================
+
+* Allow constructors expected to be called with 'new' to be mocked
+  and stubbed in JS.Test
+
+* Enhance browser UI with user agent and success indicator and
+  provide controls for running individual groups of tests
+
+* Send entire test UI snapshot to TestSwarm rather than just a
+  short status summary
+
+* Fix serialization of objects containing circular references
+  in JS.Console.convert()
+
+* Improvements to jsbuild for managing bundles of scripts
+
+
+Version 3.0.2
+TestSwarm build: http://swarm.jcoglan.com/job/70/
+July 16 2011
+================================================================
+
+* Exit with non-zero exit status from JS.Test.autorun() if there
+  are any test failures
+
+* Log test progress at JSON so we can pick up test results using
+  PhantomJS (http://www.phantomjs.org)
+
+* Allow post-test reports to cause the build to fail by returning
+  false from report(). e.g. Coverage can cause a red build if it
+  finds methods that were not called
+
+* Use synchronous console.warn() to produce output in Node, and
+  System.out.print[ln] on Rhino platforms
+
+
+Version 3.0.1
+TestSwarm build: http://swarm.jcoglan.com/job/31/
+June 17 2011
+================================================================
+
+* Adds NPM package and jsbuild command-line program for bundling
+  required modules for deployment, see
+  http://jsclass.jcoglan.com/packages/bundling.html
+
+* When using JS.require(), scripts from the same domain are
+  prefetched over XHR to maximize parallel downloading
+
+* Fixes support for negative mock expectations, e.g.
+  expect(object, 'm').exactly(0)
+
+* Fixes scheduling bugs in FakeClock so that current time remains
+  correct when removing and restoring timers
+
+* Avoids stubbing of setTimeout() inside AsyncSteps, otherwise
+  it becomes very hard to use with FakeClock
+
+
+Version 3.0.0
+TestSwarm build: http://swarm.jcoglan.com/job/19/
+February 28 2011
+================================================================
+
+* All components now run on a much wider array of platforms,
+  see http://jsclass.jcoglan.com/platforms.html
+
+* JS.Class is now tested using its own test framework, JS.Test.
+  See http://jsclass.jcoglan.com/testing.html
+
+* New libraries: Benchmark, Console, Deferrable, OrderedHash,
+  Range, OrderedSet, TSort
+
+* HashSet has become the base Set implementation, and the
+  original Set implementation has been removed
+
+* StackTrace has been totally overhauled to support extensible
+  user-defined tracing functionality
+
+* New core method Module#alias() for aliasing methods
+
+* User-defined keyword methods using Method.keyword()
+
+* JS.Class no longer supports subclassing the Class class
+
+* Module#instanceMethod() returns a Method, not a Function
+
+* Enumerable#grep() now supports selecting by type, e.g.
+  items.grep(Array). It does not support functional predicates
+  like items.grep(function(x) { return x == 0 }), you should use
+  Enumerable#select() for this
+
+* Objects with the same properties, and Arrays with the same
+  elements are now considered equal when used as Hash keys
+
+* MethodChain#fire() is now called MethodChain#__exec__()
+
+* JS.Ruby has been removed
+
+* JS.State now adds states() as a class method, rather than a
+  macro in the class body. All classes using 'inline' states
+  MUST call this method to declare and resolve their states
+
+
+Version 2.1.5
+June 5 2010
+================================================================
+
+* Adds support for Node, Narwhal and Windows Script Host to the
+  JS.Package loading system.
+
+* Adds an `autoload` macro to the package system for quickly
+  configuring modules using filename conventions.
+
+* Renames `require()` to `JS.require()` so as not to conflict
+  with CommonJS module API.
+
+
+Version 2.1.4
+March 9 2010
+================================================================
+
+* Rewritten the package loader to use event listeners to trigger
+  loading of dependencies rather than polling for readiness.
+
+* package.js and loader.js no longer depend on or include the
+  JS.Class core; you must call `require()` to use JS.Class,
+  JS.Module, JS.Interface or JS.Singleton.
+
+* Fix bug in browser package loader in environments that have
+  a global `console` object with no `info()` method.
+
+
+Version 2.1.3
+October 10 2009
+================================================================
+
+* Fixes the load() function in the Packages DSL, and adds some
+  caching to improve lookup times for finding a package by the
+  name of its provided objects.
+
+* Non-existent package errors are now defered until you require()
+  an object rather than being thrown at package definition time.
+  This means require() won't complain about being passed native
+  objects or objects loaded by other means, as long as the
+  required object does actually exist.
+
+* MethodChain now adds instance methods from Modules, and adds
+  methods that were defined *before* MethodChain was loaded.
+
+* State now supports callSuper() to state methods imported from
+  mixins; previously you could only callSuper() to the superclass.
+
+
+Version 2.1.2
+August 11 2009
+================================================================
+
+* LinkedList was defined twice in the stdlib.js bundle; this
+  is now fixed [thanks @skim].
+
+
+Version 2.1.1
+July 6 2009
+================================================================
+
+* Fixes a couple of Set bugs: Set#isProperSuperset had a missing
+  argument, and incomparable objects were being allowed into
+  SortedSet collections.
+
+
+Version 2.1.0
+June 8 2009
+================================================================
+
+* New libraries: ConstantScope, Hash, HashSet.
+
+* Improved package manager, supports parallel downloads in
+  web browsers and now also works on server-side platforms
+  (tested on SpiderMonkey, Rhino and V8). Also supports custom
+  loader functions for integration with Google, YUI etc.
+
+* Enumerable updated with Ruby 1.9 methods, enumerators, and
+  Symbol#to_proc functionality when passing strings to iterators.
+  Any object with a toFunction() method can be used as an iterator.
+  Search methods now use equals() where possible.
+
+* ObjectMethods module is now called Kernel.
+
+* New Kernel methods: tap(), equals(), hash(), enumFor() and methods(),
+  and new Module methods: instanceMethods() and match().
+
+* The double inclusion problem is now fixed, i.e. the following
+  works in JS.Class 2.1:
+  
+      A = new JS.Module();
+      C = new JS.Class({ include: A });
+      B = new JS.Module({ foo: function() { return 'B#foo' } });
+      A.include(B);
+      D = new JS.Class({ include: A });
+
+      new C().foo()   // -> 'B#foo'
+      new D().foo()   // -> 'B#foo'
+  
+  (See http://eigenclass.org/hiki/The+double+inclusion+problem)
+
+* Ancestor and method lookups are cached for improved performance.
+
+* Automatic generation of displayName on methods for integration
+  with the WebKit debugger.
+
+* API change: Set#classify now returns a Hash, not an Object.
+
+* PDoc documentation for the core classes.
+
+
+Version 1.6.3
+March 4 2009
+================================================================
+
+* Fixes a bug caused by Function#prototype becoming a non-
+  enumerable property in Safari 4, causing classes to inherit
+  from themselves and leading to stack overflows.
+
+
+Version 2.0.2
+October 1 2008
+================================================================
+
+* The function returned by object.method('callSuper') now behaves
+  correctly when called after the containing method has returned.
+
+
+Version 1.6.2
+October 1 2008
+================================================================
+
+* Fixes some bugs to make various forEach() methods more robust.
+
+
+Version 2.0.1
+September 14 2008
+================================================================
+
+* Fixes a super()-related bug in Command.
+
+* Better handling of 'include' and 'extend' directives such
+  that these are processed before all the other methods are
+  added. This allows mixins to override parts of the including
+  class to affect future method definitions.
+
+* Module#include() has been fixed so that overriding it produces
+  more sane behaviour with respect to classes that delegate to
+  a module behind the scenes to store methods.
+
+
+Version 2.0.0
+August 12 2008
+================================================================
+
+* Complete rewrite of the core, including a proper implementation
+  of Modules with all inheritance semantics based around this.
+  Ruby-style multiple inheritance now works correctly, and
+  callSuper() can call methods from mixins.
+
+* Class and Module are now classes, and must be created using
+  the 'new' keyword.
+
+* Some backward compatibility breaks; see http://jsclass.jcoglan.com/upgrade.html
+
+* New method: Object#__eigen__() returns an object's metaclass.
+
+* Performance of super() calls is much improved.
+
+* New libraries: Package, Set, SortedSet and StackTrace.
+
+* Package provides a dependency-aware system for loading new
+  JavaScript files on demand.
+
+
+Version 1.6.1
+April 17 2008
+================================================================
+
+* Fixes bug in Decorator and Proxy.Virtual caused by the 'klass'
+  property being treated as a method and delegated.
+
+
+Version 1.6.0
+April 10 2008
+================================================================
+
+* Adds a DSL for defining classes in a more Ruby-like way using
+  procedures rather than declarations (experimental).
+
+* New libraries: Forwardable, State.
+
+* The extended() hook is now supported.
+
+* The 'implement' directive is no longer supported.
+
+
+Version 1.5.0
+February 25 2008
+================================================================
+
+* Adds a standard library, including Command, Comparable,
+  Decorator, Enumerable, LinkedList, MethodChain, Observable
+  and Proxy.Virtual.
+
+* Renames _super() to callSuper() to avoid problems with PackR's
+  private variable shrinking.
+
+* Adds an Object#wait() method that calls a MethodChain on the
+  object using setTimeout().
+
+
+Version 1.0.1
+January 14 2008
+================================================================
+
+* Memoizes calls to Object#method() so that the same function
+  object is returned each time.
+
+
+Version 1.0.0
+January 4 2008
+================================================================
+
+* Singleton methods that call super() are now supported.
+
+* Object#is_a() has been renamed to Object#isA().
+
+* Classes now support inherited() and included() hooks.
+
+* Adds Interface class for easier duck-typing checks across
+  several methods.
+
+* New directive 'implement' can be used to check that a class
+  implements some interfaces.
+
+* Singletons are now supported as class-like definitions that
+  yield a single object.
+
+* Module has been added as a way to protect sets of methods by
+  wrapping them in a closure.
+
+* Removes the bindMethods class flag in favour of the more
+  efficient and Ruby-like Ojbect#method(). This can also be
+  used on classes to get bound class methods.
+
+* Exceptions thrown while calling super are no longer swallowed
+  inside the framework.
+
+* Class#method() is now Class#instanceMethod.
+
+
+Version 0.9.2
+November 13 2007
+================================================================
+
+* Fixes bug caused by multiple methods in the same call stack
+  clobbering _super().
+
+* Fixes some inheritance bugs related to class methods and
+  built-in instance methods.
+
+* Improves performance by bootstrapping JavaScript's prototypes
+  for instance method inheritance.
+
+* Allows inheritance from non-JS.Class-based classes.
+
+
+Version 0.9.1
+November 12 2007
+================================================================
+
+* Improves performance by checking whether methods use _super()
+  and only wrapping where necessary.
+
+
+Version 0.9.0
+November 11 2007
+================================================================
+
+* Initial release. Features single inheritance and _super().
+

@@ -1,0 +1,208 @@
+#!/usr/bin/env node
+
+var fs      = require('fs'),
+    http    = require('http'),
+    https   = require('https'),
+    path    = require('path'),
+    url     = require('url'),
+    
+    nopt    = require('nopt'),
+    
+    options = { manifest: path,
+                root:     path,
+                external: Boolean,
+                packages: Boolean,
+                bundles:  path,
+                output:   String,
+                approot:  path
+              },
+    
+    shorts  = { 'm': '--manifest',
+                'r': '--root',
+                'e': '--external',
+                'p': '--packages',
+                'P': '--no-packages',
+                'b': '--bundles',
+                'o': '--output',
+                'd': '--directory'
+              },
+    
+    outputs = ['code', 'paths'],
+    
+    params  = nopt(options, shorts),
+    include = params.argv.remain.slice(),
+    dir     = new RegExp('^' + path.resolve(params.directory || '.') + '/')
+
+JSCLASS_PATH = path.dirname(__filename) + '/../src'
+require(JSCLASS_PATH + '/loader')
+JS.require('JS.Console')
+var C = JS.Console
+
+var die = function(message) {
+  C.consoleFormat('white', 'bgred')
+  C.print('ERROR')
+  C.reset()
+  C.puts(' ' + message)
+  process.exit(1)
+};
+
+if (params.output && outputs.indexOf(params.output) < 0)
+  die('--output must be one of: ' + outputs.join(', '))
+
+if (include.length === 0) {
+  C.bold()
+  C.puts('\nUsage: jsbuild --manifest MANIFEST --root ROOT [OPTIONS] module1 [module2 ...]')
+  C.reset()
+  
+  C.puts('\nOptions:  --manifest,    -m : path to JS.Packages manifest script')
+  C.puts('          --root,        -r : directory containing your JavaScripts')
+  C.puts('          --external,    -e : include external scripts from the web')
+  C.puts('          --no-packages, -P : don\'t include JS.Package system in build')
+  C.puts('          --bundles,     -b : path to bundle definitions file')
+  C.puts('          --output,      -o : select output type: \'code\' or \'paths\'')
+  C.puts('          --directory,   -d : directory for paths to print relative to')
+  
+  C.puts('\ne.g. jsbuild -m path/to/js/manifest.js -r path/to/js/ -eP jQuery JS.Set\n')
+  
+  process.exit()
+}
+
+HTTP_REGEX = /^https?:\/\//
+
+JS.Package.DSL.file = function(filename) {
+  if (!HTTP_REGEX.test(filename))
+    filename = path.join(params.root || '.', filename)
+  
+  return JS.Package._getByPath(filename)
+}
+
+if (params.manifest) require(params.manifest)
+
+var packages = [],
+    excluded = [],
+    bundles  = params.bundles ? JSON.parse(fs.readFileSync(params.bundles)) : {},
+    source   = [],
+    output   = function() { console.log(source.join('\n\n')) }
+
+var expand = function(name, list) {
+  var pkg  = JS.Package._getByName(name),
+      deps = list || []
+  
+  pkg._deps.list.forEach(function(p) { expand(p, deps) })
+  if (deps.indexOf(pkg) === -1) deps.push(pkg)
+  pkg._uses.list.forEach(function(p) { expand(p, deps) })
+  
+  return deps
+}
+
+var array = function(object) {
+  if (object === undefined) return []
+  return [].concat(object)
+}
+
+var expandBundle = function(name) {
+  var bundle = bundles[name]
+  
+  array(bundle.include).forEach(function(p) { expand(p, packages) })
+  
+  var expandExcluded = function(excl) {
+    var exclBundle = bundles[excl]
+    if (!exclBundle) return expand(excl, excluded)
+    
+    array(exclBundle.include).forEach(function(p) { expand(p, excluded) })
+    array(exclBundle.exclude).forEach(expandExcluded)
+  }
+  array(bundle.exclude).forEach(expandExcluded)
+}
+
+var packageFiles = function(packages) {
+  var files = []
+  packages.forEach(function(pkg) {
+    var paths = pkg._loader
+    
+    if (!(paths instanceof Array))
+      die('Cannot bundle ' + pkg + ': no path specified in your manifest')
+    
+    files = files.concat(paths.map(function(loader) {
+      return HTTP_REGEX.test(loader)
+           ? loader
+           : path.resolve(loader)
+    }))
+  })
+  return files
+}
+
+include.forEach(function(inc) {
+  if (bundles[inc]) expandBundle(inc)
+  else expand(inc, packages)
+})
+
+var includedFiles = packageFiles(packages),
+    excludedFiles = packageFiles(excluded),
+    files         = includedFiles.slice()
+
+excludedFiles.forEach(function(exclude) {
+  var index = files.indexOf(exclude)
+  if (index >= 0) files.splice(index, 1)
+})
+
+if (params.output === 'paths') {
+  var formatPath = function(s) { return s.replace(dir, '') }
+  console.log(files.map(formatPath).join('\n'))
+  process.exit()
+}
+
+if (params.packages !== false)
+  source.push(fs.readFileSync(JSCLASS_PATH + '/package-browser.js'))
+
+var bundle = function(i) {
+  if (i >= files.length) return output()
+  var file = files[i]
+  
+  if (HTTP_REGEX.test(file))
+    bundleRemote(file, i)
+  else
+    bundleLocal(file, i)
+}
+
+var bundleLocal = function(file, i) {
+  fs.readFile(file, function(error, content) {
+    if (error)
+      die('Cannot find file ' + file + ', please check your --root setting')
+    
+    source.push(content.toString())
+    bundle(i + 1)
+  })
+}
+
+var bundleRemote = function(file, i) {
+  if (!params.external) {
+    console.error('Warning: skipping ' + file + ', pass --external to include it')
+    return bundle(i + 1)
+  }
+  
+  var uri     = url.parse(file),
+      client  = (uri.protocol === 'https:') ? https : http,
+      port    = uri.port || (client === https ? '443' : '80'),
+      options = {host: uri.hostname, port: port, path: uri.pathname},
+      body    = ''
+  
+  var end = function() {
+    source.push(body)
+    bundle(i + 1)
+  }
+  client.get(options, function(response) {
+    if (response.statusCode < 200 || response.statusCode >= 300)
+      die('Request unsuccessful: ' + file)
+    
+    response.addListener('data', function(c) { body += c.toString('utf8', 0, c.length) })
+    response.addListener('close', end)
+    response.addListener('end', end)
+  })
+  .on('error', function() {
+    die('Request unsuccessful: ' + file)
+  })
+}
+
+bundle(0)
+
