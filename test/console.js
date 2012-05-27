@@ -8,13 +8,17 @@ if (this.ActiveXObject)
     } finally {
       try { if (file) file.Close() } catch (e) {}
     }
-  }
+  };
 
-JSCLASS_PATH = 'node_modules/jsclass/src'
+(function() {
+  var $ = (typeof global === 'object') ? global : this
+  $.JSCLASS_PATH = 'node_modules/jsclass/src'
+})()
 
 if (typeof require === 'function') {
-  Sylvester = require('../lib/sylvester')
-  require('jsclass')
+  require('../' + JSCLASS_PATH + '/loader')
+  JS.ENV.Sylvester = require('../lib/sylvester')
+  Sylvester.precision = 1e-6
   require('./runner')
 }
 else {

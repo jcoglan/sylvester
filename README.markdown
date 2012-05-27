@@ -21,16 +21,26 @@ To build the library from source:
 
 To test, run using various JS binaries and open the tests in the browser:
 
-    node test/console.js
     v8 test/console.js
+    node test/console.js
+    
     rhino test/console.js
-    # etc
+    narwhal test/console.js
+    ringo test/console.js
+    
+    spidermonkey test/console.js # or `js test/console.js`
+    
+    cscript.exe test/console.js # on Windows
     
     open test/browser.html
 
 To view the website locally:
     
-    staticmatic preview site
+    bundle exec staticmatic preview site
+
+To build the static files for the website:
+
+    bundle exec staticmatic build site
 
 
 ## License
