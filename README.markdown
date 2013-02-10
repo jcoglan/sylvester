@@ -11,42 +11,36 @@ target platforms, including browsers, Node and other JS runtimes.
 
 Install the build tools (requires Rubygems)
 
-    gem install bundler
-    bundle install
+    $ gem install bundler
+    $ bundle install
 
 To build the library from source:
 
-    bundle exec jake
+    $ bundle exec jake
 
 To test, run using various JS binaries and open the tests in the browser:
 
-    v8 test/console.js
-    node test/console.js
-    
-    rhino test/console.js
-    narwhal test/console.js
-    ringo test/console.js
-    
-    spidermonkey test/console.js # or `js test/console.js`
-    
-    cscript.exe test/console.js # on Windows
-    
-    open test/browser.html
+    $ JS=(v8 node spidermonkey rhino narwhal ringo)
+    $ for js in "${JS[@]}"; do echo "$js" ; $js test/console.js ; echo $? ; done
+
+    $ cscript.exe test/console.js # on Windows
+
+    $ open test/browser.html
 
 To view the website locally:
-    
-    bundle exec staticmatic preview site
+
+    $ bundle exec staticmatic preview site
 
 To build the static files for the website:
 
-    bundle exec staticmatic build site
+    $ bundle exec staticmatic build site
 
 
 ## License
 
 (The MIT License)
 
-Copyright (c) 2007-2012 James Coglan
+Copyright (c) 2007-2013 James Coglan
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the 'Software'), to deal in
