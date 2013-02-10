@@ -84,7 +84,7 @@ Sylvester.Polygon.prototype = {
   // some are 'negative'. If you want the polygon broken into constituent
   // triangles, use toTriangles(). This method is used because it's much faster
   // than toTriangles().
-  // 
+  //
   // The triangles generated share vertices with the original polygon, so they
   // transform with the polygon. They are cached after first calculation and
   // should remain in sync with changes to the parent polygon.

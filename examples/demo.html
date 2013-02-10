@@ -7,31 +7,31 @@
     <script type="text/javascript" src="../lib/sylvester-min.js"></script>
   </head>
   <body>
-    
+
     <canvas id="screen" width="800" height="600"></canvas>
-    
+
     <script type="text/javascript">
         var P = Polygon.create([
             [0,0], [5,0], [5,5], [0,5], [0,10],
-            
+
             [5,10], [0,5], [5,5], [10,10], [10,15],
-            
+
             [-5,15], [-5,5],
             [-10,5], [-10,0], [-5,0], [-5,-5], [0,-5]
         ])
         .scale(25, [0,0,0])
         .translate([400,380,0]);
-        
+
         var trigs = P.toTriangles(),
         screen = document.getElementById('screen'),
         ctx = screen.getContext('2d');
-        
+
         function draw() {
             ctx.fillStyle = 'black';
             ctx.fillRect(0,0, 800,600);
-            
+
             var i, n, c;
-            
+
             for (i = 0, n = trigs.length; i < n; i++) {
                 c = Math.round(255 * (i+1) / n);
                 ctx.fillStyle = 'rgb(' + [c,c,c].join(',') + ')';
@@ -42,22 +42,22 @@
                 ctx.fill();
             }
         };
-        
+
         draw();
-        
+
         var angle = Math.PI/36,
         axis = $L([400,380], [0.3,1.4,1]);
-        
+
         setInterval(function() {
             P.rotate(angle, axis);
             draw();
         }, 20);
-        
+
         var i = 0;
         document.onclick = function() {
             trigs[i++].copyVertices();
         };
     </script>
-    
+
   </body>
 </html>
