@@ -8,13 +8,13 @@ var fs      = require('fs'),
     
     nopt    = require('nopt'),
     
-    options = { manifest: path,
-                root:     path,
-                external: Boolean,
-                packages: Boolean,
-                bundles:  path,
-                output:   String,
-                approot:  path
+    options = { manifest:   path,
+                root:       path,
+                external:   Boolean,
+                packages:   Boolean,
+                bundles:    path,
+                output:     String,
+                directory:  path
               },
     
     shorts  = { 'm': '--manifest',

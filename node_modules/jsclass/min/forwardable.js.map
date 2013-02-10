@@ -1,0 +1,8 @@
+{
+  "version": 3,
+  "file": "forwardable.js",
+  "sourceRoot": "",
+  "sources": ["../src/forwardable.js"],
+  "names": ["_resolve", "alias", "i", "method", "methods", "object", "property", "resolve", "subject"],
+  "mappings": "AAAA,GAAG,YAAc,IAAI,GAAG,QAAQ,cAC9B,gBAAiB,SAASQ,EAASL,EAAQF,EAAOM,GAChDN,EAAQA,GAASE,EACjB,KAAK,OAAOF,EAAO,WACjB,IAAII,EAAW,KAAKG,GAChBF,EAAWD,EAAOF,GAEtB,OAAQ,OAAOG,KAAc,WACvBA,EAAS,MAAMD,EAAQ,WACvBC,IACJN,GAAUO,IAAY,SAG5B,iBAAkB,WAChB,IAAIH,EAAU,GAAG,MAAM,WACnBI,EAAUJ,EAAQ,QAClBF,EAAUE,EAAQ,OAEtB,MAAOF,IAAK,KAAK,gBAAgBM,EAASJ,EAAQF,GAAIE,EAAQF,GAAI,OAClE,KAAK;"
+}

@@ -75,6 +75,9 @@ JS.Console = new JS.Module('Console', {
               (object.toString().match(/^\s*function ([^\(]+)\(/) || [])[1] ||
                '#function';
       
+      if (object instanceof Date)
+        return object.toGMTString();
+      
       if (object.toString &&
           object.toString !== Object.prototype.toString &&
           !object.toString.__traced__)
