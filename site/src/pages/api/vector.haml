@@ -165,22 +165,6 @@
     that is, if all their elements are equal. <a href="/docs.html">See note on
     accuracy</a>.</p>
 
-  <a name="foreach"></a>
-  <h3 class="method">forEach(<span class="arg">iterator</span>, <span class="arg">context</span>) <span class="version">0.2.0</span></h3>
-
-  <p>Calls <code>iterator</code> for each element of the receiver.
-    <code>iterator</code> is passed the index (numbered from 1) of each element
-    as the second argument. For example, the following alerts the index and
-    value of each of the vector&rsquo;s elements:</p>
-
-  <pre><code>$V([4,9,3,6]).each(function(x, i) {
-    alert(i + ': ' + x);
-  });
-
-  // Alerts: '1: 4', '2: 9', '3: 3', '4: 6'</pre></code>
-
-  <p>This method is aliased as <a href="#each"><code>each(iterator, context)</code></a>.</p>
-
   <a name="indexof"></a>
   <h3 class="method">indexOf(<span class="arg">x</span>) <span class="version">0.1.0</span></h3>
 

@@ -160,16 +160,6 @@
     returns <code>null</code> if the lines are parallel &ndash; there is no
     unique closest point.</p>
 
-  <a name="positionof"></a>
-  <h3 class="method">positionOf(<span class="arg">point</span>) <span class="version">0.2.0</span></h3>
-
-  <p>Returns a number representing the distance along the line from its
-    <code>anchor</code> to the vector <code>point</code>, in the direction of
-    the line's <code>direction</code> vector. That is, if <span
-    class="math"><b>point</b> &ndash; <b>anchor</b></span> is antiparallel to
-    <code>direction</code>, the result is negative. If <code>point</code> does
-    not lie on the line, returns <code>null</code>.</p>
-
   <a name="reflectionin"></a>
   <h3 class="method">reflectionIn(<span class="arg">obj</span>) <span class="version">0.1.0</span></h3>
 
@@ -177,12 +167,6 @@
     (inverting) the receiver in <code>obj</code>, which can be a
     <code>Line</code>, a <a href="/api/plane.html"><code>Plane</code></a> or a
     <a href="/api/vector.html"><code>Vector</code></a>.</p>
-
-  <a name="reverse"></a>
-  <h3 class="method">reverse() <span class="version">0.2.0</span></h3>
-
-  <p>Returns a copy of the receiver with its <code>direction</code> vector
-    multiplied by <span class="math">&ndash;1</span>.</p>
 
   <a name="rotate"></a>
   <h3 class="method">rotate(<span class="arg">angle</span>, <span class="arg">axis</span>) <span class="version">0.1.0</span></h3>
