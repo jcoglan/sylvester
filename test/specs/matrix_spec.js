@@ -65,7 +65,7 @@ JS.ENV.MatrixSpec = JS.Test.describe("Matrix", function() { with(this) {
     var M2 = M1.dup()
     assert( M1.eql(M2) )
     M2.elements[1][1] = 99
-    assert( ! M1.eql(M2) )
+    assertNot( M1.eql(M2) )
     assertEqual( 0, M1.elements[1][1] )
   }})
 
@@ -76,15 +76,15 @@ JS.ENV.MatrixSpec = JS.Test.describe("Matrix", function() { with(this) {
       [6,3,0]
     ])
     assert( M.eql([[2,3,8],  [7,0,2],  [6,3,0]]) )
-    assert( ! M.eql([[7,3,8],  [7,0,2],  [6,3,0]]) )
-    assert( ! M.eql([[2,7,8],  [7,0,2],  [6,3,0]]) )
-    assert( ! M.eql([[2,3,7],  [7,0,2],  [6,3,0]]) )
-    assert( ! M.eql([[2,3,8],  [8,0,2],  [6,3,0]]) )
-    assert( ! M.eql([[2,3,8],  [7,7,2],  [6,3,0]]) )
-    assert( ! M.eql([[2,3,8],  [7,0,7],  [6,3,0]]) )
-    assert( ! M.eql([[2,3,8],  [7,0,2],  [7,3,0]]) )
-    assert( ! M.eql([[2,3,8],  [7,0,2],  [6,7,0]]) )
-    assert( ! M.eql([[2,3,8],  [7,0,2],  [6,3,7]]) )
+    assertNot( M.eql([[7,3,8],  [7,0,2],  [6,3,0]]) )
+    assertNot( M.eql([[2,7,8],  [7,0,2],  [6,3,0]]) )
+    assertNot( M.eql([[2,3,7],  [7,0,2],  [6,3,0]]) )
+    assertNot( M.eql([[2,3,8],  [8,0,2],  [6,3,0]]) )
+    assertNot( M.eql([[2,3,8],  [7,7,2],  [6,3,0]]) )
+    assertNot( M.eql([[2,3,8],  [7,0,7],  [6,3,0]]) )
+    assertNot( M.eql([[2,3,8],  [7,0,2],  [7,3,0]]) )
+    assertNot( M.eql([[2,3,8],  [7,0,2],  [6,7,0]]) )
+    assertNot( M.eql([[2,3,8],  [7,0,2],  [6,3,7]]) )
   }})
 
   test("map", function() { with(this) {
@@ -128,8 +128,8 @@ JS.ENV.MatrixSpec = JS.Test.describe("Matrix", function() { with(this) {
 
   test("isSameSizeAs", function() { with(this) {
     assert( Matrix.Random(2,5).isSameSizeAs(Matrix.Zero(2,5)) )
-    assert( ! Matrix.Random(2,6).isSameSizeAs(Matrix.Zero(2,5)) )
-    assert( ! Matrix.Random(1,5).isSameSizeAs(Matrix.Zero(2,5)) )
+    assertNot( Matrix.Random(2,6).isSameSizeAs(Matrix.Zero(2,5)) )
+    assertNot( Matrix.Random(1,5).isSameSizeAs(Matrix.Zero(2,5)) )
   }})
 
   test("arithmetic", function() { with(this) {
@@ -201,8 +201,8 @@ JS.ENV.MatrixSpec = JS.Test.describe("Matrix", function() { with(this) {
 
   test("isSquare", function() { with(this) {
     assert( Matrix.Zero(9,9).isSquare() )
-    assert( ! Matrix.Zero(4,9).isSquare() )
-    assert( ! Matrix.Zero(9,3).isSquare() )
+    assertNot( Matrix.Zero(4,9).isSquare() )
+    assertNot( Matrix.Zero(9,3).isSquare() )
     assert( $M([]).isSquare() )
   }})
 
@@ -267,7 +267,7 @@ JS.ENV.MatrixSpec = JS.Test.describe("Matrix", function() { with(this) {
     var M = Matrix.Random(3,3).x(10)
     M.elements[0][0] = M.elements[1][0] = M.elements[2][0] = 0
     assert( M.isSingular() )
-    assert( ! Matrix.Zero(4,3).isSingular() )
+    assertNot( Matrix.Zero(4,3).isSingular() )
   }})
 
   test("trace", function() { with(this) {

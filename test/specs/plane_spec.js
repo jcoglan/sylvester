@@ -6,9 +6,9 @@ JS.ENV.PlaneSpec = JS.Test.describe("Plane", function() { with(this) {
 
   test("eql", function() { with(this) {
     assert( Plane.XY.dup().eql($P([34,-99,0], [0,0,-4])) )
-    assert( ! Plane.XY.dup().eql($P([34,-99,1], [0,0,-4])) )
-    assert( ! Plane.XY.dup().eql($P([34,-99,0], [1,0,-4])) )
-    assert( ! Plane.XY.dup().eql($P([34,-99,0], [0,-1,-4])) )
+    assertNot( Plane.XY.dup().eql($P([34,-99,1], [0,0,-4])) )
+    assertNot( Plane.XY.dup().eql($P([34,-99,0], [1,0,-4])) )
+    assertNot( Plane.XY.dup().eql($P([34,-99,0], [0,-1,-4])) )
   }})
 
   test("dup", function() { with(this) {

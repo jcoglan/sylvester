@@ -7,9 +7,11 @@
 , "version"         : "0.2.0"
 , "engines"         : {"node": ">=0.4.0"}
 , "main"            : "./lib/sylvester"
-, "devDependencies" : {"jsclass": ""}
+, "devDependencies" : {"jstest": "", "wake": ""}
 
-, "scripts"         : {"test": "node test/console.js"}
+, "scripts"         : { "build" : "wake"
+                      , "test"  : "node test/console.js"
+                      }
 
 , "bugs"            : "http://github.com/jcoglan/sylvester/issues"
 
@@ -18,9 +20,33 @@
                         }
                       ]
 
-, "repositories"    : [ { "type"    : "git"
-                        , "url"     : "git://github.com/jcoglan/sylvester.git"
-                        }
-                      ]
+, "repository"      : { "type"    : "git"
+                      , "url"     : "git://github.com/jcoglan/sylvester.git"
+                      }
+
+, "wake": {
+    "javascript": {
+      "sourceDirectory": "src",
+      "targetDirectory": "lib",
+      "builds": {
+        "src": {"digest": false, "minify": false},
+        "min": {"digest": false, "minify": true, "sourceMap": "src", "tag": "suffix"}
+      },
+      "targets": {
+        "sylvester": [
+          "sylvester",
+          "vector",
+          "matrix",
+          "line",
+          "line.segment",
+          "plane",
+          "polygon",
+          "polygon.vertex",
+          "linkedlist",
+          "exports"
+        ]
+      }
+    }
+  }
 }
 

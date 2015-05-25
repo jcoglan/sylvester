@@ -10,13 +10,8 @@ if (this.ActiveXObject)
     }
   };
 
-(function() {
-  var $ = (typeof global === 'object') ? global : this
-  $.JSCLASS_PATH = 'node_modules/jsclass/src'
-})()
-
 if (typeof require === 'function') {
-  require('../' + JSCLASS_PATH + '/loader')
+  JS = require('../node_modules/jstest/jstest')
   JS.ENV.Sylvester = require('../lib/sylvester')
   Sylvester.precision = 1e-6
   require('./runner')

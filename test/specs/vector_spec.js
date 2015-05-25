@@ -44,10 +44,10 @@ JS.ENV.VectorSpec = JS.Test.describe("Vector", function() { with(this) {
     assert( V.eql(V) )
     assert( Vector.Zero(3).eql([0,0,0]) )
     assert( $V([3,6,9]).eql([3.0,6.0,9.0]) )
-    assert( ! $V([3.01,6,9]).eql([3.0,6.0,9.0]) )
-    assert( ! $V([3,6,9]).eql([3,6,10]) )
-    assert( ! $V([3,6,9]).eql([3,7,9]) )
-    assert( ! $V([3,6,9]).eql([4,6,9]) )
+    assertNot( $V([3.01,6,9]).eql([3.0,6.0,9.0]) )
+    assertNot( $V([3,6,9]).eql([3,6,10]) )
+    assertNot( $V([3,6,9]).eql([3,7,9]) )
+    assertNot( $V([3,6,9]).eql([4,6,9]) )
   }})
 
   test("single element", function() { with(this) {
@@ -154,12 +154,12 @@ JS.ENV.VectorSpec = JS.Test.describe("Vector", function() { with(this) {
 
   test("liesIn", function() { with(this) {
     assert( $V([12,0,0]).liesOn(Sylvester.Line.X) )
-    assert( ! $V([12,1,0]).liesOn(Sylvester.Line.X) )
-    assert( ! $V([12,0,3]).liesOn(Sylvester.Line.X) )
+    assertNot( $V([12,1,0]).liesOn(Sylvester.Line.X) )
+    assertNot( $V([12,0,3]).liesOn(Sylvester.Line.X) )
     assert( $V([9,16,4]).liesOn(Sylvester.Line.Segment.create([2,9,4], [14,21,4])) )
-    assert( ! $V([9,17,4]).liesOn(Sylvester.Line.Segment.create([2,9,4], [14,21,4])) )
+    assertNot( $V([9,17,4]).liesOn(Sylvester.Line.Segment.create([2,9,4], [14,21,4])) )
     assert( $V([0,-3,6]).liesIn(Sylvester.Plane.YZ) )
-    assert( ! $V([4,-3,6]).liesIn(Sylvester.Plane.YZ) )
+    assertNot( $V([4,-3,6]).liesIn(Sylvester.Plane.YZ) )
   }})
 
   test("reflectionIn", function() { with(this) {

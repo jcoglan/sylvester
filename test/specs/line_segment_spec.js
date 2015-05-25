@@ -5,13 +5,13 @@ JS.ENV.LineSegmentSpec = JS.Test.describe("Line.Segment", function() { with(this
   }})
 
   before(function() { with(this) {
-    segment  = Line.Segment.create([5,5,5], [10,10,10])
-    segment2 = Line.Segment.create([1,1,0], [1,2,0])
+    this.segment  = Line.Segment.create([5,5,5], [10,10,10])
+    this.segment2 = Line.Segment.create([1,1,0], [1,2,0])
   }})
 
   test("eql", function() { with(this) {
     assert( segment.eql(segment) )
-    assert( ! segment.eql(segment2) )
+    assertNot( segment.eql(segment2) )
     assert( segment.eql(Line.Segment.create(segment.end, segment.start)) )
   }})
 
@@ -19,11 +19,11 @@ JS.ENV.LineSegmentSpec = JS.Test.describe("Line.Segment", function() { with(this
     var seg = segment.dup()
     assert( segment.eql(seg) )
     seg.start.setElements([23,87,56])
-    assert( ! segment.eql(seg) )
+    assertNot( segment.eql(seg) )
     assert( segment.start.eql([5,5,5]) )
   }})
 
-  test("length", function() { with(this) {
+  test("length()", function() { with(this) {
     assert( segment.length() - Math.sqrt(75) <= Sylvester.precision )
   }})
 
@@ -45,11 +45,11 @@ JS.ENV.LineSegmentSpec = JS.Test.describe("Line.Segment", function() { with(this
 
   test("isParallelTo", function() { with(this) {
     assert( segment2.isParallelTo(Line.Y) )
-    assert( ! segment2.isParallelTo(Line.Z) )
+    assertNot( segment2.isParallelTo(Line.Z) )
     assert( segment2.isParallelTo(Sylvester.Plane.XY) )
     assert( segment2.isParallelTo(Sylvester.Plane.YZ) )
-    assert( ! segment2.isParallelTo(Sylvester.Plane.ZX) )
-    assert( ! segment.isParallelTo(segment2) )
+    assertNot( segment2.isParallelTo(Sylvester.Plane.ZX) )
+    assertNot( segment.isParallelTo(segment2) )
     assert( segment2.isParallelTo(segment2) )
   }})
 
@@ -57,11 +57,11 @@ JS.ENV.LineSegmentSpec = JS.Test.describe("Line.Segment", function() { with(this
     assert( segment.contains(segment.midpoint()) )
     assert( segment.contains([5,5,5]) )
     assert( segment.contains([10,10,10]) )
-    assert( ! segment.contains([4.9999,4.9999,4.9999]) )
-    assert( ! segment.contains([10.00001, 10.00001, 10.00001]) )
+    assertNot( segment.contains([4.9999,4.9999,4.9999]) )
+    assertNot( segment.contains([10.00001, 10.00001, 10.00001]) )
     assert( segment.contains(Line.Segment.create([5,5,5], [8,8,8])) )
     assert( segment.contains(Line.Segment.create([7,7,7], [10,10,10])) )
-    assert( ! segment.contains(Line.Segment.create([4,4,4], [8,8,8])) )
+    assertNot( segment.contains(Line.Segment.create([4,4,4], [8,8,8])) )
   }})
 
   test("distanceFrom", function() { with(this) {
@@ -74,12 +74,12 @@ JS.ENV.LineSegmentSpec = JS.Test.describe("Line.Segment", function() { with(this
   }})
 
   test("intersection", function() { with(this) {
-    assert( ! segment.intersects(Line.X) )
-    assert( ! segment.intersects(Line.Y) )
-    assert( ! segment.intersects(Line.Z) )
-    assert( ! segment.intersects(Sylvester.Plane.XY) )
-    assert( ! segment.intersects(Sylvester.Plane.YZ) )
-    assert( ! segment.intersects(Sylvester.Plane.ZX) )
+    assertNot( segment.intersects(Line.X) )
+    assertNot( segment.intersects(Line.Y) )
+    assertNot( segment.intersects(Line.Z) )
+    assertNot( segment.intersects(Sylvester.Plane.XY) )
+    assertNot( segment.intersects(Sylvester.Plane.YZ) )
+    assertNot( segment.intersects(Sylvester.Plane.ZX) )
     assert( segment.intersectionWith(segment.bisectingPlane()).eql(segment.midpoint()) )
     assert(
       Line.Segment.create([0,4,4], [0,8,4]).intersectionWith(
@@ -92,7 +92,7 @@ JS.ENV.LineSegmentSpec = JS.Test.describe("Line.Segment", function() { with(this
       )
     )
     assert( segment.intersects(Line.Segment.create([6,7,7], [9,7,7])) )
-    assert( ! segment.intersects(segment2) )
+    assertNot( segment.intersects(segment2) )
   }})
 
   test("pointClosestTo", function() { with(this) {

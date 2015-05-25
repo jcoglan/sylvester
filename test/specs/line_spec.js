@@ -11,7 +11,7 @@ JS.ENV.LineSpec = JS.Test.describe("Line", function() { with(this) {
     L.direction.setElements([2,5,6])
     assert( Line.X.anchor.eql([0,0,0]) )
     assert( Line.X.direction.eql(Sylvester.Vector.i) )
-    assert( ! L.eql(Line.X) )
+    assertNot( L.eql(Line.X) )
   }})
 
   test("equality with antiparallel lines", function() { with(this) {
@@ -20,17 +20,17 @@ JS.ENV.LineSpec = JS.Test.describe("Line", function() { with(this) {
 
   test("contains", function() { with(this) {
     assert( Line.X.contains([99,0,0]) )
-    assert( ! Line.X.contains([99,1,0]) )
-    assert( ! Line.X.contains([99,0,2]) )
+    assertNot( Line.X.contains([99,1,0]) )
+    assertNot( Line.X.contains([99,0,2]) )
     assert( $L([0,0,0], [1,1,1]).contains(Line.Segment.create([-2,-2,-2], [13,13,13])) )
   }})
 
   test("isParallelTo", function() { with(this) {
     assert( Line.X.isParallelTo($L([0,0,-12], [-4,0,0])) )
     assert( Line.X.isParallelTo(Sylvester.Plane.create([0,0,-4], Sylvester.Vector.k)) )
-    assert( ! Line.Z.isParallelTo(Sylvester.Plane.create([0,0,-4], Sylvester.Vector.k)) )
+    assertNot( Line.Z.isParallelTo(Sylvester.Plane.create([0,0,-4], Sylvester.Vector.k)) )
     assert( Line.Z.isParallelTo(Line.Segment.create([9,2,6], [9,2,44])) )
-    assert( ! Line.Z.isParallelTo(Line.Segment.create([9,3,6], [9,2,44])) )
+    assertNot( Line.Z.isParallelTo(Line.Segment.create([9,3,6], [9,2,44])) )
   }})
 
   test("translate", function() { with(this) {
@@ -51,7 +51,7 @@ JS.ENV.LineSpec = JS.Test.describe("Line", function() { with(this) {
     }
     assert( $L([5,0], [0,1]).intersectionWith($L([0,0], [-1,-1])).eql([5,5,0]) )
     assert( Line.X.intersects(Line.Segment.create([7,-4,0], [7,5,0])) )
-    assert( ! Line.X.intersects(Line.Segment.create([7,-4,-1], [7,5,0])) )
+    assertNot( Line.X.intersects(Line.Segment.create([7,-4,-1], [7,5,0])) )
   }})
 
   test("positionOf", function() { with(this) {
